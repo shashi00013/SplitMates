@@ -38,9 +38,17 @@ app.use(
 // Body Parser Middleware
 app.use(express.json());
 
-// Health check endpoint
+// Health check endpoints
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
+});
+
+app.get('/api', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
+});
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', timestamp: new Date() });
 });
 
 // API Routes
