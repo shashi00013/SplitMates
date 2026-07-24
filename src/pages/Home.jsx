@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, PlusCircle, ArrowUpRight, Users, Clock } from 'lucide-react';
+import { Bell, PlusCircle, ArrowUpRight, Users, Clock, QrCode } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
 import Avatar from '../components/Avatar';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 import NotificationsModal from '../components/NotificationsModal';
+import JoinGroupModal from '../components/JoinGroupModal';
 
 export default function Home() {
   const {
@@ -29,6 +30,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [activeExpense, setActiveExpense] = useState(null);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -55,38 +57,50 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Real Notification Bell Button */}
-        <button
-          className="btn-icon"
-          id="notifications-btn"
-          aria-label="Notifications"
-          onClick={() => setShowNotificationsModal(true)}
-          style={{ position: 'relative' }}
-        >
-          <Bell size={18} />
-          {unreadCount > 0 && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '-2px',
-                right: '-2px',
-                background: '#FF4757',
-                color: '#FFF',
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                width: '18px',
-                height: '18px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '2px solid var(--bg-primary)',
-              }}
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </button>
+        {/* Header Action Buttons (Quick QR Scan & Notifications) */}
+        <div className="flex items-center gap-8">
+          <button
+            className="btn-icon"
+            id="home-scan-qr-btn"
+            aria-label="Scan QR Code"
+            title="Scan QR Code"
+            onClick={() => setShowJoinModal(true)}
+            style={{ position: 'relative', background: 'var(--bg-input)', border: '1px solid var(--border-light)' }}
+          >
+            <QrCode size={18} style={{ color: 'var(--accent)' }} />
+          </button>
+          <button
+            className="btn-icon"
+            id="notifications-btn"
+            aria-label="Notifications"
+            onClick={() => setShowNotificationsModal(true)}
+            style={{ position: 'relative' }}
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-2px',
+                  right: '-2px',
+                  background: '#FF4757',
+                  color: '#FFF',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid var(--bg-primary)',
+                }}
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Net Balance Card */}
@@ -277,6 +291,8 @@ export default function Home() {
         onMarkRead={(id) => markNotificationRead(id)}
         onMarkAllRead={() => markNotificationRead('all')}
       />
+
+      <JoinGroupModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
     </div>
   );
 }
