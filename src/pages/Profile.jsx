@@ -17,9 +17,6 @@ import {
   Check,
   Camera,
   Upload,
-  Users,
-  Receipt,
-  CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
@@ -169,69 +166,19 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Stats Column */}
-      <div className="flex flex-col gap-10" style={{ marginBottom: '24px' }} id="profile-stats-column">
-        <div
-          className="card flex justify-between items-center"
-          onClick={() => navigate('/groups')}
-          style={{ cursor: 'pointer', padding: '14px 18px' }}
-          id="stat-card-groups"
-        >
-          <div className="flex items-center gap-12">
-            <div style={{ background: 'var(--accent-dim)', color: 'var(--accent)', padding: '10px', borderRadius: '12px', display: 'flex' }}>
-              <Users size={20} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('groups')}</h4>
-              <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>Active expense groups</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-8">
-            <span className="fw-800 text-accent" style={{ fontSize: '1.2rem' }}>{userGroups.length}</span>
-            <ChevronRight size={16} className="text-secondary" />
-          </div>
+      {/* Profile Stats Row */}
+      <div className="stats-row" style={{ marginBottom: '24px' }}>
+        <div className="stat-card" onClick={() => navigate('/groups')} style={{ cursor: 'pointer' }}>
+          <p className="stat-value">{userGroups.length}</p>
+          <p className="stat-label">{t('groups')}</p>
         </div>
-
-        <div
-          className="card flex justify-between items-center"
-          onClick={() => navigate('/expenses')}
-          style={{ cursor: 'pointer', padding: '14px 18px' }}
-          id="stat-card-expenses"
-        >
-          <div className="flex items-center gap-12">
-            <div style={{ background: 'var(--accent-dim)', color: 'var(--accent)', padding: '10px', borderRadius: '12px', display: 'flex' }}>
-              <Receipt size={20} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('expenses')}</h4>
-              <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>Total split expenses</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-8">
-            <span className="fw-800 text-accent" style={{ fontSize: '1.2rem' }}>{totalExpenses}</span>
-            <ChevronRight size={16} className="text-secondary" />
-          </div>
+        <div className="stat-card" onClick={() => navigate('/expenses')} style={{ cursor: 'pointer' }}>
+          <p className="stat-value">{totalExpenses}</p>
+          <p className="stat-label">{t('expenses')}</p>
         </div>
-
-        <div
-          className="card flex justify-between items-center"
-          onClick={() => navigate('/history')}
-          style={{ cursor: 'pointer', padding: '14px 18px' }}
-          id="stat-card-settled"
-        >
-          <div className="flex items-center gap-12">
-            <div style={{ background: 'var(--accent-dim)', color: 'var(--accent)', padding: '10px', borderRadius: '12px', display: 'flex' }}>
-              <CheckCircle2 size={20} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('allSettled')}</h4>
-              <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>Completed settlements</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-8">
-            <span className="fw-800 text-accent" style={{ fontSize: '1.2rem' }}>{totalSettlements}</span>
-            <ChevronRight size={16} className="text-secondary" />
-          </div>
+        <div className="stat-card" onClick={() => navigate('/history')} style={{ cursor: 'pointer' }} id="stat-settled">
+          <p className="stat-value">{totalSettlements}</p>
+          <p className="stat-label">{t('allSettled')}</p>
         </div>
       </div>
 
