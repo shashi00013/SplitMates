@@ -88,11 +88,12 @@ export default function Expenses() {
       ) : filtered.length === 0 ? (
         <div className="card text-center" style={{ padding: '40px 20px' }}>
           <p style={{ fontSize: '2rem', marginBottom: '12px' }}>📭</p>
-          <p className="text-secondary text-sm" style={{ marginBottom: '4px' }}>No expenses found</p>
-          <p className="text-secondary text-xs">
+          <p className="text-secondary text-sm" style={{ fontWeight: 600 }}>
             {filter === 'all'
-              ? 'Add an expense to start tracking group balances.'
-              : `No expenses matching "${filter}" filter.`}
+              ? 'No expenses yet'
+              : filter === 'current'
+              ? 'No current expenses'
+              : 'No expense history'}
           </p>
         </div>
       ) : (
