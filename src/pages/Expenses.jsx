@@ -106,8 +106,10 @@ export default function Expenses() {
             const isParticipant = participants.includes(user.id);
             const userShare = exp.shares?.[user.id] || (isParticipant ? (exp.amount / (participants.length || 1)) : 0);
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
-            const impactClass = isPayer ? 'text-accent' : userShare > 0 ? 'text-negative' : 'text-secondary';
-            const impactText = isPayer ? `+${formatCurrency(receivable)}` : userShare > 0 ? `-${formatCurrency(userShare)}` : 'Not involved';
+            const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
+            const impactText = isPayer
+              ? (receivable > 0 ? `Others owe you ${formatCurrency(receivable)}` : 'All settled')
+              : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved');
 
             return (
               <div
