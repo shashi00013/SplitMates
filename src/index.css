@@ -6,25 +6,25 @@
 :root, [data-theme="dark"] {
   --bg-primary: #050505;
   --bg-card: #0f0f0f;
-  --bg-card-alt: #0a0a0a;
-  --bg-input: #161616;
-  --bg-elevated: #1a1a1a;
-  --accent: #CCFF00;
-  --accent-dim: rgba(204, 255, 0, 0.10);
-  --accent-glow: rgba(204, 255, 0, 0.06);
-  --accent-dark: #a8d600;
+  --bg-card-alt: #141414;
+  --bg-input: #1a1a1a;
+  --bg-elevated: #222222;
   --text-primary: #FFFFFF;
   --text-secondary: #888888;
-  --text-tertiary: #4a4a4a;
-  --border-color: rgba(255,255,255,0.06);
-  --border-light: rgba(255,255,255,0.10);
+  --text-tertiary: #555555;
+  --border-color: rgba(255,255,255,0.08);
+  --border-light: rgba(255,255,255,0.14);
+  --accent: #CCFF00;
+  --accent-dim: rgba(204,255,0,0.12);
+  --accent-glow: rgba(204,255,0,0.06);
+  --accent-dark: #a8d600;
   --positive: #CCFF00;
   --negative: #FF4757;
   --warning: #FFA502;
-  --radius-sm: 12px;
-  --radius-md: 16px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
   --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius-xl: 24px;
   --radius-full: 50%;
   --shadow-card: 0 2px 20px rgba(0,0,0,0.5);
   --shadow-glow: 0 0 40px rgba(204, 255, 0, 0.06);
@@ -38,15 +38,15 @@
   --bg-card-alt: #F1F5F9;
   --bg-input: #EDF2F7;
   --bg-elevated: #E2E8F0;
-  --accent: #65A30D;
-  --accent-dim: rgba(101, 163, 13, 0.12);
-  --accent-glow: rgba(101, 163, 13, 0.08);
-  --accent-dark: #4D7C0F;
   --text-primary: #0F172A;
   --text-secondary: #64748B;
   --text-tertiary: #94A3B8;
   --border-color: #E2E8F0;
   --border-light: #CBD5E1;
+  --accent: #65A30D;
+  --accent-dim: rgba(101,163,13,0.12);
+  --accent-glow: rgba(101,163,13,0.08);
+  --accent-dark: #4D7C0F;
   --positive: #16A34A;
   --negative: #DC2626;
   --warning: #D97706;
@@ -124,22 +124,25 @@ body {
 }
 
 /* ---- Typography ---- */
-h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
-h2 { font-size: 1.15rem; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
+h1 { font-size: 1.4rem; font-weight: 800; line-height: 1.25; letter-spacing: -0.02em; }
+h2 { font-size: 1.1rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
 h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 
 .text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
 .text-accent { color: var(--accent); }
 .text-negative { color: var(--negative); }
-.text-sm { font-size: 0.8rem; }
-.text-xs { font-size: 0.7rem; }
-.text-lg { font-size: 1.1rem; }
-.text-xl { font-size: 1.35rem; }
+.text-sm { font-size: 0.85rem; font-weight: 500; }
+.text-xs { font-size: 0.75rem; font-weight: 500; }
+.text-caption { font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); }
+.text-lg { font-size: 1.1rem; font-weight: 700; }
+.text-xl { font-size: 1.35rem; font-weight: 700; }
 .text-2xl { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
-.text-3xl { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.03em; }
+.text-3xl, .financial-hero-amount { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.03em; }
 .fw-500 { font-weight: 500; }
 .fw-600 { font-weight: 600; }
 .fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
 
 /* ---- Layout Helpers ---- */
 .flex { display: flex; }
@@ -1024,7 +1027,7 @@ select.input option {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-bottom: none;
-  border-radius: 24px 24px 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   width: 100%;
   max-width: 430px;
   padding: 24px;
@@ -1033,7 +1036,7 @@ select.input option {
   display: flex;
   flex-direction: column;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
 }
 
