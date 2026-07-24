@@ -77,7 +77,7 @@ export const authApi = {
       const data = await api.get('/auth/me');
       return mapUser(data?.user || data);
     } catch (err) {
-      if (err.status === 0) {
+      if (err.status === 0 || err.status === 408 || !err.status || err.message?.includes('fetch') || err.message?.includes('timed out')) {
         const storedMock = localStorage.getItem('splitly_mock_user');
         if (storedMock) {
           try {
