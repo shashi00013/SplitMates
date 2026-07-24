@@ -115,10 +115,10 @@ export default function Settlement() {
             <Users size={32} strokeWidth={2} />
           </div>
           <h2 style={{ fontSize: '1.35rem', marginBottom: '8px', letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>
-            Ready to settle
+            Ready to Settle?
           </h2>
           <p className="text-secondary text-sm" style={{ maxWidth: '280px', textAlign: 'center', lineHeight: 1.5, marginBottom: '24px' }}>
-            Review the final balances and start the settlement for "{group.name}".
+            Confirm settlement with all members for "{group.name}".
           </p>
 
           {/* Suggested settlement summary */}
@@ -148,29 +148,29 @@ export default function Settlement() {
               })}
             </div>
 
-            {/* Suggested Payments */}
+            {/* Pending Transactions List */}
             {transactions.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-light)', paddingTop: '16px' }}>
-                <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suggested Payments</p>
+                <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Transactions</p>
                 {transactions.map((tx, idx) => {
                   const fromUser = members.find((m) => m.id === tx.from);
                   const toUser = members.find((m) => m.id === tx.to);
+                  const fromName = tx.from === user?.id ? 'You' : fromUser?.firstName || 'Member';
+                  const toName = tx.to === user?.id ? 'you' : toUser?.firstName || 'Member';
                   return (
                     <div
                       key={idx}
                       className="flex justify-between items-center text-xs"
                       style={{
-                        padding: '8px 12px',
+                        padding: '10px 12px',
                         background: 'var(--bg-elevated)',
                         borderRadius: '8px',
                         border: '1px solid var(--border-light)',
                       }}
                     >
-                      <span>
-                        <strong>{fromUser?.firstName || 'Someone'}</strong> pays{' '}
-                        <strong>{toUser?.firstName || 'Someone'}</strong>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                        {fromName} {tx.from === user?.id ? 'owe' : 'owes'} {toName} {formatCurrency(tx.amount)}
                       </span>
-                      <span className="fw-700 text-accent">{formatCurrency(tx.amount)}</span>
                     </div>
                   );
                 })}
@@ -185,7 +185,7 @@ export default function Settlement() {
             disabled={groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating}
             style={{ opacity: (groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating) ? 0.45 : 1, fontWeight: 700 }}
           >
-            {isInitiating ? t('loading') : 'Start Settling'}
+            {isInitiating ? t('loading') : 'Proceed to Confirm'}
           </button>
         </div>
       </div>
@@ -205,7 +205,7 @@ export default function Settlement() {
           <ChevronLeft size={20} />
         </button>
         <div>
-          <h1>{t('settleUp')}</h1>
+          <h1>Confirm Settlement</h1>
           <p className="text-secondary text-xs">{group.name}</p>
         </div>
         <div className="spacer" />
@@ -219,20 +219,20 @@ export default function Settlement() {
               <Check size={28} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-              Everyone is confirmed
+              Everyone is confirmed!
             </h3>
             <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
-              Settlement is ready to be completed.
+              All members have confirmed their payments for {group.name}.
             </p>
             <button
               className="btn btn-primary btn-full"
               onClick={async () => {
                 const historyEntry = await completeSettlement(groupId);
-                navigate(`/settlement-success/${groupId}`, { state: { historyEntry }, replace: true });
+                navigate(`/settlement-success/${groupId}`, { state: { historyEntry, groupName: group.name }, replace: true });
               }}
               id="complete-settlement-btn"
             >
-              Complete Settlement
+              Settle All
             </button>
           </>
         ) : !isUserConfirmed ? (
@@ -241,10 +241,10 @@ export default function Settlement() {
               <Clock size={28} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-              Your confirmation is needed
+              Confirm Settlement
             </h3>
             <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
-              Confirm that you have completed your payment.
+              All members need to confirm they've paid. Confirm when you've made your payments.
             </p>
             <button
               className="btn btn-primary btn-full"
@@ -252,7 +252,7 @@ export default function Settlement() {
               disabled={confirmingMemberId === user.id}
               id="confirm-payment-btn"
             >
-              {confirmingMemberId === user.id ? t('loading') : t('confirmPayment')}
+              {confirmingMemberId === user.id ? t('loading') : 'Confirm My Payment'}
             </button>
           </>
         ) : (
@@ -261,10 +261,10 @@ export default function Settlement() {
               <Check size={28} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-              You're all set
+              Confirm Settlement
             </h3>
             <p className="text-accent text-xs fw-700" style={{ margin: '0 0 4px 0' }}>
-              ✓ You confirmed
+              ✓ You confirmed your payment
             </p>
             <p className="text-secondary text-sm" style={{ margin: 0 }}>
               Waiting for remaining members ({pendingCount})

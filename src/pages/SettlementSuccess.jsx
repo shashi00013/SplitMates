@@ -15,6 +15,8 @@ export default function SettlementSuccess() {
   const memberCount = entry?.memberCount || 0;
   const date = entry?.date || new Date().toISOString();
 
+  const groupName = location.state?.groupName;
+
   function handleStartNewCycle() {
     if (entry?.groupId) {
       startNewCycle(entry.groupId);
@@ -37,10 +39,10 @@ export default function SettlementSuccess() {
           <Check size={44} strokeWidth={3} />
         </div>
         <h1 style={{ fontSize: '1.6rem', marginBottom: '10px', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-          {t('allSettled')}! 🎉
+          Settlement Complete! 🎉
         </h1>
         <p className="text-secondary" style={{ lineHeight: 1.6 }}>
-          Balances cleared. Time for a fresh start.
+          All balances cleared for {groupName || 'this group'}. New cycle started.
         </p>
       </div>
 
@@ -49,7 +51,7 @@ export default function SettlementSuccess() {
         <p className="text-secondary text-xs fw-600" style={{
           marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.06em',
         }}>
-          {t('settleUp')} Summary
+          Settlement Summary
         </p>
         <div className="summary-row">
           <span className="label">Total Settled</span>
@@ -70,9 +72,9 @@ export default function SettlementSuccess() {
         <button
           className="btn btn-primary btn-full"
           onClick={handleStartNewCycle}
-          id="start-new-cycle-btn"
+          id="view-updated-balance-btn"
         >
-          {t('home')}
+          View Updated Balance
         </button>
         <button
           className="btn btn-secondary btn-full"
