@@ -166,19 +166,72 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Stats Row */}
-      <div className="stats-row" style={{ marginBottom: '24px' }}>
-        <div className="stat-card" onClick={() => navigate('/groups')} style={{ cursor: 'pointer' }}>
-          <p className="stat-value">{userGroups.length}</p>
-          <p className="stat-label">{t('groups')}</p>
+      {/* 4-Column Side-by-Side Stats Row: Groups | Expenses | Settled | Total */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '8px',
+          marginBottom: '24px',
+        }}
+        id="profile-4col-stats"
+      >
+        <div
+          className="card"
+          onClick={() => navigate('/groups')}
+          style={{ cursor: 'pointer', padding: '12px 6px', textAlign: 'center' }}
+          id="stat-card-groups"
+        >
+          <p className="text-accent fw-800" style={{ fontSize: '1.15rem', marginBottom: '2px' }}>
+            {userGroups.length}
+          </p>
+          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
+            Groups
+          </p>
         </div>
-        <div className="stat-card" onClick={() => navigate('/expenses')} style={{ cursor: 'pointer' }}>
-          <p className="stat-value">{totalExpenses}</p>
-          <p className="stat-label">{t('expenses')}</p>
+
+        <div
+          className="card"
+          onClick={() => navigate('/expenses')}
+          style={{ cursor: 'pointer', padding: '12px 6px', textAlign: 'center' }}
+          id="stat-card-expenses"
+        >
+          <p className="text-accent fw-800" style={{ fontSize: '1.15rem', marginBottom: '2px' }}>
+            {totalExpenses}
+          </p>
+          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
+            Expenses
+          </p>
         </div>
-        <div className="stat-card" onClick={() => navigate('/history')} style={{ cursor: 'pointer' }} id="stat-settled">
-          <p className="stat-value">{totalSettlements}</p>
-          <p className="stat-label">{t('allSettled')}</p>
+
+        <div
+          className="card"
+          onClick={() => navigate('/history')}
+          style={{ cursor: 'pointer', padding: '12px 6px', textAlign: 'center' }}
+          id="stat-card-settled"
+        >
+          <p className="text-accent fw-800" style={{ fontSize: '1.15rem', marginBottom: '2px' }}>
+            {totalSettlements}
+          </p>
+          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
+            Settled
+          </p>
+        </div>
+
+        <div
+          className="card"
+          style={{ padding: '12px 6px', textAlign: 'center' }}
+          id="stat-card-total"
+        >
+          <p
+            className={totalBalance > 0 ? 'text-accent fw-800' : totalBalance < 0 ? 'text-negative fw-800' : 'text-secondary fw-800'}
+            style={{ fontSize: '0.95rem', marginBottom: '2px', whiteSpace: 'nowrap' }}
+          >
+            {formatCurrency(totalBalance)}
+          </p>
+          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
+            Total
+          </p>
         </div>
       </div>
 
