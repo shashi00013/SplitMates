@@ -42,9 +42,7 @@ export default function Expenses() {
           <ChevronLeft size={20} />
         </button>
         <h1>{t('expenses')}</h1>
-        <button className="btn-icon" id="expenses-filter-btn" onClick={cycleFilter}>
-          <SlidersHorizontal size={18} />
-        </button>
+        <div className="spacer" />
       </div>
 
       {/* Filter Tabs */}
@@ -53,7 +51,6 @@ export default function Expenses() {
           { key: 'all', label: 'All' },
           { key: 'current', label: t('currentPeriod') },
           { key: 'historical', label: t('history') },
-          { key: 'month', label: 'This Month' },
         ].map((f) => (
           <button
             key={f.key}
@@ -67,16 +64,19 @@ export default function Expenses() {
       </div>
 
       {/* Total Summary Card */}
-      <div className="card card-glow" style={{ marginBottom: '20px', padding: '20px 22px' }}>
+      <div className="card card-glow" style={{ marginBottom: '20px', padding: '18px 20px' }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-secondary text-sm" style={{ marginBottom: '6px', fontWeight: 500 }}>Total Expenses</p>
-            <p className="text-2xl" style={{ fontWeight: 800 }}>{formatCurrency(totalExpenses)}</p>
-            <p className="text-secondary text-xs" style={{ marginTop: '6px' }}>
+            <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+              Total Expenses
+            </p>
+            <p className="text-2xl" style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+              {formatCurrency(totalExpenses)}
+            </p>
+            <p className="text-secondary text-xs" style={{ marginTop: '4px' }}>
               {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <MiniChart bars={8} maxHeight={36} />
         </div>
       </div>
 

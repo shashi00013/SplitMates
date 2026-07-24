@@ -96,10 +96,8 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
                     <span className="text-secondary text-xs fw-600">Balance Impact</span>
                     <span className={`fw-800 text-sm ${isPayer ? 'text-accent' : userShare > 0 ? 'text-negative' : 'text-secondary'}`}>
                       {isPayer
-                        ? `${t('youGet')} ${formatCurrency(receivableAmount)}`
-                        : userShare > 0
-                        ? `${t('youPay')} ${formatCurrency(userShare)}`
-                        : 'Not involved'}
+                        ? (receivableAmount > 0 ? `Others owe you ${formatCurrency(receivableAmount)}` : 'All settled')
+                        : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved')}
                     </span>
                   </div>
                 </div>
