@@ -58,8 +58,8 @@ export default function JoinGroupConfirm() {
           padding: '28px 24px',
           maxWidth: '420px',
           width: '100%',
-          border: '1px solid #333333',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+          border: '1px solid var(--border-light)',
+          boxShadow: 'var(--shadow-card)',
         }}
       >
         {/* Top Navigation */}
@@ -68,11 +68,11 @@ export default function JoinGroupConfirm() {
             className="btn-icon"
             onClick={() => navigate('/')}
             id="join-confirm-back-btn"
-            style={{ color: '#888888' }}
+            style={{ color: 'var(--text-secondary)' }}
           >
             <ArrowLeft size={20} />
           </button>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Group Invitation
           </span>
           <div style={{ width: '20px' }} />
@@ -85,8 +85,8 @@ export default function JoinGroupConfirm() {
               width: '64px',
               height: '64px',
               borderRadius: '20px',
-              background: 'rgba(163, 230, 53, 0.12)',
-              color: '#A3E635',
+              background: 'var(--accent-dim)',
+              color: 'var(--accent)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -96,10 +96,10 @@ export default function JoinGroupConfirm() {
             <Link2 size={32} />
           </div>
 
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 6px 0', color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
             {t('joinAGroup')}
           </h1>
-          <p style={{ fontSize: '0.85rem', color: '#888888', margin: 0 }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
             {t('joinGroupDesc')}
           </p>
         </div>

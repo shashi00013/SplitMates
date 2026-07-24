@@ -286,18 +286,16 @@ export default function GroupDetails() {
       {/* Action Buttons */}
       <div className="action-buttons">
         <button
-          className="btn btn-secondary btn-full"
+          className="btn btn-secondary flex-1"
           onClick={() => navigate(`/settle/${groupId}`)}
           id="settle-up-btn"
-          style={{ background: '#262626', color: '#FFFFFF', border: '1px solid #333333', fontWeight: 700 }}
         >
           {t('settleUp')}
         </button>
         <button
-          className="btn btn-primary btn-full"
+          className="btn btn-primary flex-1"
           onClick={() => navigate('/add-expense', { state: { groupId } })}
           id="add-expense-btn"
-          style={{ background: '#A3E635', color: '#000000', fontWeight: 700, border: 'none' }}
         >
           {t('addExpense')}
         </button>

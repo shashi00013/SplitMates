@@ -266,7 +266,7 @@ export default function Profile() {
           <Bell size={20} />
           <span className="menu-label">{t('notifications')}</span>
           {unreadCount > 0 && (
-            <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFF', padding: '2px 8px', borderRadius: '10px' }}>
+            <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFFFFF', padding: '2px 8px', borderRadius: '10px' }}>
               {unreadCount} new
             </span>
           )}

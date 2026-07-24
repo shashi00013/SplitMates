@@ -404,7 +404,7 @@ export default function AddExpense() {
                         onChange={(e) => setCustomPercents({ ...customPercents, [m.id]: e.target.value })}
                         style={{ fontSize: '0.85rem', padding: '6px 12px', flex: 1 }}
                       />
-                      <span style={{ fontSize: '0.8rem', color: '#888' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         = {formatCurrency(computedShares[m.id] || 0)}
                       </span>
                     </div>
