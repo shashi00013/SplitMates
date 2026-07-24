@@ -153,27 +153,32 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Balance Summary Card */}
-      <div className="card card-glow" style={{ marginBottom: '20px', padding: '18px 20px' }}>
-        <div className="flex justify-between items-center">
-          <div className="text-center flex-1">
-            <p className="text-accent fw-700" style={{ fontSize: '1.15rem', letterSpacing: '-0.01em' }}>
-              {formatCurrency(totalOwed)}
-            </p>
-            <p className="text-secondary text-xs" style={{ marginTop: '4px', fontWeight: 600 }}>
-              {t('youGet')}
-            </p>
-          </div>
-          <div style={{ width: '1px', height: '36px', background: 'var(--border-color)' }} />
-          <div className="text-center flex-1">
-            <p className="text-negative fw-700" style={{ fontSize: '1.15rem', letterSpacing: '-0.01em' }}>
-              {formatCurrency(totalOwe)}
-            </p>
-            <p className="text-secondary text-xs" style={{ marginTop: '4px', fontWeight: 600 }}>
-              {t('youPay')}
-            </p>
-          </div>
-        </div>
+      {/* Unified Net Balance Summary Card */}
+      <div
+        className="card card-glow text-center"
+        style={{ marginBottom: '20px', padding: '18px 20px', cursor: 'pointer' }}
+        onClick={() => navigate('/')}
+        id="profile-net-balance-card"
+      >
+        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+          {t('netBalance')}
+        </p>
+        <p className="text-2xl financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
+          {formatCurrency(Math.abs(totalBalance))}
+        </p>
+        {totalBalance > 0 ? (
+          <p className="text-accent text-xs fw-600" style={{ marginTop: '4px' }}>
+            ↑ {t('youGet')} {formatCurrency(Math.abs(totalBalance))}
+          </p>
+        ) : totalBalance < 0 ? (
+          <p className="text-negative text-xs fw-600" style={{ marginTop: '4px' }}>
+            ↓ {t('youPay')} {formatCurrency(Math.abs(totalBalance))}
+          </p>
+        ) : (
+          <p className="text-secondary text-xs fw-600" style={{ marginTop: '4px' }}>
+            All settled up 🎉
+          </p>
+        )}
       </div>
 
       {/* 4-Column Side-by-Side Stats Row */}

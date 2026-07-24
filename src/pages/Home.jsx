@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, PlusCircle, ArrowUpRight, Users, Clock, QrCode } from 'lucide-react';
+import { Bell, PlusCircle, ArrowUpRight, Users, Clock, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
+import { calculateSettlementTransactions } from '../data/balanceEngine';
 import Avatar from '../components/Avatar';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 import NotificationsModal from '../components/NotificationsModal';
@@ -31,6 +32,7 @@ export default function Home() {
   const [activeExpense, setActiveExpense] = useState(null);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [isBalanceExpanded, setIsBalanceExpanded] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -42,6 +44,31 @@ export default function Home() {
 
   // Check if any group has an active pending settlement
   const pendingSettlementGroup = userGroups.find((g) => settlements[g.id]?.status === 'pending');
+
+  // Compute aggregated per-member breakdown across all user groups
+  const memberDuesMap = {};
+  userGroups.forEach((g) => {
+    const balances = getBalancesForGroup(g.id);
+    const txs = calculateSettlementTransactions(balances);
+    txs.forEach((tx) => {
+      if (tx.from === user?.id) {
+        const toUser = getUserById(tx.to);
+        if (toUser) {
+          const key = toUser.id;
+          if (!memberDuesMap[key]) memberDuesMap[key] = { member: toUser, amount: 0 };
+          memberDuesMap[key].amount -= tx.amount;
+        }
+      } else if (tx.to === user?.id) {
+        const fromUser = getUserById(tx.from);
+        if (fromUser) {
+          const key = fromUser.id;
+          if (!memberDuesMap[key]) memberDuesMap[key] = { member: fromUser, amount: 0 };
+          memberDuesMap[key].amount += tx.amount;
+        }
+      }
+    });
+  });
+  const memberBreakdownItems = Object.values(memberDuesMap);
 
   return (
     <div className="page" id="home-page">
@@ -103,23 +130,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Net Balance Card */}
-      <div className="card card-glow" style={{ marginBottom: '20px', padding: '20px' }} id="total-balance-card">
+      {/* Net Balance Card with Expandable Dues Breakdown */}
+      <div
+        className="card card-glow"
+        style={{ marginBottom: '20px', padding: '20px', cursor: 'pointer' }}
+        id="total-balance-card"
+        onClick={() => setIsBalanceExpanded(!isBalanceExpanded)}
+      >
         <div className="flex items-center justify-between">
           <div>
             <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
               {t('netBalance')}
             </p>
             <p className="text-3xl financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
-              {formatCurrency(totalBalance)}
+              {formatCurrency(Math.abs(totalBalance))}
             </p>
             {totalBalance > 0 ? (
               <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
-                ↑ {t('youGet')} {formatCurrency(totalOwed)}
+                ↑ {t('youGet')} {formatCurrency(Math.abs(totalBalance))}
               </p>
             ) : totalBalance < 0 ? (
               <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
-                ↓ {t('youPay')} {formatCurrency(totalOwe)}
+                ↓ {t('youPay')} {formatCurrency(Math.abs(totalBalance))}
               </p>
             ) : (
               <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
@@ -127,7 +159,55 @@ export default function Home() {
               </p>
             )}
           </div>
+          <div className="flex items-center gap-4 text-secondary text-xs fw-600">
+            <span>{isBalanceExpanded ? 'Hide breakdown' : 'Tap for breakdown'}</span>
+            {isBalanceExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </div>
         </div>
+
+        {/* Collapsible Member Dues Breakdown */}
+        {isBalanceExpanded && (
+          <div
+            style={{
+              marginTop: '16px',
+              paddingTop: '14px',
+              borderTop: '1px solid var(--border-color)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+            id="balance-breakdown-list"
+          >
+            <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
+              Pending Dues Breakdown
+            </p>
+            {memberBreakdownItems.length === 0 ? (
+              <p className="text-secondary text-xs">No pending member balances 🎉</p>
+            ) : (
+              <div className="flex flex-col gap-8">
+                {memberBreakdownItems.map(({ member, amount }) => {
+                  const isOwed = amount > 0;
+                  const isOwe = amount < 0;
+                  const absVal = formatCurrency(Math.abs(amount));
+                  const bClass = isOwed ? 'text-accent' : isOwe ? 'text-negative' : 'text-secondary';
+                  const bText = isOwed
+                    ? `${member.firstName || 'Member'} owes you ${absVal}`
+                    : isOwe
+                    ? `You owe ${member.firstName || 'Member'} ${absVal}`
+                    : 'All settled';
+
+                  return (
+                    <div key={member.id} className="flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-8">
+                        <Avatar user={member} size="sm" />
+                        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{member.firstName || member.name}</span>
+                      </div>
+                      <span className={`fw-700 ${bClass}`}>{bText}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
 
