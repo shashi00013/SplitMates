@@ -47,6 +47,8 @@ export default function AddExpense() {
     return members.map((m) => m.id);
   });
 
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
+
   function handleGroupChange(groupId) {
     setSelectedGroup(groupId);
     const members = getGroupMembers(groupId);
@@ -203,6 +205,8 @@ export default function AddExpense() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-20">
+        {/* PRIMARY FIELDS (Always Shown) */}
+        
         {/* Group Selector */}
         <div className="input-group">
           <label>{t('groups')}</label>
@@ -225,7 +229,7 @@ export default function AddExpense() {
           <input
             className="input"
             type="text"
-            placeholder={t('expenseTitlePlaceholder')}
+            placeholder="What did you buy? (e.g. Dinner, Groceries)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             id="expense-title-input"
@@ -235,7 +239,7 @@ export default function AddExpense() {
 
         {/* Amount */}
         <div className="input-group">
-          <label>{t('amount')} (₹)</label>
+          <label>How much? (₹)</label>
           <div style={{ position: 'relative' }}>
             <span style={{
               position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
@@ -246,7 +250,7 @@ export default function AddExpense() {
               type="number"
               step="0.01"
               min="0"
-              placeholder={t('amountPlaceholder')}
+              placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               id="expense-amount-input"
@@ -257,7 +261,7 @@ export default function AddExpense() {
 
         {/* Paid By */}
         <div className="input-group">
-          <label>{t('paidBy')}</label>
+          <label>Who paid?</label>
           <div className="paid-by-selector" id="paid-by-selector">
             {allMembers.map((m) => {
               const isMe = m.id === user.id;
@@ -279,181 +283,188 @@ export default function AddExpense() {
           </div>
         </div>
 
-        {/* Split Type Selector Cards */}
-        <div className="input-group">
-          <label style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem', fontWeight: 600 }}>{t('splitType')}</label>
-          <div className="split-type-container" id="split-type-selector">
-            <button
-              type="button"
-              className={`split-type-card ${splitType === 'equal' ? 'active' : ''}`}
-              onClick={() => setSplitType('equal')}
-              id="split-tab-equal"
-            >
-              <div className="split-icon-wrapper">
-                <Users size={22} />
-              </div>
-              <span className="split-title">Equal</span>
-              <span className="split-desc">Split equally</span>
-            </button>
-
-            <button
-              type="button"
-              className={`split-type-card ${splitType === 'exact' ? 'active' : ''}`}
-              onClick={() => setSplitType('exact')}
-              id="split-tab-exact"
-            >
-              <div className="split-icon-wrapper">
-                <Calculator size={22} />
-              </div>
-              <span className="split-title">Exact Amount</span>
-              <span className="split-desc">Set custom amounts</span>
-            </button>
-
-            <button
-              type="button"
-              className={`split-type-card ${splitType === 'percentage' ? 'active' : ''}`}
-              onClick={() => setSplitType('percentage')}
-              id="split-tab-percent"
-            >
-              <div className="split-icon-wrapper">
-                <Percent size={22} />
-              </div>
-              <span className="split-title">Percentage</span>
-              <span className="split-desc">Split by percentage</span>
-            </button>
-          </div>
+        {/* More Options Toggle Link */}
+        <div className="flex justify-center" style={{ margin: '2px 0' }}>
+          <button
+            type="button"
+            className="btn-link text-xs flex items-center gap-6"
+            onClick={() => setShowMoreOptions(!showMoreOptions)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', color: 'var(--accent)', fontWeight: 600 }}
+            id="toggle-more-options-btn"
+          >
+            {showMoreOptions ? 'Hide Advanced Options ▲' : 'More Options (Split Type, Custom Shares, Date) ▼'}
+          </button>
         </div>
 
-        {/* Participants & Custom Input Rows */}
-        <div className="input-group">
-          <div className="flex items-center justify-between">
-            <label style={{ marginBottom: 0 }}>{t('splitWith')}</label>
-            {selectedParticipants.length < allMembers.length && (
-              <button
-                type="button"
-                className="see-all"
-                onClick={selectAllParticipants}
-                style={{ fontSize: '0.72rem' }}
-              >
-                Select All
-              </button>
-            )}
-          </div>
-          <div className="card" style={{ padding: '0 14px' }}>
-            {allMembers.map((m) => {
-              const isMe = m.id === user.id;
-              const isSelected = selectedParticipants.includes(m.id);
-              return (
-                <div key={m.id} style={{ borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
-                  <div
-                    className="member-row"
-                    onClick={() => toggleParticipant(m.id)}
-                    style={{ cursor: 'pointer' }}
-                    id={`participant-${m.id}`}
+        {/* ADVANCED OPTIONS (Hidden initially, expands on click) */}
+        {showMoreOptions && (
+          <div
+            className="flex flex-col gap-20"
+            style={{
+              padding: '16px',
+              background: 'var(--bg-card-alt)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-color)',
+            }}
+            id="more-options-container"
+          >
+            {/* Split Type Selector Cards */}
+            <div className="input-group">
+              <label style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem', fontWeight: 600 }}>Split how?</label>
+              <div className="split-type-container" id="split-type-selector">
+                <button
+                  type="button"
+                  className={`split-type-card ${splitType === 'equal' ? 'active' : ''}`}
+                  onClick={() => setSplitType('equal')}
+                  id="split-tab-equal"
+                >
+                  <div className="split-icon-wrapper">
+                    <Users size={20} />
+                  </div>
+                  <span className="split-title">Equal Split</span>
+                  <span className="split-desc">Splits equally</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`split-type-card ${splitType === 'exact' ? 'active' : ''}`}
+                  onClick={() => setSplitType('exact')}
+                  id="split-tab-exact"
+                >
+                  <div className="split-icon-wrapper">
+                    <Calculator size={20} />
+                  </div>
+                  <span className="split-title">Exact Amount</span>
+                  <span className="split-desc">Custom amounts</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`split-type-card ${splitType === 'percentage' ? 'active' : ''}`}
+                  onClick={() => setSplitType('percentage')}
+                  id="split-tab-percent"
+                >
+                  <div className="split-icon-wrapper">
+                    <Percent size={20} />
+                  </div>
+                  <span className="split-title">By Percentage</span>
+                  <span className="split-desc">Custom percentages</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Split With */}
+            <div className="input-group">
+              <div className="flex items-center justify-between">
+                <label style={{ marginBottom: 0 }}>Split with</label>
+                {selectedParticipants.length < allMembers.length && (
+                  <button
+                    type="button"
+                    className="see-all"
+                    onClick={selectAllParticipants}
+                    style={{ fontSize: '0.72rem' }}
                   >
-                    <Avatar user={m} size="sm" selected={isSelected} />
-                    <div className="member-info" style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: '0.88rem' }}>{isMe ? 'You' : m.name}</h3>
-                      {isSelected && parsedAmount > 0 && splitType === 'equal' && (
-                        <p className="text-accent text-xs" style={{ marginTop: '2px' }}>
-                          {formatCurrency(computedShares[m.id] || 0)}
-                        </p>
+                    Select All
+                  </button>
+                )}
+              </div>
+              <div className="card" style={{ padding: '0 14px' }}>
+                {allMembers.map((m) => {
+                  const isMe = m.id === user.id;
+                  const isSelected = selectedParticipants.includes(m.id);
+                  return (
+                    <div key={m.id} style={{ borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
+                      <div
+                        className="member-row"
+                        onClick={() => toggleParticipant(m.id)}
+                        style={{ cursor: 'pointer' }}
+                        id={`participant-${m.id}`}
+                      >
+                        <Avatar user={m} size="sm" selected={isSelected} />
+                        <div className="member-info" style={{ flex: 1 }}>
+                          <h3 style={{ fontSize: '0.88rem' }}>{isMe ? 'You' : m.name}</h3>
+                          {isSelected && parsedAmount > 0 && splitType === 'equal' && (
+                            <p className="text-accent text-xs" style={{ marginTop: '2px' }}>
+                              {formatCurrency(computedShares[m.id] || 0)}
+                            </p>
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '6px',
+                            border: isSelected ? '2px solid var(--accent)' : '2px solid var(--border-light)',
+                            background: isSelected ? 'var(--accent)' : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {isSelected && <Check size={14} color="#000" strokeWidth={3} />}
+                        </div>
+                      </div>
+
+                      {/* Custom Exact input */}
+                      {isSelected && splitType === 'exact' && (
+                        <div style={{ marginTop: '8px', paddingLeft: '40px' }}>
+                          <input
+                            className="input"
+                            type="number"
+                            step="0.01"
+                            placeholder="Amount (₹)"
+                            value={customShares[m.id] || ''}
+                            onChange={(e) => setCustomShares({ ...customShares, [m.id]: e.target.value })}
+                            style={{ fontSize: '0.85rem', padding: '6px 12px' }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Custom Percent input */}
+                      {isSelected && splitType === 'percentage' && (
+                        <div style={{ marginTop: '8px', paddingLeft: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            className="input"
+                            type="number"
+                            step="1"
+                            placeholder="Percent (%)"
+                            value={customPercents[m.id] || ''}
+                            onChange={(e) => setCustomPercents({ ...customPercents, [m.id]: e.target.value })}
+                            style={{ fontSize: '0.85rem', padding: '6px 12px', flex: 1 }}
+                          />
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            = {formatCurrency(computedShares[m.id] || 0)}
+                          </span>
+                        </div>
                       )}
                     </div>
-                    <div
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '6px',
-                        border: isSelected ? '2px solid var(--accent)' : '2px solid var(--border-light)',
-                        background: isSelected ? 'var(--accent)' : 'transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {isSelected && <Check size={14} color="#000" strokeWidth={3} />}
-                    </div>
-                  </div>
-
-                  {/* Custom Exact input */}
-                  {isSelected && splitType === 'exact' && (
-                    <div style={{ marginTop: '8px', paddingLeft: '40px' }}>
-                      <input
-                        className="input"
-                        type="number"
-                        step="0.01"
-                        placeholder="Amount (₹)"
-                        value={customShares[m.id] || ''}
-                        onChange={(e) => setCustomShares({ ...customShares, [m.id]: e.target.value })}
-                        style={{ fontSize: '0.85rem', padding: '6px 12px' }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Custom Percent input */}
-                  {isSelected && splitType === 'percentage' && (
-                    <div style={{ marginTop: '8px', paddingLeft: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input
-                        className="input"
-                        type="number"
-                        step="1"
-                        placeholder="Percent (%)"
-                        value={customPercents[m.id] || ''}
-                        onChange={(e) => setCustomPercents({ ...customPercents, [m.id]: e.target.value })}
-                        style={{ fontSize: '0.85rem', padding: '6px 12px', flex: 1 }}
-                      />
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        = {formatCurrency(computedShares[m.id] || 0)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Breakdown Card */}
-        {parsedAmount > 0 && participantCount > 0 && (
-          <div className="card" style={{ padding: '14px 18px', background: 'var(--bg-card-alt)' }}>
-            <div className="flex justify-between items-center">
-              <span className="text-secondary text-sm">{t('yourShare')}</span>
-              <span className="fw-700 text-accent" style={{ fontSize: '1rem' }}>
-                {formatCurrency(computedShares[user.id] || 0)}
-              </span>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex justify-between items-center" style={{ marginTop: '8px' }}>
-              <span className="text-secondary text-xs">
-                Total Expense: {formatCurrency(parsedAmount)}
-              </span>
-              <span className="text-secondary text-xs">
-                {splitType === 'equal' ? t('splitEqual') : splitType === 'exact' ? t('splitExact') : t('splitPercent')}
-              </span>
+
+            {/* Date */}
+            <div className="input-group">
+              <label>Date</label>
+              <div style={{ position: 'relative' }}>
+                <Calendar
+                  size={17}
+                  color="var(--text-secondary)"
+                  style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                />
+                <input
+                  className="input"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  style={{ paddingLeft: '42px' }}
+                  id="expense-date-input"
+                />
+              </div>
             </div>
           </div>
         )}
-
-        {/* Date */}
-        <div className="input-group">
-          <label>Date</label>
-          <div style={{ position: 'relative' }}>
-            <Calendar
-              size={17}
-              color="var(--text-secondary)"
-              style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
-            />
-            <input
-              className="input"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              style={{ paddingLeft: '42px' }}
-              id="expense-date-input"
-            />
-          </div>
-        </div>
 
         {/* Submit */}
         <button
