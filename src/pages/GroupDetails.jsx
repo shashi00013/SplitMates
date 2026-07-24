@@ -92,22 +92,13 @@ export default function GroupDetails() {
           <ChevronLeft size={20} />
         </button>
 
-        <div className="flex items-center gap-8">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setIsInviteOpen(true)}
-            id="header-invite-btn"
-          >
-            <UserPlus size={15} className="text-accent" /> {t('groupCode')}
-          </button>
-          <button
-            className="btn-icon"
-            id="group-menu-btn"
-            onClick={() => setShowMenu(!showMenu)}
-          >
-            <MoreVertical size={20} />
-          </button>
-        </div>
+        <button
+          className="btn-icon"
+          id="group-menu-btn"
+          onClick={() => setShowMenu(!showMenu)}
+        >
+          <MoreVertical size={20} />
+        </button>
 
         {/* Dropdown Menu */}
         {showMenu && (
@@ -283,21 +274,14 @@ export default function GroupDetails() {
         </>
       )}
 
-      {/* Action Buttons */}
-      <div className="action-buttons">
+      {/* Action Button */}
+      <div style={{ marginTop: '20px' }}>
         <button
-          className="btn btn-secondary flex-1"
-          onClick={() => navigate(`/settle/${groupId}`)}
-          id="settle-up-btn"
-        >
-          {t('settleUp')}
-        </button>
-        <button
-          className="btn btn-primary flex-1"
+          className="btn btn-primary btn-full"
           onClick={() => navigate('/add-expense', { state: { groupId } })}
           id="add-expense-btn"
         >
-          {t('addExpense')}
+          <Plus size={18} /> {t('addExpense')}
         </button>
       </div>
 
