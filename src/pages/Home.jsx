@@ -110,22 +110,21 @@ export default function Home() {
             <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
               {t('netBalance')}
             </p>
-            <p className="text-3xl" style={{ fontWeight: 800, color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
+            <p className="text-3xl financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
               {formatCurrency(totalBalance)}
             </p>
-            {totalOwed === 0 && totalOwe === 0 ? (
-              <p className="text-sm fw-600" style={{ marginTop: '10px', color: 'var(--positive)' }}>
-                {t('allSettledUp')}
+            {totalBalance > 0 ? (
+              <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
+                ↑ {t('youGet')} {formatCurrency(totalOwed)}
+              </p>
+            ) : totalBalance < 0 ? (
+              <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
+                ↓ {t('youPay')} {formatCurrency(totalOwe)}
               </p>
             ) : (
-              <div className="flex gap-16" style={{ marginTop: '10px' }}>
-                <p className="text-accent text-sm fw-600">
-                  ↑ {t('youGet')}: {formatCurrency(totalOwed)}
-                </p>
-                <p className="text-negative text-sm fw-600">
-                  ↓ {t('youPay')}: {formatCurrency(totalOwe)}
-                </p>
-              </div>
+              <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
+                All settled up 🎉
+              </p>
             )}
           </div>
         </div>
