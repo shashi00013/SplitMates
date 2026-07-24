@@ -245,53 +245,68 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Real Functional Settings Menu List */}
-      <div className="menu-list" style={{ marginBottom: '20px' }} id="profile-menu">
-        <button className="menu-item" id="menu-language" onClick={() => setShowLanguageModal(true)}>
-          <Globe size={20} style={{ color: 'var(--accent)' }} />
-          <span className="menu-label">{t('language')}</span>
-          <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)' }}>
-            {languages.find((l) => l.code === language)?.nativeLabel}
-          </span>
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
-
-        <button className="menu-item" id="menu-history" onClick={() => navigate('/history')}>
-          <HistoryIcon size={20} />
-          <span className="menu-label">{t('history')}</span>
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
-
-        <button className="menu-item" id="menu-notifications" onClick={() => setShowNotificationsModal(true)}>
-          <Bell size={20} />
-          <span className="menu-label">{t('notifications')}</span>
-          {unreadCount > 0 && (
-            <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFFFFF', padding: '2px 8px', borderRadius: '10px' }}>
-              {unreadCount} new
+      {/* Settings Sections */}
+      <div style={{ marginBottom: '24px' }}>
+        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
+          Preferences
+        </p>
+        <div className="menu-list" style={{ marginBottom: '20px' }} id="preferences-menu">
+          <button className="menu-item" id="menu-language" onClick={() => setShowLanguageModal(true)}>
+            <Globe size={20} style={{ color: 'var(--accent)' }} />
+            <span className="menu-label">{t('language')}</span>
+            <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)' }}>
+              {languages.find((l) => l.code === language)?.nativeLabel}
             </span>
-          )}
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
+            <ChevronRight size={16} className="menu-chevron" />
+          </button>
 
-        <button className="menu-item" id="menu-theme" onClick={() => setShowThemeModal(true)}>
-          {themeMode === 'light' ? <Sun size={20} style={{ color: 'var(--accent)' }} /> : themeMode === 'dark' ? <Moon size={20} style={{ color: 'var(--accent)' }} /> : <Monitor size={20} style={{ color: 'var(--accent)' }} />}
-          <span className="menu-label">App Theme</span>
-          <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)', textTransform: 'capitalize' }}>
-            {themeMode === 'system' ? 'System' : `${themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}`}
-          </span>
-          <ChevronRight size={16} className="menu-chevron" />
+          <button className="menu-item" id="menu-theme" onClick={() => setShowThemeModal(true)}>
+            {themeMode === 'light' ? <Sun size={20} style={{ color: 'var(--accent)' }} /> : themeMode === 'dark' ? <Moon size={20} style={{ color: 'var(--accent)' }} /> : <Monitor size={20} style={{ color: 'var(--accent)' }} />}
+            <span className="menu-label">App Theme</span>
+            <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)', textTransform: 'capitalize' }}>
+              {themeMode === 'system' ? 'System' : `${themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}`}
+            </span>
+            <ChevronRight size={16} className="menu-chevron" />
+          </button>
+
+          <button className="menu-item" id="menu-notifications" onClick={() => setShowNotificationsModal(true)}>
+            <Bell size={20} />
+            <span className="menu-label">{t('notifications')}</span>
+            {unreadCount > 0 && (
+              <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFFFFF', padding: '2px 8px', borderRadius: '10px' }}>
+                {unreadCount} new
+              </span>
+            )}
+            <ChevronRight size={16} className="menu-chevron" />
+          </button>
+
+          <button className="menu-item" id="menu-history" onClick={() => navigate('/history')}>
+            <HistoryIcon size={20} />
+            <span className="menu-label">{t('history')}</span>
+            <ChevronRight size={16} className="menu-chevron" />
+          </button>
+        </div>
+
+        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
+          Account
+        </p>
+        <div className="menu-list" style={{ marginBottom: '20px' }} id="account-menu">
+          <button className="menu-item" id="menu-edit-profile" onClick={handleOpenEditModal}>
+            <Edit3 size={20} style={{ color: 'var(--accent)' }} />
+            <span className="menu-label">{t('edit')} {t('profile')}</span>
+            <ChevronRight size={16} className="menu-chevron" />
+          </button>
+        </div>
+
+        <button
+          className="btn btn-danger-text btn-full"
+          id="logout-btn"
+          onClick={logout}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}
+        >
+          <LogOut size={17} /> {t('logOut')}
         </button>
       </div>
-
-      {/* Logout */}
-      <button
-        className="btn btn-danger-text btn-full"
-        id="logout-btn"
-        onClick={logout}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}
-      >
-        <LogOut size={17} /> {t('logOut')}
-      </button>
 
       {/* Language Selector Modal */}
       {showLanguageModal && (
