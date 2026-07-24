@@ -82,7 +82,7 @@ export default function NotificationsModal({ isOpen, onClose, notifications, unr
           {!notifications || notifications.length === 0 ? (
             <div className="text-center" style={{ padding: '40px 16px' }}>
               <Bell size={36} className="text-secondary" style={{ opacity: 0.4, marginBottom: '12px' }} />
-              <p className="text-secondary text-sm">No notifications yet</p>
+              <p className="text-secondary text-sm" style={{ fontWeight: 600 }}>You're all caught up 🎉</p>
             </div>
           ) : (
             notifications.map((n) => (
