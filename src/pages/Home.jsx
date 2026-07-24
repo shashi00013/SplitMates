@@ -130,12 +130,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Net Balance Card with Expandable Dues Breakdown */}
+      {/* Net Balance Card with Expandable Dues Breakdown & Full Breakdown Navigation */}
       <div
         className="card card-glow"
         style={{ marginBottom: '20px', padding: '20px', cursor: 'pointer' }}
         id="total-balance-card"
-        onClick={() => setIsBalanceExpanded(!isBalanceExpanded)}
+        onClick={() => navigate('/balance-breakdown')}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -159,9 +159,9 @@ export default function Home() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-4 text-secondary text-xs fw-600">
-            <span>{isBalanceExpanded ? 'Hide breakdown' : 'Tap for breakdown'}</span>
-            {isBalanceExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <div className="flex items-center gap-4 text-accent text-xs fw-600">
+            <span>Summary</span>
+            <ArrowUpRight size={16} />
           </div>
         </div>
 

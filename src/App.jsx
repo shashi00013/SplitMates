@@ -15,7 +15,7 @@ import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicOnlyRoute from './components/PublicOnlyRoute';
 
-import JoinGroupConfirm from './pages/JoinGroupConfirm';
+import BalanceBreakdown from './pages/BalanceBreakdown';
 
 export default function App() {
   const { toast, isAuthenticated } = useApp();
@@ -53,6 +53,7 @@ export default function App() {
         {/* Protected application routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
+          <Route path="/balance-breakdown" element={<BalanceBreakdown />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/group/:groupId" element={<GroupDetails />} />
           <Route path="/add-expense" element={<AddExpense />} />
