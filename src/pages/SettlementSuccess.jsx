@@ -36,7 +36,7 @@ export default function SettlementSuccess() {
         >
           <Check size={44} strokeWidth={3} />
         </div>
-        <h1 style={{ fontSize: '1.6rem', marginBottom: '10px', letterSpacing: '-0.02em', color: '#FFFFFF' }}>
+        <h1 style={{ fontSize: '1.6rem', marginBottom: '10px', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
           {t('allSettled')}! 🎉
         </h1>
         <p className="text-secondary" style={{ lineHeight: 1.6 }}>
@@ -53,7 +53,7 @@ export default function SettlementSuccess() {
         </p>
         <div className="summary-row">
           <span className="label">Total Settled</span>
-          <span className="value text-accent" style={{ color: '#A3E635', fontWeight: 700 }}>{formatCurrency(totalSettled)}</span>
+          <span className="value text-accent" style={{ fontWeight: 700 }}>{formatCurrency(totalSettled)}</span>
         </div>
         <div className="summary-row">
           <span className="label">{t('peopleInGroup')}</span>
@@ -71,7 +71,6 @@ export default function SettlementSuccess() {
           className="btn btn-primary btn-full"
           onClick={handleStartNewCycle}
           id="start-new-cycle-btn"
-          style={{ background: '#A3E635', color: '#000', fontWeight: 700 }}
         >
           {t('home')}
         </button>
@@ -79,7 +78,6 @@ export default function SettlementSuccess() {
           className="btn btn-secondary btn-full"
           onClick={() => navigate('/history')}
           id="view-history-btn"
-          style={{ background: '#262626', color: '#FFF', border: '1px solid #333' }}
         >
           {t('history')}
         </button>

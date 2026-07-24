@@ -83,8 +83,8 @@ export default function Home() {
                   position: 'absolute',
                   top: '-2px',
                   right: '-2px',
-                  background: '#FF4757',
-                  color: '#FFF',
+                  background: 'var(--negative)',
+                  color: '#FFFFFF',
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   width: '18px',
@@ -114,7 +114,7 @@ export default function Home() {
               {formatCurrency(totalBalance)}
             </p>
             {totalOwed === 0 && totalOwe === 0 ? (
-              <p className="text-secondary text-sm fw-600" style={{ marginTop: '10px', color: '#A3E635' }}>
+              <p className="text-sm fw-600" style={{ marginTop: '10px', color: 'var(--positive)' }}>
                 {t('allSettledUp')}
               </p>
             ) : (

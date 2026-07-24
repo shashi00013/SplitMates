@@ -107,8 +107,8 @@ export default function JoinGroupConfirm() {
         {/* Group Code Badge Box */}
         <div
           style={{
-            background: '#111111',
-            border: '1px solid #333333',
+            background: 'var(--bg-card-alt)',
+            border: '1px solid var(--border-light)',
             borderRadius: '14px',
             padding: '16px',
             textAlign: 'center',
@@ -116,7 +116,7 @@ export default function JoinGroupConfirm() {
           }}
           id="confirm-invite-code-box"
         >
-          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {t('groupCode')}
           </span>
           <div
@@ -125,7 +125,7 @@ export default function JoinGroupConfirm() {
               fontWeight: 700,
               fontFamily: 'monospace',
               letterSpacing: '0.08em',
-              color: '#A3E635',
+              color: 'var(--accent)',
               marginTop: '4px',
               wordBreak: 'break-all',
             }}
@@ -139,7 +139,7 @@ export default function JoinGroupConfirm() {
         {user && (
           <div
             style={{
-              background: '#222222',
+              background: 'var(--bg-elevated)',
               borderRadius: '12px',
               padding: '10px 14px',
               marginBottom: '20px',
@@ -148,10 +148,10 @@ export default function JoinGroupConfirm() {
               gap: '10px',
             }}
           >
-            <UserCheck size={18} style={{ color: '#A3E635' }} />
+            <UserCheck size={18} style={{ color: 'var(--accent)' }} />
             <div style={{ fontSize: '0.8rem', textAlign: 'left' }}>
-              <span style={{ color: '#888888', display: 'block' }}>Joining as</span>
-              <strong style={{ color: '#FFFFFF' }}>{user.name}</strong> ({user.email})
+              <span style={{ color: 'var(--text-secondary)', display: 'block' }}>Joining as</span>
+              <strong style={{ color: 'var(--text-primary)' }}>{user.name}</strong> ({user.email})
             </div>
           </div>
         )}
@@ -161,7 +161,7 @@ export default function JoinGroupConfirm() {
           <div
             style={{
               background: 'rgba(255, 59, 48, 0.1)',
-              border: '1px solid #FF3B30',
+              border: '1px solid var(--negative)',
               borderRadius: '12px',
               padding: '12px',
               marginBottom: '20px',
@@ -171,8 +171,8 @@ export default function JoinGroupConfirm() {
             }}
             id="join-group-error-alert"
           >
-            <AlertCircle size={18} style={{ color: '#FF3B30', flexShrink: 0 }} />
-            <p style={{ fontSize: '0.82rem', color: '#FF3B30', margin: 0, fontWeight: 500 }}>
+            <AlertCircle size={18} style={{ color: 'var(--negative)', flexShrink: 0 }} />
+            <p style={{ fontSize: '0.82rem', color: 'var(--negative)', margin: 0, fontWeight: 500 }}>
               {error}
             </p>
           </div>
@@ -183,15 +183,15 @@ export default function JoinGroupConfirm() {
           <div className="flex flex-col gap-12 text-center">
             <div
               style={{
-                background: 'rgba(163, 230, 53, 0.1)',
-                border: '1px solid #A3E635',
+                background: 'var(--accent-dim)',
+                border: '1px solid var(--accent)',
                 borderRadius: '12px',
                 padding: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                color: '#A3E635',
+                color: 'var(--accent)',
                 fontSize: '0.85rem',
                 fontWeight: 600,
               }}
@@ -203,7 +203,7 @@ export default function JoinGroupConfirm() {
               className="btn btn-primary btn-full"
               onClick={() => navigate(`/group/${existingGroup.id}`, { replace: true })}
               id="already-member-go-group-btn"
-              style={{ background: '#A3E635', color: '#000000', fontWeight: 700, border: 'none', marginTop: '6px' }}
+              style={{ marginTop: '6px' }}
             >
               Go to Group
             </button>
@@ -218,10 +218,6 @@ export default function JoinGroupConfirm() {
               disabled={isSubmitting}
               id="confirm-join-group-btn"
               style={{
-                background: '#A3E635',
-                color: '#000000',
-                fontWeight: 700,
-                border: 'none',
                 opacity: isSubmitting ? 0.6 : 1,
               }}
             >
@@ -233,7 +229,6 @@ export default function JoinGroupConfirm() {
               className="btn btn-secondary btn-full"
               onClick={() => navigate('/')}
               id="cancel-join-group-btn"
-              style={{ background: '#262626', color: '#888888', border: '1px solid #333333', fontWeight: 600 }}
             >
               {t('cancel')}
             </button>

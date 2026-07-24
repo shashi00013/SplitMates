@@ -85,15 +85,15 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
         {/* Monospace Code Container */}
         <div
           style={{
-            background: '#111111',
-            border: '1px solid #333333',
+            background: 'var(--bg-card-alt)',
+            border: '1px solid var(--border-light)',
             borderRadius: '12px',
             padding: '12px',
             textAlign: 'center',
           }}
           id="modal-invite-code-box"
         >
-          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {t('groupCode')}
           </span>
           <div
@@ -102,7 +102,7 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
               fontWeight: 700,
               fontFamily: 'monospace',
               letterSpacing: '0.08em',
-              color: '#A3E635',
+              color: 'var(--accent)',
               marginTop: '4px',
               wordBreak: 'break-all',
             }}
@@ -119,7 +119,6 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
             className="btn btn-primary btn-full"
             onClick={handleCopyCode}
             id="invite-modal-copy-btn"
-            style={{ background: '#A3E635', color: '#000000', fontWeight: 700, border: 'none' }}
           >
             {copied ? <><Check size={18} /> {t('copied')}</> : <><Copy size={18} /> {t('copy')} {t('groupCode')}</>}
           </button>
@@ -130,7 +129,6 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
               className="btn btn-secondary btn-full"
               onClick={handleShare}
               id="invite-modal-share-btn"
-              style={{ background: '#262626', color: '#FFFFFF', border: '1px solid #333333', fontWeight: 600 }}
             >
               <Share2 size={18} /> {t('share')}
             </button>

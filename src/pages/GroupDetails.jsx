@@ -48,7 +48,6 @@ export default function GroupDetails() {
           <button
             className="btn btn-secondary"
             onClick={() => navigate('/groups', { replace: true })}
-            style={{ background: '#262626', color: '#FFFFFF', border: '1px solid #333333' }}
           >
             Back to Groups
           </button>
@@ -95,23 +94,11 @@ export default function GroupDetails() {
 
         <div className="flex items-center gap-8">
           <button
+            className="btn btn-secondary btn-sm"
             onClick={() => setIsInviteOpen(true)}
             id="header-invite-btn"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '16px',
-              background: '#262626',
-              border: '1px solid #333333',
-              color: '#FFFFFF',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
           >
-            <UserPlus size={15} style={{ color: '#A3E635' }} /> {t('groupCode')}
+            <UserPlus size={15} className="text-accent" /> {t('groupCode')}
           </button>
           <button
             className="btn-icon"

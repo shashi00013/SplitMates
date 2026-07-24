@@ -178,7 +178,7 @@ export default function CreateGroupModal({ isOpen, onClose }) {
                   fontWeight: 700,
                   fontFamily: 'monospace',
                   letterSpacing: '0.08em',
-                  color: '#A3E635',
+                  color: 'var(--accent)',
                   marginTop: '4px',
                   wordBreak: 'break-all',
                 }}
@@ -195,7 +195,6 @@ export default function CreateGroupModal({ isOpen, onClose }) {
                 className="btn btn-primary btn-full"
                 onClick={handleCopyCode}
                 id="copy-created-group-code-btn"
-                style={{ background: '#A3E635', color: '#000000', fontWeight: 700, border: 'none' }}
               >
                 {copied ? (
                   <>
@@ -214,7 +213,6 @@ export default function CreateGroupModal({ isOpen, onClose }) {
                   className="btn btn-secondary btn-full"
                   onClick={handleShareInvite}
                   id="share-created-group-btn"
-                  style={{ background: '#262626', color: '#FFFFFF', border: '1px solid #333333', fontWeight: 600 }}
                 >
                   <Share2 size={18} /> {t('share')}
                 </button>
@@ -225,7 +223,7 @@ export default function CreateGroupModal({ isOpen, onClose }) {
                 className="btn btn-secondary btn-full"
                 onClick={handleGoToGroup}
                 id="go-to-created-group-btn"
-                style={{ background: 'transparent', color: '#888888', border: 'none', fontWeight: 600, marginTop: '2px' }}
+                style={{ background: 'transparent', color: 'var(--text-secondary)', border: 'none', fontWeight: 600, marginTop: '2px' }}
               >
                 Go to Group <ArrowRight size={16} style={{ marginLeft: '4px' }} />
               </button>
@@ -235,8 +233,8 @@ export default function CreateGroupModal({ isOpen, onClose }) {
           /* Form View */
           <>
             <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{t('createGroupTitle')}</h2>
-              <button className="btn-icon" onClick={handleClose} id="close-create-group-btn" style={{ color: '#888' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('createGroupTitle')}</h2>
+              <button className="btn-icon" onClick={handleClose} id="close-create-group-btn" style={{ color: 'var(--text-secondary)' }}>
                 <X size={18} />
               </button>
             </div>
@@ -244,19 +242,24 @@ export default function CreateGroupModal({ isOpen, onClose }) {
             <form onSubmit={handleSubmit} className="flex flex-col gap-16">
               {/* Icon Selector */}
               <div className="input-group">
-                <label style={{ color: '#888' }}>{t('groupIcon')}</label>
+                <label style={{ color: 'var(--text-secondary)' }}>{t('groupIcon')}</label>
                 <div className="flex gap-8" style={{ overflowX: 'auto', paddingBottom: '4px' }}>
                   {icons.map((ic) => (
                     <button
                       type="button"
                       key={ic}
                       onClick={() => setSelectedIcon(ic)}
-                      className={`avatar ${selectedIcon === ic ? 'avatar-selected' : ''}`}
                       style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '12px',
                         fontSize: '1.25rem',
-                        background: 'var(--bg-elevated)',
-                        border: selectedIcon === ic ? '2px solid #A3E635' : '1px solid var(--border-light)',
+                        background: selectedIcon === ic ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
+                        border: selectedIcon === ic ? '2px solid var(--accent)' : '1px solid var(--border-light)',
                         cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
                       {ic}
@@ -298,7 +301,7 @@ export default function CreateGroupModal({ isOpen, onClose }) {
                 className="btn btn-primary btn-full"
                 disabled={!name.trim() || isSubmitting}
                 id="submit-create-group-btn"
-                style={{ opacity: (!name.trim() || isSubmitting) ? 0.5 : 1, marginTop: '8px', background: '#A3E635', color: '#000', fontWeight: 700 }}
+                style={{ opacity: (!name.trim() || isSubmitting) ? 0.5 : 1, marginTop: '8px', background: 'var(--accent)', color: '#000', fontWeight: 700 }}
               >
                 {isSubmitting ? (
                   t('loading')

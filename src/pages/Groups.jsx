@@ -39,7 +39,6 @@ export default function Groups() {
           className="btn btn-primary flex-1"
           onClick={() => setShowCreateModal(true)}
           id="open-create-group-btn"
-          style={{ fontSize: '0.85rem', background: '#A3E635', color: '#000', fontWeight: 700 }}
         >
           <Plus size={16} /> {t('createGroup')}
         </button>
@@ -47,7 +46,6 @@ export default function Groups() {
           className="btn btn-secondary flex-1"
           onClick={() => setShowJoinModal(true)}
           id="open-join-group-btn"
-          style={{ fontSize: '0.85rem', background: '#262626', color: '#FFF', border: '1px solid #333' }}
         >
           <Link2 size={16} /> {t('joinAGroup')}
         </button>
@@ -124,7 +122,6 @@ export default function Groups() {
                 className="btn btn-primary flex-1"
                 onClick={() => setShowCreateModal(true)}
                 id="empty-create-group-btn"
-                style={{ background: '#A3E635', color: '#000', fontWeight: 700 }}
               >
                 {t('createGroup')}
               </button>
@@ -132,7 +129,6 @@ export default function Groups() {
                 className="btn btn-secondary flex-1"
                 onClick={() => setShowJoinModal(true)}
                 id="empty-join-group-btn"
-                style={{ background: '#262626', color: '#FFF', border: '1px solid #333' }}
               >
                 {t('joinAGroup')}
               </button>

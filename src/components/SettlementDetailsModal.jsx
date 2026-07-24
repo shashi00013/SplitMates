@@ -33,10 +33,10 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
         {/* Header */}
         <div className="flex justify-between items-center" style={{ marginBottom: '20px' }}>
           <div className="flex items-center gap-8">
-            <ShieldCheck size={20} style={{ color: '#A3E635' }} />
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{t('settleUp')} Details</h2>
+            <ShieldCheck size={20} className="text-accent" />
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('settleUp')} Details</h2>
           </div>
-          <button className="btn-icon" onClick={onClose} id="close-settlement-details-btn" style={{ color: '#888' }}>
+          <button className="btn-icon" onClick={onClose} id="close-settlement-details-btn" style={{ color: 'var(--text-secondary)' }}>
             <X size={18} />
           </button>
         </div>
@@ -47,9 +47,9 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
             style={{
               padding: '6px 14px',
               borderRadius: '20px',
-              background: 'rgba(163, 230, 53, 0.12)',
-              border: '1px solid #A3E635',
-              color: '#A3E635',
+              background: 'var(--accent-dim)',
+              border: '1px solid var(--accent)',
+              color: 'var(--accent)',
               fontSize: '0.8rem',
               fontWeight: 600,
               display: 'inline-flex',
@@ -64,13 +64,13 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
         {/* Settlement Hero */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px', textAlign: 'center' }}>
           <div className="expense-hero-icon-large" style={{ fontSize: '2.5rem', marginBottom: '4px' }}>{group?.icon || '📜'}</div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '8px', marginBottom: '4px', color: '#FFFFFF' }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '8px', marginBottom: '4px', color: 'var(--text-primary)' }}>
             {group?.name || 'Group Settlement'}
           </h3>
           <p className="text-secondary text-xs" style={{ marginBottom: '12px' }}>
             {cycle ? `Period ID: ${cycle.id}` : 'Historical Period'}
           </p>
-          <p className="text-3xl text-accent fw-700" style={{ color: '#A3E635' }}>{formatCurrency(settlement.totalSettled)}</p>
+          <p className="text-3xl text-accent fw-700">{formatCurrency(settlement.totalSettled)}</p>
           <div className="flex items-center gap-6 text-secondary text-xs" style={{ marginTop: '10px' }}>
             <Calendar size={14} />
             <span>Completed on {formatDateTime(settlement.completedAt || settlement.date)}</span>
@@ -79,8 +79,8 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
 
         {/* Transactions list */}
         <div className="input-group" style={{ marginBottom: '20px' }}>
-          <label style={{ color: '#888' }}>{t('settleUp')} Transactions ({transactions.length})</label>
-          <div className="card" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: '#111' }}>
+          <label style={{ color: 'var(--text-secondary)' }}>{t('settleUp')} Transactions ({transactions.length})</label>
+          <div className="card" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-card-alt)' }}>
             {transactions.length === 0 ? (
               <p className="text-secondary text-xs text-center" style={{ padding: '8px 0' }}>{t('allSettled')}.</p>
             ) : (
@@ -88,15 +88,15 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
                 const fromUser = getUserById(tx.from);
                 const toUser = getUserById(tx.to);
                 return (
-                  <div key={idx} className="flex justify-between items-center text-sm" style={{ padding: '8px 0', borderBottom: idx < transactions.length - 1 ? '1px solid #222' : 'none' }}>
+                  <div key={idx} className="flex justify-between items-center text-sm" style={{ padding: '8px 0', borderBottom: idx < transactions.length - 1 ? '1px solid var(--border-light)' : 'none' }}>
                     <div className="flex items-center gap-10">
                       <Avatar user={fromUser} size="xs" />
                       <div>
-                        <p style={{ margin: 0, fontWeight: 600, color: '#FFF' }}>{fromUser?.firstName || 'Member'} → {toUser?.firstName || 'Member'}</p>
+                        <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{fromUser?.firstName || 'Member'} → {toUser?.firstName || 'Member'}</p>
                         <p className="text-secondary text-xs" style={{ margin: 0 }}>{fromUser?.name} paid {toUser?.name}</p>
                       </div>
                     </div>
-                    <span className="fw-700 text-accent" style={{ color: '#A3E635' }}>{formatCurrency(tx.amount)}</span>
+                    <span className="fw-700 text-accent">{formatCurrency(tx.amount)}</span>
                   </div>
                 );
               })
@@ -106,16 +106,16 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
 
         {/* Member Confirmations */}
         <div className="input-group" style={{ marginBottom: '20px' }}>
-          <label style={{ color: '#888' }}>{t('confirmPayment')} ({confirmationList.length})</label>
-          <div className="card" style={{ padding: '0 16px', maxHeight: '140px', overflowY: 'auto', background: '#111' }}>
+          <label style={{ color: 'var(--text-secondary)' }}>{t('confirmPayment')} ({confirmationList.length})</label>
+          <div className="card" style={{ padding: '0 16px', maxHeight: '140px', overflowY: 'auto', background: 'var(--bg-card-alt)' }}>
             {groupMembers.map((m) => {
               return (
-                <div key={m.id} className="member-row" style={{ padding: '10px 0', borderBottom: '1px solid #222' }}>
+                <div key={m.id} className="member-row" style={{ padding: '10px 0', borderBottom: '1px solid var(--border-light)' }}>
                   <Avatar user={m} size="xs" />
                   <div className="member-info" style={{ flex: 1 }}>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: 500, margin: 0, color: '#FFF' }}>{m.name}</h4>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: 500, margin: 0, color: 'var(--text-primary)' }}>{m.name}</h4>
                   </div>
-                  <span className="text-accent text-xs fw-600" style={{ color: '#A3E635' }}>✓ {t('confirmPayment')}</span>
+                  <span className="text-accent text-xs fw-600">✓ {t('confirmPayment')}</span>
                 </div>
               );
             })}

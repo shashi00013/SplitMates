@@ -115,7 +115,7 @@ export default function Login() {
             className="btn btn-primary btn-full login-submit"
             disabled={isSubmitting}
             id="login-submit-btn"
-            style={{ opacity: isSubmitting ? 0.55 : 1, background: '#A3E635', color: '#000', fontWeight: 700 }}
+            style={{ opacity: isSubmitting ? 0.55 : 1 }}
           >
             {isSubmitting ? (
               t('loading')
@@ -129,7 +129,7 @@ export default function Login() {
 
         <p className="login-footer" style={{ marginTop: '24px', textAlign: 'center' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: '#A3E635', fontWeight: 600, textDecoration: 'none' }}>
+          <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
             Sign Up
           </Link>
         </p>

@@ -155,7 +155,7 @@ export default function Register() {
             className="btn btn-primary btn-full login-submit"
             disabled={isSubmitting}
             id="register-submit-btn"
-            style={{ opacity: isSubmitting ? 0.55 : 1, marginTop: '8px', background: '#A3E635', color: '#000', fontWeight: 700 }}
+            style={{ opacity: isSubmitting ? 0.55 : 1, marginTop: '8px' }}
           >
             {isSubmitting ? (
               t('loading')
@@ -169,7 +169,7 @@ export default function Register() {
 
         <p className="login-footer" style={{ marginTop: '24px', textAlign: 'center' }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: '#A3E635', fontWeight: 600, textDecoration: 'none' }}>
+          <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
             Sign In
           </Link>
         </p>

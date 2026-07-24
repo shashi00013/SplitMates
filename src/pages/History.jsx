@@ -57,7 +57,7 @@ export default function History() {
             <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Historical Settled Total
             </p>
-            <p className="text-accent fw-700 text-3xl" style={{ marginTop: '4px', color: '#A3E635' }}>
+            <p className="text-accent fw-700 text-3xl" style={{ marginTop: '4px' }}>
               {formatCurrency(totalSettledOverall)}
             </p>
           </div>
@@ -97,7 +97,7 @@ export default function History() {
                 style={{ cursor: 'pointer' }}
                 id={`history-item-${settle.id}`}
               >
-                <div className="expense-icon" style={{ background: 'rgba(163, 230, 53, 0.1)', color: '#A3E635' }}>
+                <div className="expense-icon" style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>
                   {group?.icon || '📜'}
                 </div>
                 <div className="expense-info">
@@ -107,7 +107,7 @@ export default function History() {
                   </p>
                 </div>
                 <div className="expense-amount">
-                  <p className="amount text-accent" style={{ fontWeight: 700, color: '#A3E635' }}>
+                  <p className="amount text-accent" style={{ fontWeight: 700 }}>
                     {formatCurrency(settle.totalSettled)}
                   </p>
                   <p className="date text-secondary" style={{ fontSize: '0.75rem' }}>

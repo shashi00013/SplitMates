@@ -212,7 +212,7 @@ export default function Settlement() {
           <div style={{
             height: '100%',
             width: `${progressPct}%`,
-            background: '#A3E635',
+            background: 'var(--accent)',
             borderRadius: '3px',
             transition: 'width 0.4s ease',
           }} />
