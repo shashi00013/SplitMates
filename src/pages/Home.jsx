@@ -113,41 +113,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Quick Action Shortcuts */}
-      <div className="flex gap-10" style={{ marginBottom: '24px' }}>
-        <button
-          className="btn btn-primary"
-          style={{ flex: 1, padding: '10px 12px', fontSize: '0.85rem', gap: '6px', fontWeight: 700 }}
-          onClick={() => navigate('/add-expense')}
-          id="quick-add-expense-btn"
-        >
-          <PlusCircle size={16} /> Add Expense
-        </button>
 
-        {userGroups.length > 0 && (
-          <button
-            className="btn btn-outline"
-            style={{ flex: 1, padding: '10px 12px', fontSize: '0.85rem', gap: '6px', fontWeight: 600 }}
-            onClick={() => {
-              const targetGroup = pendingSettlementGroup || userGroups[0];
-              selectGroup(targetGroup.id);
-              navigate(`/settlement/${targetGroup.id}`);
-            }}
-            id="quick-settle-btn"
-          >
-            <ArrowUpRight size={16} /> Settle Up
-          </button>
-        )}
-
-        <button
-          className="btn btn-outline"
-          style={{ padding: '10px 14px', fontSize: '0.85rem', gap: '6px' }}
-          onClick={() => navigate('/groups')}
-          id="quick-new-group-btn"
-        >
-          <Users size={16} /> Groups
-        </button>
-      </div>
 
       {/* Pending Settlement Banner (if any) */}
       {pendingSettlementGroup && (
