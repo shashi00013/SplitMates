@@ -28,26 +28,27 @@ export default function Groups() {
           <ChevronLeft size={20} />
         </button>
         <h1>{t('myGroups')}</h1>
-        <button className="btn-icon" onClick={refreshGroups} id="refresh-groups-btn" aria-label="Refresh Groups">
-          <RefreshCw size={18} className={isLoadingGroups ? 'animate-spin' : ''} />
-        </button>
+        <div className="flex items-center gap-8">
+          <button
+            className="btn btn-primary btn-sm flex items-center gap-4"
+            onClick={() => setShowCreateModal(true)}
+            id="open-create-group-btn"
+          >
+            <Plus size={16} /> {t('createGroup')}
+          </button>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex gap-10" style={{ marginBottom: '20px' }}>
+      {/* Secondary Join Action */}
+      <div className="flex justify-between items-center" style={{ marginBottom: '16px', padding: '0 4px' }}>
+        <span className="text-xs text-secondary">{userGroups.length} {userGroups.length === 1 ? 'group' : 'groups'}</span>
         <button
-          className="btn btn-primary flex-1"
-          onClick={() => setShowCreateModal(true)}
-          id="open-create-group-btn"
-        >
-          <Plus size={16} /> {t('createGroup')}
-        </button>
-        <button
-          className="btn btn-secondary flex-1"
+          className="text-xs text-accent flex items-center gap-4"
           onClick={() => setShowJoinModal(true)}
           id="open-join-group-btn"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
         >
-          <Link2 size={16} /> {t('joinAGroup')}
+          <Link2 size={14} /> {t('joinAGroup')}
         </button>
       </div>
 
