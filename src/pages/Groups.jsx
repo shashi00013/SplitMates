@@ -113,9 +113,9 @@ export default function Groups() {
         {!isLoadingGroups && userGroups.length === 0 && (
           <div className="card text-center" style={{ padding: '40px 20px' }}>
             <p style={{ fontSize: '2rem', marginBottom: '12px' }}>🏘️</p>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '6px' }}>No Groups Found</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '6px' }}>No groups yet</h3>
             <p className="text-secondary text-sm" style={{ marginBottom: '20px' }}>
-              You aren't a member of any active groups yet.
+              Create a group to start splitting expenses with your people.
             </p>
             <div className="flex gap-10">
               <button
