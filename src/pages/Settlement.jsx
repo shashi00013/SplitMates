@@ -103,7 +103,10 @@ export default function Settlement() {
           <button className="btn-icon" onClick={() => navigate(-1)} id="settle-back-btn">
             <ChevronLeft size={20} />
           </button>
-          <h1>{t('settleUp')}</h1>
+          <div>
+            <h1>{t('settleUp')}</h1>
+            <p className="text-secondary text-xs">{group.name}</p>
+          </div>
           <div className="spacer" />
         </div>
 
@@ -112,10 +115,10 @@ export default function Settlement() {
             <Users size={32} strokeWidth={2} />
           </div>
           <h2 style={{ fontSize: '1.35rem', marginBottom: '8px', letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>
-            {t('settleUp')} {group.name}
+            Ready to settle
           </h2>
           <p className="text-secondary text-sm" style={{ maxWidth: '280px', textAlign: 'center', lineHeight: 1.5, marginBottom: '24px' }}>
-            {t('confirmPaymentDesc')}
+            Review the final balances and start the settlement for "{group.name}".
           </p>
 
           {/* Suggested settlement summary */}
@@ -182,7 +185,7 @@ export default function Settlement() {
             disabled={groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating}
             style={{ opacity: (groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating) ? 0.45 : 1, fontWeight: 700 }}
           >
-            {isInitiating ? t('loading') : t('startSettlingUp')}
+            {isInitiating ? t('loading') : 'Start Settling'}
           </button>
         </div>
       </div>
@@ -254,14 +257,17 @@ export default function Settlement() {
           </>
         ) : (
           <>
-            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'rgba(22, 163, 74, 0.15)', color: 'var(--positive)' }}>
+            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'rgba(204, 255, 0, 0.12)', color: 'var(--accent)' }}>
               <Check size={28} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
               You're all set
             </h3>
+            <p className="text-accent text-xs fw-700" style={{ margin: '0 0 4px 0' }}>
+              ✓ You confirmed
+            </p>
             <p className="text-secondary text-sm" style={{ margin: 0 }}>
-              Waiting for remaining members ({confirmedCount}/{members.length}).
+              Waiting for remaining members ({pendingCount})
             </p>
           </>
         )}
@@ -288,6 +294,8 @@ export default function Settlement() {
                     ? (isMe ? '✓ You confirmed' : '✓ Confirmed')
                     : confirmingMemberId === member.id
                     ? t('loading')
+                    : isMe
+                    ? 'Waiting for your confirmation'
                     : 'Waiting for confirmation'}
                 </p>
               </div>
