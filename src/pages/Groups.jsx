@@ -44,7 +44,7 @@ export default function Groups() {
         </button>
         <button
           className="btn btn-secondary flex-1"
-          onClick={() => setShowJoinModal(true)}
+          onClick={() => navigate('/groups/join')}
           id="open-join-group-btn"
         >
           <Link2 size={16} /> {t('joinAGroup')}
@@ -127,7 +127,7 @@ export default function Groups() {
               </button>
               <button
                 className="btn btn-secondary flex-1"
-                onClick={() => setShowJoinModal(true)}
+                onClick={() => navigate('/groups/join')}
                 id="empty-join-group-btn"
               >
                 {t('joinAGroup')}
