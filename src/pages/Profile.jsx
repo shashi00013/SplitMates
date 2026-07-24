@@ -36,7 +36,7 @@ export default function Profile() {
   const totalExpenses = getAllExpensesForUser().length;
   const userSettlements = getSettlementHistory();
   const totalSettlements = userSettlements.length;
-  const { totalOwed, totalOwe } = getTotalBalances();
+  const { totalOwed, totalOwe, totalBalance = 0 } = getTotalBalances();
 
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
