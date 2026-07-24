@@ -17,6 +17,7 @@ import PublicOnlyRoute from './components/PublicOnlyRoute';
 
 import BalanceBreakdown from './pages/BalanceBreakdown';
 import JoinGroupFlow from './pages/JoinGroupFlow';
+import JoinGroupConfirm from './pages/JoinGroupConfirm';
 
 export default function App() {
   const { toast, isAuthenticated } = useApp();
