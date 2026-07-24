@@ -182,12 +182,14 @@ export default function GroupDetails() {
       <div className="card card-glow" style={{ marginBottom: '24px', padding: '20px' }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-secondary text-xs" style={{ marginBottom: '4px', fontWeight: 600 }}>{t('yourPart')}</p>
+            <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+              {t('netBalance')}
+            </p>
             <p className={`text-2xl fw-800 ${statusClass}`}>
-              {formatCurrency(myBalance)}
+              {myBalance === 0 ? '₹0.00' : formatCurrency(Math.abs(myBalance))}
             </p>
             <p className={`text-xs fw-600 ${statusClass}`} style={{ marginTop: '4px' }}>
-              {labelText}
+              {labelText} {myBalance > 0 ? '(Receivable)' : myBalance < 0 ? '(Payable)' : ''}
             </p>
           </div>
           <MiniChart bars={6} maxHeight={36} />
@@ -211,18 +213,19 @@ export default function GroupDetails() {
           const bal = balances[m.id] || 0;
           const isMe = m.id === user.id;
           const bClass = bal > 0 ? 'text-accent' : bal < 0 ? 'text-negative' : 'text-secondary';
+          const balText = bal > 0 ? `Gets ${formatCurrency(bal)}` : bal < 0 ? `Owes ${formatCurrency(Math.abs(bal))}` : t('allSettled');
           return (
             <div
               key={m.id}
               className="card flex flex-col items-center text-center"
-              style={{ minWidth: '100px', padding: '14px 10px', background: '#111111', borderRadius: '16px' }}
+              style={{ minWidth: '110px', padding: '14px 10px', background: '#111111', borderRadius: '16px' }}
             >
               <Avatar user={m} size="md" />
               <strong style={{ fontSize: '0.82rem', marginTop: '6px', color: '#FFFFFF' }}>
                 {isMe ? 'You' : m.firstName}
               </strong>
-              <span className={`text-xs fw-600 ${bClass}`} style={{ marginTop: '2px' }}>
-                {formatCurrency(bal)}
+              <span className={`text-xs fw-600 ${bClass}`} style={{ marginTop: '4px' }}>
+                {balText}
               </span>
             </div>
           );

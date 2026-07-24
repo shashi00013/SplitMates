@@ -81,6 +81,7 @@ export default function Groups() {
           const myBalance = user ? (balances[user.id] || 0) : 0;
           const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
           const labelText = myBalance > 0 ? t('youGet') : myBalance < 0 ? t('youPay') : t('allSettled');
+          const displayAmount = myBalance === 0 ? '₹0.00' : formatCurrency(Math.abs(myBalance));
 
           return (
             <div
@@ -103,7 +104,7 @@ export default function Groups() {
                   {labelText}
                 </p>
                 <p className={`balance-amount ${statusClass}`}>
-                  {formatCurrency(myBalance)}
+                  {displayAmount}
                 </p>
               </div>
             </div>

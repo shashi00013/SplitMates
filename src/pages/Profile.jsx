@@ -230,7 +230,7 @@ export default function Profile() {
             {formatCurrency(totalBalance)}
           </p>
           <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
-            Total
+            Net Balance
           </p>
         </div>
       </div>

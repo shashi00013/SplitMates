@@ -96,19 +96,23 @@ export default function Home() {
             <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
               {t('netBalance')}
             </p>
-            <p className="text-3xl" style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+            <p className="text-3xl" style={{ fontWeight: 800, color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
               {formatCurrency(totalBalance)}
             </p>
-            <div className="flex gap-16" style={{ marginTop: '10px' }}>
-              <p className="text-accent text-sm fw-600">
-                ↑ {t('youGet')}: {formatCurrency(totalOwed)}
+            {totalOwed === 0 && totalOwe === 0 ? (
+              <p className="text-secondary text-sm fw-600" style={{ marginTop: '10px', color: '#A3E635' }}>
+                {t('allSettledUp')}
               </p>
-              {totalOwe > 0 && (
+            ) : (
+              <div className="flex gap-16" style={{ marginTop: '10px' }}>
+                <p className="text-accent text-sm fw-600">
+                  ↑ {t('youGet')}: {formatCurrency(totalOwed)}
+                </p>
                 <p className="text-negative text-sm fw-600">
                   ↓ {t('youPay')}: {formatCurrency(totalOwe)}
                 </p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -178,6 +182,7 @@ export default function Home() {
             const myBalance = user ? balances[user.id] || 0 : 0;
             const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
             const labelText = myBalance > 0 ? t('youGet') : myBalance < 0 ? t('youPay') : t('allSettled');
+            const displayAmount = myBalance === 0 ? '₹0.00' : formatCurrency(Math.abs(myBalance));
             return (
               <div
                 key={group.id}
@@ -195,7 +200,7 @@ export default function Home() {
                 </div>
                 <div className="group-card-balance">
                   <p className={`balance-label ${statusClass}`}>{labelText}</p>
-                  <p className={`balance-amount ${statusClass}`}>{formatCurrency(myBalance)}</p>
+                  <p className={`balance-amount ${statusClass}`}>{displayAmount}</p>
                 </div>
               </div>
             );
