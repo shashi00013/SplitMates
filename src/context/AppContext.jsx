@@ -1031,6 +1031,7 @@ export function AppProvider({ children }) {
     unreadCount,
     fetchNotifications,
     markNotificationRead,
+    setUser,
     getUserById,
   };
 

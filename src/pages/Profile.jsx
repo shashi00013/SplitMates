@@ -1,15 +1,34 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Settings, HelpCircle, LogOut, Moon, Sun, Monitor, Bell, Shield, Edit3, History as HistoryIcon, Globe, X, Check } from 'lucide-react';
+import {
+  ChevronRight,
+  Settings,
+  HelpCircle,
+  LogOut,
+  Moon,
+  Sun,
+  Monitor,
+  Bell,
+  Shield,
+  Edit3,
+  History as HistoryIcon,
+  Globe,
+  X,
+  Check,
+  Camera,
+  Upload,
+} from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../data/mockData';
 import Avatar from '../components/Avatar';
 
+const PRESET_CHARACTERS = ['🦊', '🐯', '🦁', '🐼', '🐱', '🐶', '🚀', '🦄', '⚡', '👑'];
+
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, getUserGroups, getAllExpensesForUser, getSettlementHistory, getTotalBalances, logout, showToast } = useApp();
+  const { user, setUser, getUserGroups, getAllExpensesForUser, getSettlementHistory, getTotalBalances, logout, showToast } = useApp();
   const { language, setLanguage, t, languages } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
 
@@ -24,6 +43,55 @@ export default function Profile() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [activeInfoModal, setActiveInfoModal] = useState(null); // 'notifications' | 'privacy' | 'help' | 'settings'
 
+  // Draft profile edit state
+  const [draftName, setDraftName] = useState(user?.name || '');
+  const [draftAvatar, setDraftAvatar] = useState(user?.avatar || null);
+  const fileInputRef = useRef(null);
+
+  function handleOpenEditModal() {
+    setDraftName(user?.name || '');
+    setDraftAvatar(user?.avatar || null);
+    setShowEditModal(true);
+  }
+
+  function handleImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file');
+      return;
+    }
+
+    // Limit file size to 3MB
+    if (file.size > 3 * 1024 * 1024) {
+      showToast('Image size should be less than 3MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setDraftAvatar(event.target.result);
+        showToast('Photo uploaded!');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleSaveProfile() {
+    if (!user) return;
+    const updatedUser = {
+      ...user,
+      name: draftName.trim() || user.name,
+      firstName: (draftName.trim() || user.name).split(' ')[0],
+      avatar: draftAvatar,
+    };
+    setUser(updatedUser);
+    setShowEditModal(false);
+    showToast('Profile updated successfully!');
+  }
+
   return (
     <div className="page" id="profile-page">
       <div className="page-header">
@@ -33,7 +101,7 @@ export default function Profile() {
           className="btn-icon"
           id="edit-profile-btn"
           aria-label="Edit profile"
-          onClick={() => setShowEditModal(true)}
+          onClick={handleOpenEditModal}
         >
           <Edit3 size={17} />
         </button>
@@ -41,16 +109,41 @@ export default function Profile() {
 
       {/* Profile Header */}
       <div className="profile-header" style={{ marginBottom: '24px', paddingTop: '8px' }}>
-        <Avatar user={user} size="xl" />
-        <div className="text-center">
-          <h2 style={{ fontSize: '1.35rem', letterSpacing: '-0.01em', marginBottom: '4px', color: '#FFFFFF' }}>
+        <div
+          style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }}
+          onClick={handleOpenEditModal}
+          id="profile-avatar-clickable"
+        >
+          <Avatar user={user} size="xl" />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              background: '#A3E635',
+              color: '#000',
+              borderRadius: '50%',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              border: '2px solid var(--bg-primary)',
+            }}
+          >
+            <Camera size={14} />
+          </div>
+        </div>
+
+        <div className="text-center" style={{ marginTop: '10px' }}>
+          <h2 style={{ fontSize: '1.35rem', letterSpacing: '-0.01em', marginBottom: '4px', color: 'var(--text-primary)' }}>
             {user?.name}
           </h2>
           <p className="text-secondary text-sm">{user?.email}</p>
         </div>
       </div>
 
-      {/* Balance Summary Card with Simple Wording */}
+      {/* Balance Summary Card */}
       <div className="card card-glow" style={{ marginBottom: '20px', padding: '18px 20px' }}>
         <div className="flex justify-between items-center">
           <div className="text-center flex-1">
@@ -73,8 +166,8 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="profile-stats" style={{ marginBottom: '24px' }} id="profile-stats">
+      {/* Profile Stats Row */}
+      <div className="stats-row" style={{ marginBottom: '24px' }}>
         <div className="stat-card" onClick={() => navigate('/groups')} style={{ cursor: 'pointer' }}>
           <p className="stat-value">{userGroups.length}</p>
           <p className="stat-label">{t('groups')}</p>
@@ -280,29 +373,135 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Edit Profile Modal */}
+      {/* Edit Profile & Avatar Selection Modal */}
       {showEditModal && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)} id="edit-profile-modal-overlay">
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: '#1A1A1A', borderRadius: '24px', padding: '24px', maxWidth: '400px', width: '92%' }}
+          >
             <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{t('edit')} {t('profile')}</h2>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{t('edit')} {t('profile')}</h2>
               <button className="btn-icon" onClick={() => setShowEditModal(false)} style={{ color: '#888' }}>
                 <X size={18} />
               </button>
             </div>
-            <div className="flex flex-col gap-12">
-              <div className="input-group">
-                <label style={{ color: '#888' }}>Name</label>
-                <input className="input" defaultValue={user?.name} readOnly />
+
+            {/* Hidden File Input for Image Upload */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleImageUpload}
+              id="avatar-file-input"
+            />
+
+            <div className="flex flex-col gap-16">
+              {/* Current Avatar Preview & Upload Action */}
+              <div className="flex flex-col items-center gap-10">
+                <div style={{ position: 'relative' }}>
+                  <Avatar user={{ ...user, avatar: draftAvatar }} size="xl" />
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    fontSize: '0.8rem',
+                    padding: '6px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    borderRadius: '20px',
+                    borderColor: '#A3E635',
+                    color: '#A3E635',
+                    fontWeight: 600,
+                  }}
+                  id="upload-photo-btn"
+                >
+                  <Upload size={14} /> Upload Custom Photo
+                </button>
               </div>
-              <div className="input-group">
-                <label style={{ color: '#888' }}>Email</label>
-                <input className="input" defaultValue={user?.email} readOnly />
+
+              {/* Character Avatar Presets Grid */}
+              <div style={{ borderTop: '1px solid #282828', paddingTop: '14px' }}>
+                <p className="text-secondary text-xs fw-600" style={{ marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Or Choose a Character Avatar
+                </p>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(5, 1fr)',
+                    gap: '10px',
+                  }}
+                >
+                  {PRESET_CHARACTERS.map((char) => {
+                    const isSelected = draftAvatar === char;
+                    return (
+                      <button
+                        key={char}
+                        type="button"
+                        onClick={() => setDraftAvatar(char)}
+                        style={{
+                          width: '46px',
+                          height: '46px',
+                          borderRadius: '50%',
+                          fontSize: '1.4rem',
+                          background: isSelected ? 'rgba(163, 230, 53, 0.2)' : '#222222',
+                          border: isSelected ? '2px solid #A3E635' : '1px solid #333333',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                        }}
+                        id={`avatar-char-${char}`}
+                      >
+                        {char}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#888' }}>Profile details are synced with your authenticated account.</p>
-              <button className="btn btn-primary btn-full" onClick={() => setShowEditModal(false)} style={{ background: '#A3E635', color: '#000', fontWeight: 700 }}>
-                {t('done')}
-              </button>
+
+              {/* Name Field */}
+              <div className="input-group">
+                <label style={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>Your Name</label>
+                <input
+                  className="input"
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                  placeholder="Enter your name"
+                  style={{ background: '#111', border: '1px solid #333', color: '#FFF' }}
+                  id="edit-profile-name-input"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-10" style={{ marginTop: '4px' }}>
+                {draftAvatar && (
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => setDraftAvatar(null)}
+                    style={{ flex: 1, fontSize: '0.8rem', color: '#888', borderColor: '#444' }}
+                  >
+                    Reset Initial
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSaveProfile}
+                  style={{ flex: 2, background: '#A3E635', color: '#000', fontWeight: 700 }}
+                  id="save-profile-btn"
+                >
+                  Save Profile
+                </button>
+              </div>
             </div>
           </div>
         </div>
