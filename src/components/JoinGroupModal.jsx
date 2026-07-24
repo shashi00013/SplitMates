@@ -33,7 +33,7 @@ export default function JoinGroupModal({ isOpen, onClose }) {
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
         id="join-group-modal-content"
-        style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px' }}
+        style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px' }}
       >
         <div className="modal-drag-handle" />
 

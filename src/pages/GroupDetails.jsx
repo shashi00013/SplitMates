@@ -5,7 +5,6 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
 import Avatar from '../components/Avatar';
-import MiniChart from '../components/MiniChart';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 import SettlementDetailsModal from '../components/SettlementDetailsModal';
 import InviteGroupModal from '../components/InviteGroupModal';
@@ -130,11 +129,11 @@ export default function GroupDetails() {
               position: 'absolute',
               top: '44px',
               right: '0',
-              background: '#1A1A1A',
-              border: '1px solid #333333',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-light)',
               borderRadius: '14px',
               padding: '8px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+              boxShadow: 'var(--shadow-card)',
               zIndex: 100,
               minWidth: '180px',
             }}
@@ -143,23 +142,23 @@ export default function GroupDetails() {
             <button
               className="menu-item"
               onClick={() => { setShowMenu(false); setIsInviteOpen(true); }}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: '#FFFFFF', fontSize: '0.85rem' }}
+              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem' }}
             >
-              <QrCode size={16} style={{ color: '#A3E635' }} /> {t('groupCode')} & QR
+              <QrCode size={16} style={{ color: 'var(--accent)' }} /> {t('groupCode')} & QR
             </button>
             <button
               className="menu-item"
               onClick={() => { setShowMenu(false); navigate(`/settle/${groupId}`); }}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: '#FFFFFF', fontSize: '0.85rem' }}
+              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem' }}
             >
-              <CheckCircle2 size={16} style={{ color: '#A3E635' }} /> {t('settleUp')}
+              <CheckCircle2 size={16} style={{ color: 'var(--accent)' }} /> {t('settleUp')}
             </button>
-            <div style={{ height: '1px', background: '#333333', margin: '4px 0' }} />
+            <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
             <button
               className="menu-item"
               onClick={handleLeaveGroup}
               disabled={isLeaving}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: '#FF3B30', fontSize: '0.85rem' }}
+              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--negative)', fontSize: '0.85rem' }}
             >
               <LogOut size={16} /> {isLeaving ? 'Leaving...' : t('leaveGroup')}
             </button>
@@ -171,7 +170,7 @@ export default function GroupDetails() {
       <div className="flex items-center gap-16" style={{ marginBottom: '20px', paddingTop: '8px' }}>
         <div style={{ fontSize: '2.8rem' }}>{group.icon || '🏠'}</div>
         <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{group.name}</h1>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{group.name}</h1>
           <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>
             {group.description || `${members.length} ${t('peopleInGroup')}`}
           </p>
@@ -192,7 +191,6 @@ export default function GroupDetails() {
               {labelText} {myBalance > 0 ? '(Receivable)' : myBalance < 0 ? '(Payable)' : ''}
             </p>
           </div>
-          <MiniChart bars={6} maxHeight={36} />
         </div>
       </div>
 
@@ -202,7 +200,7 @@ export default function GroupDetails() {
         <button
           className="see-all"
           onClick={() => setIsInviteOpen(true)}
-          style={{ color: '#A3E635', fontSize: '0.8rem', fontWeight: 600 }}
+          style={{ color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 600 }}
         >
           + {t('groupCode')}
         </button>
@@ -218,10 +216,10 @@ export default function GroupDetails() {
             <div
               key={m.id}
               className="card flex flex-col items-center text-center"
-              style={{ minWidth: '110px', padding: '14px 10px', background: '#111111', borderRadius: '16px' }}
+              style={{ minWidth: '110px', padding: '14px 10px', background: 'var(--bg-input)', borderRadius: '16px' }}
             >
               <Avatar user={m} size="md" />
-              <strong style={{ fontSize: '0.82rem', marginTop: '6px', color: '#FFFFFF' }}>
+              <strong style={{ fontSize: '0.82rem', marginTop: '6px', color: 'var(--text-primary)' }}>
                 {isMe ? 'You' : m.firstName}
               </strong>
               <span className={`text-xs fw-600 ${bClass}`} style={{ marginTop: '4px' }}>

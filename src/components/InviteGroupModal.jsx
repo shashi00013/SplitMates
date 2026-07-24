@@ -47,7 +47,7 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
         className="modal-content flex flex-col gap-16"
         onClick={(e) => e.stopPropagation()}
         id="invite-group-modal-content"
-        style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}
+        style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}
       >
         <div className="flex justify-between items-center">
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>

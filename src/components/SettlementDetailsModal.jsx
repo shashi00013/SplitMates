@@ -26,7 +26,7 @@ export default function SettlementDetailsModal({ settlement, onClose }) {
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
         id="settlement-details-content"
-        style={{ maxHeight: '92vh', overflowY: 'auto', background: '#1A1A1A', borderRadius: '20px', padding: '24px' }}
+        style={{ maxHeight: '92vh', overflowY: 'auto', background: 'var(--bg-card)', borderRadius: '20px', padding: '24px' }}
       >
         <div className="modal-drag-handle" />
 

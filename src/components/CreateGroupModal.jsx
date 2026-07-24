@@ -97,7 +97,7 @@ export default function CreateGroupModal({ isOpen, onClose }) {
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
         id="create-group-modal-content"
-        style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px', maxHeight: '90vh', overflowY: 'auto' }}
+        style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px', maxHeight: '90vh', overflowY: 'auto' }}
       >
         <div className="modal-drag-handle" />
 

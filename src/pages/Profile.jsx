@@ -2,14 +2,11 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronRight,
-  Settings,
-  HelpCircle,
   LogOut,
   Moon,
   Sun,
   Monitor,
   Bell,
-  Shield,
   Edit3,
   History as HistoryIcon,
   Globe,
@@ -23,12 +20,26 @@ import { useLanguage } from '../translations/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../data/mockData';
 import Avatar from '../components/Avatar';
+import NotificationsModal from '../components/NotificationsModal';
 
 const PRESET_CHARACTERS = ['🦊', '🐯', '🦁', '🐼', '🐱', '🐶', '🚀', '🦄', '⚡', '👑'];
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, setUser, getUserGroups, getAllExpensesForUser, getSettlementHistory, getTotalBalances, logout, showToast } = useApp();
+  const {
+    user,
+    setUser,
+    getUserGroups,
+    getAllExpensesForUser,
+    getSettlementHistory,
+    getTotalBalances,
+    logout,
+    showToast,
+    notifications,
+    unreadCount,
+    markNotificationRead,
+  } = useApp();
+
   const { language, setLanguage, t, languages } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
 
@@ -40,8 +51,8 @@ export default function Profile() {
 
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [activeInfoModal, setActiveInfoModal] = useState(null); // 'notifications' | 'privacy' | 'help' | 'settings'
 
   // Draft profile edit state
   const [draftName, setDraftName] = useState(user?.name || '');
@@ -63,7 +74,6 @@ export default function Profile() {
       return;
     }
 
-    // Limit file size to 3MB
     if (file.size > 3 * 1024 * 1024) {
       showToast('Image size should be less than 3MB');
       return;
@@ -120,14 +130,14 @@ export default function Profile() {
               position: 'absolute',
               bottom: 0,
               right: 0,
-              background: '#A3E635',
+              background: 'var(--accent)',
               color: '#000',
               borderRadius: '50%',
               padding: '6px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
               border: '2px solid var(--bg-primary)',
             }}
           >
@@ -166,7 +176,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* 4-Column Side-by-Side Stats Row: Groups | Expenses | Settled | Total */}
+      {/* 4-Column Side-by-Side Stats Row */}
       <div
         style={{
           display: 'grid',
@@ -235,12 +245,12 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Settings Menu List */}
+      {/* Real Functional Settings Menu List */}
       <div className="menu-list" style={{ marginBottom: '20px' }} id="profile-menu">
         <button className="menu-item" id="menu-language" onClick={() => setShowLanguageModal(true)}>
-          <Globe size={20} style={{ color: '#A3E635' }} />
+          <Globe size={20} style={{ color: 'var(--accent)' }} />
           <span className="menu-label">{t('language')}</span>
-          <span className="text-secondary text-sm" style={{ fontWeight: 600, color: '#A3E635' }}>
+          <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)' }}>
             {languages.find((l) => l.code === language)?.nativeLabel}
           </span>
           <ChevronRight size={16} className="menu-chevron" />
@@ -252,37 +262,23 @@ export default function Profile() {
           <ChevronRight size={16} className="menu-chevron" />
         </button>
 
-        <button className="menu-item" id="menu-notifications" onClick={() => setActiveInfoModal('notifications')}>
+        <button className="menu-item" id="menu-notifications" onClick={() => setShowNotificationsModal(true)}>
           <Bell size={20} />
           <span className="menu-label">{t('notifications')}</span>
-          <span className="text-secondary text-xs" style={{ background: 'rgba(163, 230, 53, 0.15)', color: '#A3E635', padding: '2px 8px', borderRadius: '10px' }}>Active</span>
+          {unreadCount > 0 && (
+            <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFF', padding: '2px 8px', borderRadius: '10px' }}>
+              {unreadCount} new
+            </span>
+          )}
           <ChevronRight size={16} className="menu-chevron" />
         </button>
 
         <button className="menu-item" id="menu-theme" onClick={() => setShowThemeModal(true)}>
-          {themeMode === 'light' ? <Sun size={20} style={{ color: '#A3E635' }} /> : themeMode === 'dark' ? <Moon size={20} style={{ color: '#A3E635' }} /> : <Monitor size={20} style={{ color: '#A3E635' }} />}
+          {themeMode === 'light' ? <Sun size={20} style={{ color: 'var(--accent)' }} /> : themeMode === 'dark' ? <Moon size={20} style={{ color: 'var(--accent)' }} /> : <Monitor size={20} style={{ color: 'var(--accent)' }} />}
           <span className="menu-label">App Theme</span>
-          <span className="text-secondary text-sm" style={{ fontWeight: 600, color: '#A3E635', textTransform: 'capitalize' }}>
+          <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)', textTransform: 'capitalize' }}>
             {themeMode === 'system' ? 'System' : `${themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}`}
           </span>
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
-
-        <button className="menu-item" id="menu-privacy" onClick={() => setActiveInfoModal('privacy')}>
-          <Shield size={20} />
-          <span className="menu-label">{t('privacy')}</span>
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
-
-        <button className="menu-item" id="menu-settings" onClick={() => setActiveInfoModal('settings')}>
-          <Settings size={20} />
-          <span className="menu-label">{t('settings')}</span>
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
-
-        <button className="menu-item" id="menu-help" onClick={() => setActiveInfoModal('help')}>
-          <HelpCircle size={20} />
-          <span className="menu-label">{t('helpSupport')}</span>
           <ChevronRight size={16} className="menu-chevron" />
         </button>
       </div>
@@ -300,10 +296,10 @@ export default function Profile() {
       {/* Language Selector Modal */}
       {showLanguageModal && (
         <div className="modal-overlay" onClick={() => setShowLanguageModal(false)} id="language-modal-overlay">
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
             <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{t('selectLanguage')}</h2>
-              <button className="btn-icon" onClick={() => setShowLanguageModal(false)} style={{ color: '#888' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('selectLanguage')}</h2>
+              <button className="btn-icon" onClick={() => setShowLanguageModal(false)} style={{ color: 'var(--text-secondary)' }}>
                 <X size={18} />
               </button>
             </div>
@@ -323,18 +319,18 @@ export default function Profile() {
                     }}
                     style={{
                       padding: '14px 16px',
-                      background: isSelected ? 'rgba(163, 230, 53, 0.12)' : '#111111',
-                      border: isSelected ? '1px solid #A3E635' : '1px solid #333333',
+                      background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
+                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-light)',
                       cursor: 'pointer',
                       borderRadius: '12px',
                     }}
                     id={`lang-option-${lang.code}`}
                   >
                     <div className="flex flex-col text-left">
-                      <strong style={{ color: isSelected ? '#A3E635' : '#FFFFFF', fontSize: '0.95rem' }}>{lang.nativeLabel}</strong>
-                      <span style={{ fontSize: '0.75rem', color: '#888888' }}>{lang.label}</span>
+                      <strong style={{ color: isSelected ? 'var(--accent)' : 'var(--text-primary)', fontSize: '0.95rem' }}>{lang.nativeLabel}</strong>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{lang.label}</span>
                     </div>
-                    {isSelected && <Check size={18} style={{ color: '#A3E635' }} />}
+                    {isSelected && <Check size={18} style={{ color: 'var(--accent)' }} />}
                   </button>
                 );
               })}
@@ -346,10 +342,10 @@ export default function Profile() {
       {/* Theme Selector Modal */}
       {showThemeModal && (
         <div className="modal-overlay" onClick={() => setShowThemeModal(false)} id="theme-modal-overlay">
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
             <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>Select App Theme</h2>
-              <button className="btn-icon" onClick={() => setShowThemeModal(false)} style={{ color: '#888' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Select App Theme</h2>
+              <button className="btn-icon" onClick={() => setShowThemeModal(false)} style={{ color: 'var(--text-secondary)' }}>
                 <X size={18} />
               </button>
             </div>
@@ -373,55 +369,27 @@ export default function Profile() {
                     }}
                     style={{
                       padding: '14px 16px',
-                      background: isSelected ? 'rgba(163, 230, 53, 0.12)' : '#111111',
-                      border: isSelected ? '1px solid #A3E635' : '1px solid #333333',
+                      background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
+                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-light)',
                       cursor: 'pointer',
                       borderRadius: '12px',
                     }}
                     id={`theme-option-${tOption.code}`}
                   >
                     <div className="flex items-center gap-12 text-left">
-                      <span style={{ color: isSelected ? '#A3E635' : '#888888' }}>
+                      <span style={{ color: isSelected ? 'var(--accent)' : 'var(--text-secondary)' }}>
                         {tOption.icon}
                       </span>
                       <div className="flex flex-col text-left">
-                        <strong style={{ color: isSelected ? '#A3E635' : '#FFFFFF', fontSize: '0.95rem' }}>{tOption.label}</strong>
-                        <span style={{ fontSize: '0.75rem', color: '#888888' }}>{tOption.sub}</span>
+                        <strong style={{ color: isSelected ? 'var(--accent)' : 'var(--text-primary)', fontSize: '0.95rem' }}>{tOption.label}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{tOption.sub}</span>
                       </div>
                     </div>
-                    {isSelected && <Check size={18} style={{ color: '#A3E635' }} />}
+                    {isSelected && <Check size={18} style={{ color: 'var(--accent)' }} />}
                   </button>
                 );
               })}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Info Modals for Settings, Privacy, Notifications, Help */}
-      {activeInfoModal && (
-        <div className="modal-overlay" onClick={() => setActiveInfoModal(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: '#1A1A1A', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
-            <div className="flex justify-between items-center" style={{ marginBottom: '14px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>
-                {activeInfoModal === 'notifications' && t('notifications')}
-                {activeInfoModal === 'privacy' && t('privacy')}
-                {activeInfoModal === 'settings' && t('settings')}
-                {activeInfoModal === 'help' && t('helpSupport')}
-              </h2>
-              <button className="btn-icon" onClick={() => setActiveInfoModal(null)} style={{ color: '#888' }}>
-                <X size={18} />
-              </button>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: '#888888', lineHeight: 1.5, margin: '0 0 16px 0' }}>
-              {activeInfoModal === 'notifications' && 'In-app notifications and SMS updates are active for instant expense tracking.'}
-              {activeInfoModal === 'privacy' && 'SplitMates uses encrypted tokens and integer-cent calculations to keep your expense data private and secure.'}
-              {activeInfoModal === 'settings' && `Logged in as ${user?.email}. App version v1.2.0 (Production Ready).`}
-              {activeInfoModal === 'help' && 'Need assistance? Tap below to email support or visit splitmates.app/help.'}
-            </p>
-            <button className="btn btn-primary btn-full" onClick={() => setActiveInfoModal(null)} style={{ background: '#A3E635', color: '#000', fontWeight: 700 }}>
-              {t('done')}
-            </button>
           </div>
         </div>
       )}
@@ -432,16 +400,15 @@ export default function Profile() {
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
-            style={{ background: '#1A1A1A', borderRadius: '24px', padding: '24px', maxWidth: '400px', width: '92%' }}
+            style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '400px', width: '92%' }}
           >
             <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>{t('edit')} {t('profile')}</h2>
-              <button className="btn-icon" onClick={() => setShowEditModal(false)} style={{ color: '#888' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('edit')} {t('profile')}</h2>
+              <button className="btn-icon" onClick={() => setShowEditModal(false)} style={{ color: 'var(--text-secondary)' }}>
                 <X size={18} />
               </button>
             </div>
 
-            {/* Hidden File Input for Image Upload */}
             <input
               type="file"
               ref={fileInputRef}
@@ -469,8 +436,8 @@ export default function Profile() {
                     alignItems: 'center',
                     gap: '6px',
                     borderRadius: '20px',
-                    borderColor: '#A3E635',
-                    color: '#A3E635',
+                    borderColor: 'var(--accent)',
+                    color: 'var(--accent)',
                     fontWeight: 600,
                   }}
                   id="upload-photo-btn"
@@ -480,7 +447,7 @@ export default function Profile() {
               </div>
 
               {/* Character Avatar Presets Grid */}
-              <div style={{ borderTop: '1px solid #282828', paddingTop: '14px' }}>
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
                 <p className="text-secondary text-xs fw-600" style={{ marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Or Choose a Character Avatar
                 </p>
@@ -503,8 +470,8 @@ export default function Profile() {
                           height: '46px',
                           borderRadius: '50%',
                           fontSize: '1.4rem',
-                          background: isSelected ? 'rgba(163, 230, 53, 0.2)' : '#222222',
-                          border: isSelected ? '2px solid #A3E635' : '1px solid #333333',
+                          background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
+                          border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border-light)',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
@@ -522,13 +489,13 @@ export default function Profile() {
 
               {/* Name Field */}
               <div className="input-group">
-                <label style={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>Your Name</label>
+                <label style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600 }}>Your Name</label>
                 <input
                   className="input"
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
                   placeholder="Enter your name"
-                  style={{ background: '#111', border: '1px solid #333', color: '#FFF' }}
+                  style={{ background: 'var(--bg-input)', border: '1px solid var(--border-light)', color: 'var(--text-primary)' }}
                   id="edit-profile-name-input"
                 />
               </div>
@@ -540,7 +507,7 @@ export default function Profile() {
                     type="button"
                     className="btn btn-outline"
                     onClick={() => setDraftAvatar(null)}
-                    style={{ flex: 1, fontSize: '0.8rem', color: '#888', borderColor: '#444' }}
+                    style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-secondary)', borderColor: 'var(--border-light)' }}
                   >
                     Reset Initial
                   </button>
@@ -549,7 +516,7 @@ export default function Profile() {
                   type="button"
                   className="btn btn-primary"
                   onClick={handleSaveProfile}
-                  style={{ flex: 2, background: '#A3E635', color: '#000', fontWeight: 700 }}
+                  style={{ flex: 2, fontWeight: 700 }}
                   id="save-profile-btn"
                 >
                   Save Profile
@@ -559,6 +526,16 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      {/* Real Working Notifications Modal */}
+      <NotificationsModal
+        isOpen={showNotificationsModal}
+        onClose={() => setShowNotificationsModal(false)}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkRead={(id) => markNotificationRead(id)}
+        onMarkAllRead={() => markNotificationRead('all')}
+      />
     </div>
   );
 }

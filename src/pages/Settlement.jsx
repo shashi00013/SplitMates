@@ -111,7 +111,7 @@ export default function Settlement() {
           <div className="success-icon-wrapper" style={{ marginBottom: '16px' }}>
             <Users size={32} strokeWidth={2} />
           </div>
-          <h2 style={{ fontSize: '1.35rem', marginBottom: '8px', letterSpacing: '-0.01em', color: '#FFFFFF' }}>
+          <h2 style={{ fontSize: '1.35rem', marginBottom: '8px', letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>
             {t('settleUp')} {group.name}
           </h2>
           <p className="text-secondary text-sm" style={{ maxWidth: '280px', textAlign: 'center', lineHeight: 1.5, marginBottom: '24px' }}>
@@ -180,7 +180,7 @@ export default function Settlement() {
             onClick={handleInitiate}
             id="initiate-settle-btn"
             disabled={groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating}
-            style={{ opacity: (groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating) ? 0.45 : 1, background: '#A3E635', color: '#000', fontWeight: 700 }}
+            style={{ opacity: (groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating) ? 0.45 : 1, fontWeight: 700 }}
           >
             {isInitiating ? t('loading') : t('startSettlingUp')}
           </button>

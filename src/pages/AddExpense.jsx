@@ -419,14 +419,14 @@ export default function AddExpense() {
         {parsedAmount > 0 && participantCount > 0 && (
           <div className="card" style={{ padding: '14px 18px', background: 'var(--bg-card-alt)' }}>
             <div className="flex justify-between items-center">
-              <span className="text-secondary text-sm">{t('yourPart')}</span>
+              <span className="text-secondary text-sm">{t('yourShare')}</span>
               <span className="fw-700 text-accent" style={{ fontSize: '1rem' }}>
                 {formatCurrency(computedShares[user.id] || 0)}
               </span>
             </div>
             <div className="flex justify-between items-center" style={{ marginTop: '8px' }}>
               <span className="text-secondary text-xs">
-                {formatCurrency(parsedAmount)} Total
+                Total Expense: {formatCurrency(parsedAmount)}
               </span>
               <span className="text-secondary text-xs">
                 {splitType === 'equal' ? t('splitEqual') : splitType === 'exact' ? t('splitExact') : t('splitPercent')}

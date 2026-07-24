@@ -229,6 +229,18 @@ export default function Home() {
             const payer = getUserById(exp.paidBy);
             const group = userGroups.find((g) => g.id === exp.groupId);
             const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Member';
+            const participants = exp.participants || exp.splitAmong || [];
+            const isPayer = exp.paidBy === user?.id;
+            const isParticipant = participants.includes(user?.id);
+            const userShare = exp.shares?.[user?.id] || (isParticipant ? (exp.amount / (participants.length || 1)) : 0);
+            const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
+            const impactClass = isPayer ? 'text-accent' : userShare > 0 ? 'text-negative' : 'text-secondary';
+            const impactText = isPayer
+              ? `Others owe you ${formatCurrency(receivable)}`
+              : userShare > 0
+              ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}`
+              : 'Not involved';
+
             return (
               <div
                 key={exp.id}
@@ -242,9 +254,11 @@ export default function Home() {
                   <h3>{exp.title}</h3>
                   <p>{group?.name || 'Group'} · {t('paidBy')} {paidByLabel}</p>
                 </div>
-                <div className="expense-amount">
+                <div className="expense-amount" style={{ textAlign: 'right' }}>
                   <p className="amount">{formatCurrency(exp.amount)}</p>
-                  <p className="date">{formatDate(exp.date)}</p>
+                  <p className={`date fw-600 ${impactClass}`} style={{ fontSize: '0.72rem', marginTop: '2px' }}>
+                    {impactText}
+                  </p>
                 </div>
               </div>
             );

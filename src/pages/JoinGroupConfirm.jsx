@@ -53,7 +53,7 @@ export default function JoinGroupConfirm() {
       <div
         className="card"
         style={{
-          background: '#1A1A1A',
+          background: 'var(--bg-card)',
           borderRadius: '20px',
           padding: '28px 24px',
           maxWidth: '420px',
