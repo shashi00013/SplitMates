@@ -336,3 +336,51 @@ export const settlementsApi = {
     }
   },
 };
+
+export const notificationsApi = {
+  async getNotifications() {
+    const startTime = Date.now();
+    console.log('[API START] GET /api/notifications');
+    try {
+      const data = await api.get('/notifications');
+      console.log(`[API SUCCESS] GET /api/notifications (${Date.now() - startTime}ms)`);
+      return {
+        notifications: data?.notifications || [],
+        unreadCount: typeof data?.unreadCount === 'number' ? data.unreadCount : 0,
+      };
+    } catch (err) {
+      console.error(`[API ERROR] GET /api/notifications (${Date.now() - startTime}ms):`, err.message);
+      if (err.status === 0) return { notifications: [], unreadCount: 0 };
+      throw err;
+    }
+  },
+
+  async markAsRead(notificationId) {
+    const startTime = Date.now();
+    console.log(`[API START] PATCH /api/notifications/${notificationId}/read`);
+    try {
+      const endpoint = notificationId === 'all' ? '/notifications/mark-all-read' : `/notifications/${notificationId}/read`;
+      const data = notificationId === 'all' ? await api.post(endpoint, {}) : await api.patch(endpoint, {});
+      console.log(`[API SUCCESS] Mark read (${Date.now() - startTime}ms)`);
+      return data;
+    } catch (err) {
+      console.error(`[API ERROR] Mark read (${Date.now() - startTime}ms):`, err.message);
+      if (err.status === 0) return { success: true };
+      throw err;
+    }
+  },
+
+  async sendReminder(groupId) {
+    const startTime = Date.now();
+    console.log(`[API START] POST /api/notifications/remind for group ${groupId}`);
+    try {
+      const data = await api.post('/notifications/remind', { groupId });
+      console.log(`[API SUCCESS] POST /api/notifications/remind (${Date.now() - startTime}ms)`);
+      return data;
+    } catch (err) {
+      console.error(`[API ERROR] POST /api/notifications/remind (${Date.now() - startTime}ms):`, err.message);
+      if (err.status === 0) return { success: true, count: 0 };
+      throw err;
+    }
+  },
+};

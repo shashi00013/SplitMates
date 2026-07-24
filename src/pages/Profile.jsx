@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Settings, HelpCircle, LogOut, Moon, Bell, Shield, Edit3, History as HistoryIcon, Globe, X, Check } from 'lucide-react';
+import { ChevronRight, Settings, HelpCircle, LogOut, Moon, Sun, Monitor, Bell, Shield, Edit3, History as HistoryIcon, Globe, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../data/mockData';
 import Avatar from '../components/Avatar';
 
@@ -10,6 +11,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const { user, getUserGroups, getAllExpensesForUser, getSettlementHistory, getTotalBalances, logout, showToast } = useApp();
   const { language, setLanguage, t, languages } = useLanguage();
+  const { themeMode, setThemeMode } = useTheme();
 
   const userGroups = getUserGroups();
   const totalExpenses = getAllExpensesForUser().length;
@@ -110,12 +112,86 @@ export default function Profile() {
           <ChevronRight size={16} className="menu-chevron" />
         </button>
 
-        <button className="menu-item" id="menu-darkmode" onClick={() => showToast('Dark Mode is enabled by default')}>
-          <Moon size={20} />
-          <span className="menu-label">{t('darkMode')}</span>
-          <span className="text-secondary text-sm">On</span>
-          <ChevronRight size={16} className="menu-chevron" />
-        </button>
+        <div className="menu-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px' }} id="menu-theme-selector">
+          <div className="flex justify-between items-center" style={{ width: '100%' }}>
+            <div className="flex items-center gap-12">
+              {themeMode === 'light' ? <Sun size={20} /> : themeMode === 'dark' ? <Moon size={20} /> : <Monitor size={20} />}
+              <span className="menu-label" style={{ fontWeight: 600 }}>App Theme</span>
+            </div>
+            <span className="text-secondary text-xs" style={{ textTransform: 'capitalize' }}>{themeMode}</span>
+          </div>
+          <div className="flex gap-8" style={{ background: 'var(--bg-input)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
+            <button
+              type="button"
+              id="theme-btn-light"
+              onClick={() => setThemeMode('light')}
+              style={{
+                flex: 1,
+                padding: '6px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                background: themeMode === 'light' ? 'var(--accent)' : 'transparent',
+                color: themeMode === 'light' ? '#000' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Sun size={14} /> Light
+            </button>
+            <button
+              type="button"
+              id="theme-btn-dark"
+              onClick={() => setThemeMode('dark')}
+              style={{
+                flex: 1,
+                padding: '6px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                background: themeMode === 'dark' ? 'var(--accent)' : 'transparent',
+                color: themeMode === 'dark' ? '#000' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Moon size={14} /> Dark
+            </button>
+            <button
+              type="button"
+              id="theme-btn-system"
+              onClick={() => setThemeMode('system')}
+              style={{
+                flex: 1,
+                padding: '6px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                background: themeMode === 'system' ? 'var(--accent)' : 'transparent',
+                color: themeMode === 'system' ? '#000' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Monitor size={14} /> System
+            </button>
+          </div>
+        </div>
 
         <button className="menu-item" id="menu-privacy" onClick={() => setActiveInfoModal('privacy')}>
           <Shield size={20} />

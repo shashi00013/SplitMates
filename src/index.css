@@ -3,7 +3,7 @@
    Premium dark mobile-first expense sharing app
    ============================================================ */
 
-:root {
+:root, [data-theme="dark"] {
   --bg-primary: #050505;
   --bg-card: #0f0f0f;
   --bg-card-alt: #0a0a0a;
@@ -32,6 +32,28 @@
   --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+[data-theme="light"] {
+  --bg-primary: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-card-alt: #F1F5F9;
+  --bg-input: #EDF2F7;
+  --bg-elevated: #E2E8F0;
+  --accent: #65A30D;
+  --accent-dim: rgba(101, 163, 13, 0.12);
+  --accent-glow: rgba(101, 163, 13, 0.08);
+  --accent-dark: #4D7C0F;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
+  --border-color: #E2E8F0;
+  --border-light: #CBD5E1;
+  --positive: #16A34A;
+  --negative: #DC2626;
+  --warning: #D97706;
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
+  --shadow-glow: 0 0 30px rgba(101, 163, 13, 0.08);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -43,7 +65,7 @@ html {
 
 body {
   font-family: var(--font);
-  background: #000;
+  background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh;

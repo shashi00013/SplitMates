@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency } from '../data/mockData';
 import { calculateSettlementTransactions } from '../data/balanceEngine';
+import { notificationsApi } from '../services/apiService';
 import Avatar from '../components/Avatar';
 
 export default function Settlement() {
@@ -33,7 +34,7 @@ export default function Settlement() {
   useEffect(() => {
     let isSubscribed = true;
     async function finalizeSettlement() {
-      if (allConfirmed && isCompleted && !hasCompletedRef.current) {
+      if (allConfirmed && !isCompleted && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
         const historyEntry = await completeSettlement(groupId);
         if (isSubscribed) {
@@ -259,7 +260,14 @@ export default function Settlement() {
       <button
         className="btn btn-outline btn-full"
         style={{ marginBottom: '12px' }}
-        onClick={() => showToast('Notifications sent to pending members!')}
+        onClick={async () => {
+          try {
+            const res = await notificationsApi.sendReminder(groupId);
+            showToast(res?.message || 'Notifications sent to pending members!');
+          } catch (err) {
+            showToast(err.message || 'Failed to send reminders');
+          }
+        }}
         id="notify-pending-btn"
       >
         <Send size={16} /> Send Reminder

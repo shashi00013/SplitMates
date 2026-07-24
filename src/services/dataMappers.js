@@ -107,7 +107,7 @@ export function mapSettlement(settle) {
   const groupId = String(settle.groupId || settle.group_id || '');
 
   const confirmations = Array.isArray(settle.confirmations)
-    ? settle.confirmations.map((c) => (typeof c === 'object' && c !== null ? String(c.id || c._id || c.userId || '') : String(c))).filter(Boolean)
+    ? settle.confirmations.map((c) => (typeof c === 'object' && c !== null ? String(c.userId || c.id || c._id || '') : String(c))).filter(Boolean)
     : [];
 
   const transactions = Array.isArray(settle.transactions)

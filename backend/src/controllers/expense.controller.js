@@ -162,6 +162,31 @@ export async function createExpense(req, res, next) {
     });
 
     const serialized = serializeExpense(expense);
+
+    // Asynchronously create notifications for split participants (excluding creator/payer)
+    try {
+      const creatorUser = await prisma.user.findUnique({ where: { id: userId } });
+      const recipients = participants.filter((pId) => pId !== userId);
+      
+      if (recipients.length > 0) {
+        console.log(`[NOTIFICATION EVENT] Expense created "${title}" (${amount}) by ${userId}`);
+        const notifs = recipients.map((rId) => {
+          console.log(`[NOTIFICATION RECIPIENT] User ${rId} notified for expense ${expense.id}`);
+          return {
+            userId: rId,
+            senderId: userId,
+            groupId,
+            title: 'New Expense Added 💸',
+            message: `${creatorUser?.name || 'A group member'} added "${title}" (₹${amount}).`,
+            type: 'expense_added',
+          };
+        });
+        await prisma.notification.createMany({ data: notifs });
+      }
+    } catch (notifErr) {
+      console.warn('Failed to send expense notifications:', notifErr.message);
+    }
+
     return res.status(201).json({ expense: serialized });
   } catch (err) {
     if (err.name === 'ZodError') {

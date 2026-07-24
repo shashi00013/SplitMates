@@ -17,7 +17,8 @@ import {
   calculateSettlementTransactions,
 } from '../data/balanceEngine';
 import { api } from '../services/api';
-import { authApi, groupsApi, expensesApi, cyclesApi, settlementsApi } from '../services/apiService';
+import { authApi, groupsApi, expensesApi, cyclesApi, settlementsApi, notificationsApi } from '../services/apiService';
+import { mapSettlement } from '../services/dataMappers';
 
 const AppContext = createContext(null);
 
@@ -59,10 +60,43 @@ export function AppProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(!!token && !!initialUser);
   const [isAuthReady, setIsAuthReady] = useState(!token || !!initialUser);
   const [toast, setToast] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const showToast = useCallback((message) => {
     setToast(message);
     setTimeout(() => setToast(null), 2500);
+  }, []);
+
+  const fetchNotifications = useCallback(async () => {
+    const token = api.getToken();
+    if (!token) return;
+    try {
+      const res = await notificationsApi.getNotifications();
+      if (res) {
+        setNotifications(res.notifications || []);
+        setUnreadCount(res.unreadCount || 0);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch notifications:', err.message);
+    }
+  }, []);
+
+  const markNotificationRead = useCallback(async (id) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      if (id === 'all') {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        setUnreadCount(0);
+      } else {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.warn('Failed to mark notification read:', err.message);
+    }
   }, []);
 
   // ── Fetch members for a single group from API ─────────────────────────────
@@ -204,6 +238,10 @@ export function AppProvider({ children }) {
           console.warn('API getSettlementHistory error:', err.message);
           return null;
         }),
+        fetchNotifications().catch((err) => {
+          console.warn('API fetchNotifications error:', err.message);
+          return null;
+        }),
       ]);
 
       if (fetchedGroups) {
@@ -267,7 +305,7 @@ export function AppProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchAllGroupsMembers]);
+  }, [fetchAllGroupsMembers, fetchNotifications]);
 
   // ── Clear all user data (on logout / auth failure) ─────────────────────────
   const clearUserData = useCallback(() => {
@@ -656,20 +694,26 @@ export function AppProvider({ children }) {
   // ── Settlement mutations ──────────────────────────────────────────────────
 
   const initiateSettlement = useCallback(async (groupId) => {
+    const startTime = Date.now();
+    console.log(`[SETTLEMENT START] Initiating settlement for group ${groupId} by user ${user?.id}`);
     const token = api.getToken();
     if (token) {
       try {
         const res = await settlementsApi.initiateSettlement(groupId);
+        const mappedSettlement = res?.settlement ? mapSettlement(res.settlement) : null;
+        const confirmationsList = mappedSettlement?.confirmations || (Array.isArray(res?.confirmations)
+          ? res.confirmations.map(String)
+          : [user ? user.id : '']);
+
         setSettlements((prev) => ({
           ...prev,
           [groupId]: {
-            status: res?.status || 'pending',
-            confirmations: Array.isArray(res?.confirmations)
-              ? res.confirmations.map(String)
-              : [user ? user.id : ''],
-            initiatedAt: res?.initiatedAt || new Date().toISOString(),
+            status: mappedSettlement?.status || res?.status || 'pending',
+            confirmations: confirmationsList,
+            initiatedAt: mappedSettlement?.createdAt || new Date().toISOString(),
           },
         }));
+        console.log(`[SETTLEMENT START SUCCESS] Group ${groupId} (${Date.now() - startTime}ms)`);
         showToast('Settlement initiated!');
         return res;
       } catch (err) {
@@ -688,17 +732,20 @@ export function AppProvider({ children }) {
   }, [user, showToast]);
 
   const confirmSettlement = useCallback(async (groupId, memberId) => {
+    const startTime = Date.now();
+    console.log(`[SETTLEMENT CONFIRM] Member ${memberId} confirming settlement for group ${groupId}`);
     const token = api.getToken();
     if (token) {
       try {
         const res = await settlementsApi.confirmSettlement(groupId, memberId);
+        const mappedSettlement = res?.settlement ? mapSettlement(res.settlement) : null;
         setSettlements((prev) => {
           const s = prev[groupId] || { status: 'pending', confirmations: [] };
-          const backendConfs = Array.isArray(res?.confirmations)
+          const backendConfs = mappedSettlement?.confirmations || (Array.isArray(res?.confirmations)
             ? res.confirmations.map(String)
             : s.confirmations.includes(memberId)
             ? s.confirmations
-            : [...s.confirmations, memberId];
+            : [...s.confirmations, memberId]);
 
           const group = groups.find((g) => g.id === groupId);
           const allConfirmed = group && backendConfs.length >= group.memberIds.length;
@@ -708,10 +755,11 @@ export function AppProvider({ children }) {
             [groupId]: {
               ...s,
               confirmations: backendConfs,
-              status: res?.status || (allConfirmed ? 'completed' : 'pending'),
+              status: mappedSettlement?.status || res?.status || (allConfirmed ? 'completed' : 'pending'),
             },
           };
         });
+        console.log(`[SETTLEMENT CONFIRM SUCCESS] Member ${memberId} confirmed (${Date.now() - startTime}ms)`);
         return res;
       } catch (err) {
         console.warn('Backend confirmSettlement error, using local fallback:', err.message);
@@ -739,6 +787,8 @@ export function AppProvider({ children }) {
   }, [groups]);
 
   const completeSettlement = useCallback(async (groupId) => {
+    const startTime = Date.now();
+    console.log(`[SETTLEMENT COMPLETE] Completing settlement for group ${groupId}`);
     const group = groups.find((g) => g.id === groupId);
     if (!group) return null;
 
@@ -977,6 +1027,10 @@ export function AppProvider({ children }) {
     completeSettlement,
     cancelSettlement,
     startNewCycle,
+    notifications,
+    unreadCount,
+    fetchNotifications,
+    markNotificationRead,
     getUserById,
   };
 

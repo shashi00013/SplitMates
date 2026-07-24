@@ -9,6 +9,7 @@ import groupRoutes from './routes/group.routes.js';
 import expenseRoutes from './routes/expense.routes.js';
 import cycleRoutes from './routes/cycle.routes.js';
 import settlementRoutes from './routes/settlement.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use('/api/groups', groupRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/cycles', cycleRoutes);
 app.use('/api/settlements', settlementRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Centralized Error Handling Middleware
 app.use(errorHandler);
