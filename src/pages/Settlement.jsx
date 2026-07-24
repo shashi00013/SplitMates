@@ -189,41 +189,85 @@ export default function Settlement() {
     );
   }
 
-  // Active settlement screen
+  // Active settlement state derivation
+  const isUserConfirmed = settlement.confirmations.includes(user.id);
   const confirmedCount = settlement.confirmations.length;
   const pendingCount = members.length - confirmedCount;
-  const progressPct = members.length > 0 ? (confirmedCount / members.length) * 100 : 0;
 
   return (
     <div className="page" id="settlement-page">
+      {/* Header */}
       <div className="page-header">
         <button className="btn-icon" onClick={() => navigate(-1)} id="settle-back-btn">
           <ChevronLeft size={20} />
         </button>
-        <h1>{t('settleUp')}</h1>
+        <div>
+          <h1>{t('settleUp')}</h1>
+          <p className="text-secondary text-xs">{group.name}</p>
+        </div>
         <div className="spacer" />
       </div>
 
-      <div className="card" style={{ textAlign: 'center', padding: '20px', marginBottom: '20px' }}>
-        <p className="text-secondary text-sm" style={{ marginBottom: '10px' }}>
-          {confirmedCount} of {members.length} {t('confirmPayment')}
-        </p>
-        <div style={{ height: '6px', background: 'var(--bg-elevated)', borderRadius: '3px', overflow: 'hidden', marginBottom: '8px' }}>
-          <div style={{
-            height: '100%',
-            width: `${progressPct}%`,
-            background: 'var(--accent)',
-            borderRadius: '3px',
-            transition: 'width 0.4s ease',
-          }} />
-        </div>
-        <p className="text-secondary text-xs">
-          {pendingCount > 0
-            ? `${pendingCount} member${pendingCount > 1 ? 's' : ''} ${t('waitingForConfirmations')}`
-            : t('allMembersConfirmed')}
-        </p>
+      {/* Status Card & Primary Action State */}
+      <div className="card text-center" style={{ padding: '24px 20px', marginBottom: '20px' }}>
+        {allConfirmed ? (
+          <>
+            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto' }}>
+              <Check size={28} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+              Everyone is confirmed
+            </h3>
+            <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
+              Settlement is ready to be completed.
+            </p>
+            <button
+              className="btn btn-primary btn-full"
+              onClick={async () => {
+                const historyEntry = await completeSettlement(groupId);
+                navigate(`/settlement-success/${groupId}`, { state: { historyEntry }, replace: true });
+              }}
+              id="complete-settlement-btn"
+            >
+              Complete Settlement
+            </button>
+          </>
+        ) : !isUserConfirmed ? (
+          <>
+            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'var(--accent-dim)', color: 'var(--accent)' }}>
+              <Clock size={28} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+              Your confirmation is needed
+            </h3>
+            <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
+              Confirm that you have completed your payment.
+            </p>
+            <button
+              className="btn btn-primary btn-full"
+              onClick={() => handleConfirm(user.id)}
+              disabled={confirmingMemberId === user.id}
+              id="confirm-payment-btn"
+            >
+              {confirmingMemberId === user.id ? t('loading') : t('confirmPayment')}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'rgba(22, 163, 74, 0.15)', color: 'var(--positive)' }}>
+              <Check size={28} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+              You're all set
+            </h3>
+            <p className="text-secondary text-sm" style={{ margin: 0 }}>
+              Waiting for remaining members ({confirmedCount}/{members.length}).
+            </p>
+          </>
+        )}
       </div>
 
+      {/* Member List */}
       <div className="card" style={{ padding: '0 16px', marginBottom: '20px' }}>
         {members.map((member) => {
           const isMe = member.id === user.id;
@@ -232,8 +276,8 @@ export default function Settlement() {
             <div
               key={member.id}
               className="settle-member"
-              onClick={() => !isConfirmed && handleConfirm(member.id)}
-              style={{ cursor: isConfirmed ? 'default' : 'pointer', padding: '14px 0' }}
+              onClick={() => !isConfirmed && isMe && handleConfirm(member.id)}
+              style={{ cursor: (!isConfirmed && isMe) ? 'pointer' : 'default', padding: '14px 0' }}
               id={`settle-member-${member.id}`}
             >
               <Avatar user={member} />
@@ -241,12 +285,10 @@ export default function Settlement() {
                 <h3>{isMe ? `You (${member.firstName})` : member.name}</h3>
                 <p className={`text-sm ${isConfirmed ? 'text-accent' : 'text-secondary'}`}>
                   {isConfirmed
-                    ? `✓ ${t('confirmPayment')}`
+                    ? (isMe ? '✓ You confirmed' : '✓ Confirmed')
                     : confirmingMemberId === member.id
                     ? t('loading')
-                    : isMe
-                    ? `Tap to ${t('confirmPayment')}`
-                    : t('waitingForConfirmations')}
+                    : 'Waiting for confirmation'}
                 </p>
               </div>
               <div className={`status-badge ${isConfirmed ? 'status-confirmed' : 'status-pending'}`}>
@@ -257,29 +299,24 @@ export default function Settlement() {
         })}
       </div>
 
-      <button
-        className="btn btn-outline btn-full"
-        style={{ marginBottom: '12px' }}
-        onClick={async () => {
-          try {
-            const res = await notificationsApi.sendReminder(groupId);
-            showToast(res?.message || 'Notifications sent to pending members!');
-          } catch (err) {
-            showToast(err.message || 'Failed to send reminders');
-          }
-        }}
-        id="notify-pending-btn"
-      >
-        <Send size={16} /> Send Reminder
-      </button>
-
-      <button
-        className="btn btn-danger-text btn-full"
-        onClick={handleCancel}
-        id="cancel-settle-btn"
-      >
-        {t('cancelSettlementBtn')}
-      </button>
+      {/* Contextual Send Reminder Action */}
+      {!allConfirmed && (
+        <button
+          className="btn-link text-xs text-secondary flex justify-center items-center gap-4"
+          style={{ width: '100%', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}
+          onClick={async () => {
+            try {
+              const res = await notificationsApi.sendReminder(groupId);
+              showToast(res?.message || 'Notifications sent to pending members!');
+            } catch (err) {
+              showToast(err.message || 'Failed to send reminders');
+            }
+          }}
+          id="notify-pending-btn"
+        >
+          <Send size={13} /> Send Reminder
+        </button>
+      )}
     </div>
   );
 }
