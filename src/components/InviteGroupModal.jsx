@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Copy, Share2, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useApp } from '../context/AppContext';
@@ -8,6 +8,16 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
   const { showToast } = useApp();
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !group) return null;
 
@@ -53,7 +63,7 @@ export default function InviteGroupModal({ isOpen, onClose, group }) {
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#FFFFFF' }}>
             {t('groupCode')} & QR
           </h2>
-          <button className="btn-icon" onClick={onClose} id="close-invite-modal-btn" style={{ color: '#888' }}>
+          <button className="btn-icon" onClick={onClose} id="close-invite-modal-btn" aria-label="Close modal" style={{ color: '#888' }}>
             <X size={18} />
           </button>
         </div>

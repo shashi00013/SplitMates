@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Calendar, Edit3, Trash2, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -12,6 +12,16 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
   const { user, deleteExpense, getGroupMembers, getUserById, groups, showToast } = useApp();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && expense) {
+        onClose();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [expense, onClose]);
 
   if (!expense) return null;
 
