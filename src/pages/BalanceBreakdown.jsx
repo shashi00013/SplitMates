@@ -101,7 +101,7 @@ export default function BalanceBreakdown() {
                     <Avatar user={item.member} size="sm" />
                     <div>
                       <h4 style={{ fontSize: '0.88rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                        {item.member.firstName || item.member.name}
+                        You owe {item.member.firstName || item.member.name}
                       </h4>
                       <p className="text-secondary text-xs" style={{ margin: 0 }}>
                         {item.groupName}
@@ -166,7 +166,7 @@ export default function BalanceBreakdown() {
                     <Avatar user={item.member} size="sm" />
                     <div>
                       <h4 style={{ fontSize: '0.88rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                        {item.member.firstName || item.member.name}
+                        {item.member.firstName || item.member.name} owes you
                       </h4>
                       <p className="text-secondary text-xs" style={{ margin: 0 }}>
                         {item.groupName}
