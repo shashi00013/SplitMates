@@ -282,7 +282,7 @@ h3, .card-title { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 }
 .btn-icon:active { transform: scale(0.92); background: var(--border-light); }
 
-/* ---- Inputs ---- */
+/* ---- Inputs & Form Controls System ---- */
 .input-group { display: flex; flex-direction: column; gap: 8px; }
 .input-group label {
   font-size: 0.82rem;
@@ -292,9 +292,14 @@ h3, .card-title { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   letter-spacing: 0.04em;
 }
 
-.input {
+.input,
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+select,
+textarea {
   width: 100%;
-  padding: 15px 16px;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 14px 16px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -303,12 +308,40 @@ h3, .card-title { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   font-size: 0.95rem;
   outline: none;
   transition: var(--transition);
+  box-sizing: border-box;
 }
 
-.input::placeholder { color: var(--text-tertiary); }
-.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+textarea.input,
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
 
-select.input {
+.input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 1;
+}
+
+.input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.input:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+select.input,
+select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
