@@ -49,15 +49,15 @@ export default function Register() {
   }
 
   return (
-    <div className="login-page" id="register-page">
-      <div className="login-container">
+    <div className="page flex flex-col justify-center items-center" id="register-page" style={{ minHeight: '85dvh' }}>
+      <div className="card page-section" style={{ width: '100%', maxWidth: '380px', padding: '28px 24px' }}>
         {/* Branding */}
-        <div className="login-brand">
-          <div className="login-logo-wrapper">
-            <span className="login-logo-icon">💸</span>
+        <div className="text-center" style={{ marginBottom: '24px' }}>
+          <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'var(--accent-dim)', color: 'var(--accent)', width: '56px', height: '56px', fontSize: '1.5rem' }}>
+            💸
           </div>
-          <h1 className="login-title">Join {t('appName')}</h1>
-          <p className="login-subtitle">{t('tagline')}</p>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>Join {t('appName')}</h1>
+          <p className="text-secondary text-xs" style={{ marginTop: '4px' }}>{t('tagline')}</p>
         </div>
 
         {/* Error Banner */}
