@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { requestLogger } from './middleware/requestLogger.js';
 
 import authRoutes from './routes/auth.routes.js';
 import groupRoutes from './routes/group.routes.js';
@@ -12,6 +13,9 @@ import settlementRoutes from './routes/settlement.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
+
+// Request Tracing & Structured Logging
+app.use(requestLogger);
 
 // Security Middleware
 app.use(helmet());
