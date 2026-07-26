@@ -24,9 +24,9 @@ export default function Settlement() {
   const settlement = settlements[groupId];
   const groupExpenses = expenses.filter((e) => e.groupId === groupId);
 
-  const allConfirmed = settlement
-    ? settlement.confirmations.length >= members.length
-    : false;
+  const confirmedCount = settlement ? settlement.confirmations.length : 0;
+  const totalMembersCount = members.length;
+  const allConfirmed = settlement ? confirmedCount >= totalMembersCount : false;
   const isCompleted = settlement?.status === 'completed';
 
   const hasCompletedRef = useRef(false);
@@ -36,18 +36,23 @@ export default function Settlement() {
     async function finalizeSettlement() {
       if (allConfirmed && !isCompleted && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
-        const historyEntry = await completeSettlement(groupId);
-        if (isSubscribed) {
-          navigate(`/settlement-success/${groupId}`, {
-            state: { historyEntry },
-            replace: true,
-          });
+        try {
+          const historyEntry = await completeSettlement(groupId);
+          if (isSubscribed) {
+            navigate(`/settlement-success/${groupId}`, {
+              state: { historyEntry, groupName: group?.name },
+              replace: true,
+            });
+          }
+        } catch (err) {
+          hasCompletedRef.current = false;
+          showToast(err.message || 'Failed to complete settlement');
         }
       }
     }
     finalizeSettlement();
     return () => { isSubscribed = false; };
-  }, [allConfirmed, isCompleted, groupId, completeSettlement, navigate]);
+  }, [allConfirmed, isCompleted, groupId, completeSettlement, navigate, group?.name, showToast]);
 
   if (!group) {
     return (
@@ -67,6 +72,7 @@ export default function Settlement() {
     setIsInitiating(true);
     try {
       await initiateSettlement(groupId);
+      showToast('Settlement initiated');
     } catch (err) {
       showToast(err.message || 'Failed to initiate settlement');
     } finally {
@@ -80,69 +86,92 @@ export default function Settlement() {
     setConfirmingMemberId(memberId);
     try {
       await confirmSettlement(groupId, memberId);
+      showToast('Payment confirmed');
     } catch (err) {
-      showToast(err.message || 'Failed to confirm settlement');
+      showToast(err.message || 'Failed to confirm payment');
     } finally {
       setConfirmingMemberId(null);
     }
   }
 
-  function handleCancel() {
-    cancelSettlement(groupId);
-    navigate(`/group/${groupId}`);
+  async function handleComplete() {
+    try {
+      const historyEntry = await completeSettlement(groupId);
+      navigate(`/settlement-success/${groupId}`, {
+        state: { historyEntry, groupName: group.name },
+        replace: true,
+      });
+    } catch (err) {
+      showToast(err.message || 'Failed to complete settlement');
+    }
   }
 
   const balances = getBalancesForGroup(groupId);
   const transactions = calculateSettlementTransactions(balances);
   const totalOutstanding = transactions.reduce((sum, tx) => sum + tx.amount, 0);
 
-  if (!settlement) {
-    return (
-      <div className="page" id="settlement-page">
-        <div className="page-header">
-          <button className="btn-icon" onClick={() => navigate(-1)} id="settle-back-btn">
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1>{t('settleUp')}</h1>
-            <p className="text-secondary text-xs">{group.name}</p>
-          </div>
-          <div className="spacer" />
+  const isUserConfirmed = settlement ? settlement.confirmations.includes(user?.id) : false;
+  const pendingCount = totalMembersCount - confirmedCount;
+
+  return (
+    <div className="page" id="settlement-page">
+      {/* 1. HEADER (Minimal) */}
+      <div className="page-header flex items-center justify-between" style={{ paddingBottom: '12px' }}>
+        <button className="btn-icon" onClick={() => navigate(`/group/${groupId}`)} id="settle-back-btn" aria-label="Go back">
+          <ChevronLeft size={20} />
+        </button>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+            Settle Up
+          </h1>
+          <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>{group.name}</p>
         </div>
+        <div style={{ width: '42px' }} />
+      </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px' }}>
-          <div className="success-icon-wrapper" style={{ marginBottom: '16px' }}>
-            <Users size={32} strokeWidth={2} />
-          </div>
-          <h2 style={{ fontSize: '1.35rem', marginBottom: '8px', letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>
-            Ready to Settle?
-          </h2>
-          <p className="text-secondary text-sm" style={{ maxWidth: '280px', textAlign: 'center', lineHeight: 1.5, marginBottom: '24px' }}>
-            Confirm settlement with all members for "{group.name}".
-          </p>
+      {/* STATE A — SETTLEMENT NOT STARTED */}
+      {!settlement && (
+        <div className="flex flex-col items-center" style={{ paddingTop: '12px' }}>
+          <div className="card card-glow page-section text-center" style={{ width: '100%', padding: '24px 20px' }}>
+            <div className="success-icon-wrapper" style={{ margin: '0 auto 16px auto', background: 'var(--accent-dim)', color: 'var(--accent)' }}>
+              <Users size={32} strokeWidth={2} />
+            </div>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
+              Ready to settle?
+            </h2>
+            <p className="text-secondary text-sm" style={{ maxWidth: '300px', margin: '0 auto 20px', lineHeight: 1.5 }}>
+              Review the final balances and start the settlement for {group.name}.
+            </p>
 
-          {/* Suggested settlement summary */}
-          <div className="card" style={{ width: '100%', marginBottom: '24px', padding: '20px' }}>
-            <div className="flex justify-between items-center" style={{ marginBottom: '16px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
-              <span className="text-secondary text-sm fw-600">{t('remainingAmount')}</span>
-              <span className="fw-700 text-accent" style={{ fontSize: '1.15rem' }}>
+            {/* Financial Summary */}
+            <div className="flex justify-between items-center" style={{ marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+              <span className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Remaining Amount
+              </span>
+              <span className="fw-800 text-accent" style={{ fontSize: '1.2rem' }}>
                 {formatCurrency(totalOutstanding)}
               </span>
             </div>
 
             {/* Balances details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-              <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('peopleInGroup')}</p>
+            <div className="flex flex-col gap-10" style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Group Balances
+              </p>
               {members.map((member) => {
                 const bal = balances[member.id] || 0;
-                const isPositive = bal > 0;
-                const isNegative = bal < 0;
+                const isMe = member.id === user?.id;
+                const memberName = isMe ? 'You' : member.firstName || member.name;
+                const statusClass = bal > 0 ? 'text-accent fw-700' : bal < 0 ? 'text-negative fw-700' : 'text-secondary';
+                const statusText = bal > 0 ? `↑ You'll get ${formatCurrency(bal)}` : bal < 0 ? `↓ You'll pay ${formatCurrency(Math.abs(bal))}` : 'All settled';
+
                 return (
-                  <div key={member.id} className="flex justify-between items-center text-sm">
-                    <span className="text-secondary">{member.name}</span>
-                    <span className={isPositive ? 'text-accent fw-600' : isNegative ? 'text-negative fw-600' : 'text-secondary'}>
-                      {bal > 0 ? `${t('youGet')} ${formatCurrency(bal)}` : bal < 0 ? `${t('youPay')} ${formatCurrency(Math.abs(bal))}` : t('allSettled')}
-                    </span>
+                  <div key={member.id} className="flex justify-between items-center text-xs" style={{ padding: '6px 0' }}>
+                    <div className="flex items-center gap-8">
+                      <Avatar user={member} size="sm" />
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{memberName}</span>
+                    </div>
+                    <span className={statusClass}>{statusText}</span>
                   </div>
                 );
               })}
@@ -150,26 +179,32 @@ export default function Settlement() {
 
             {/* Pending Transactions List */}
             {transactions.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-light)', paddingTop: '16px' }}>
-                <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Transactions</p>
+              <div className="flex flex-col gap-10" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', textAlign: 'left' }}>
+                <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Settlement Payments
+                </p>
                 {transactions.map((tx, idx) => {
                   const fromUser = members.find((m) => m.id === tx.from);
                   const toUser = members.find((m) => m.id === tx.to);
                   const fromName = tx.from === user?.id ? 'You' : fromUser?.firstName || 'Member';
                   const toName = tx.to === user?.id ? 'you' : toUser?.firstName || 'Member';
+
                   return (
                     <div
                       key={idx}
                       className="flex justify-between items-center text-xs"
                       style={{
                         padding: '10px 12px',
-                        background: 'var(--bg-elevated)',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-light)',
+                        background: 'var(--bg-input)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)',
                       }}
                     >
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                        {fromName} {tx.from === user?.id ? 'owe' : 'owes'} {toName} {formatCurrency(tx.amount)}
+                        {fromName} {tx.from === user?.id ? 'pay' : 'pays'} {toName}
+                      </span>
+                      <span className="fw-700 text-accent" style={{ fontSize: '0.88rem' }}>
+                        {formatCurrency(tx.amount)}
                       </span>
                     </div>
                   );
@@ -178,152 +213,193 @@ export default function Settlement() {
             )}
           </div>
 
+          {/* STATE A PRIMARY CTA */}
           <button
             className="btn btn-primary btn-full"
             onClick={handleInitiate}
             id="initiate-settle-btn"
             disabled={groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating}
-            style={{ opacity: (groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating) ? 0.45 : 1, fontWeight: 700 }}
+            style={{
+              opacity: (groupExpenses.length === 0 || totalOutstanding <= 0.01 || isInitiating) ? 0.45 : 1,
+              fontWeight: 800,
+              minHeight: '48px',
+              fontSize: '1rem',
+            }}
           >
-            {isInitiating ? t('loading') : 'Proceed to Confirm'}
+            {isInitiating ? 'Starting...' : 'Start Settling'}
           </button>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  // Active settlement state derivation
-  const isUserConfirmed = settlement.confirmations.includes(user.id);
-  const confirmedCount = settlement.confirmations.length;
-  const pendingCount = members.length - confirmedCount;
-
-  return (
-    <div className="page" id="settlement-page">
-      {/* Header */}
-      <div className="page-header">
-        <button className="btn-icon" onClick={() => navigate(-1)} id="settle-back-btn">
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1>Confirm Settlement</h1>
-          <p className="text-secondary text-xs">{group.name}</p>
-        </div>
-        <div className="spacer" />
-      </div>
-
-      {/* Status Card & Primary Action State */}
-      <div className="card text-center" style={{ padding: '24px 20px', marginBottom: '20px' }}>
-        {allConfirmed ? (
-          <>
-            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto' }}>
-              <Check size={28} />
+      {/* ACTIVE SETTLEMENT STATES (B, C, D) */}
+      {settlement && (
+        <div className="flex flex-col gap-20">
+          {/* PROGRESS INDICATOR */}
+          <div className="card page-section" style={{ padding: '16px 20px' }} id="settlement-progress-card">
+            <div className="flex justify-between items-center" style={{ marginBottom: '10px' }}>
+              <span className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Settlement Progress
+              </span>
+              <span className="fw-700 text-accent" style={{ fontSize: '0.88rem' }}>
+                {confirmedCount} of {totalMembersCount} members confirmed
+              </span>
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-              Everyone is confirmed!
-            </h3>
-            <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
-              All members have confirmed their payments for {group.name}.
-            </p>
-            <button
-              className="btn btn-primary btn-full"
-              onClick={async () => {
-                const historyEntry = await completeSettlement(groupId);
-                navigate(`/settlement-success/${groupId}`, { state: { historyEntry, groupName: group.name }, replace: true });
-              }}
-              id="complete-settlement-btn"
-            >
-              Settle All
-            </button>
-          </>
-        ) : !isUserConfirmed ? (
-          <>
-            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'var(--accent-dim)', color: 'var(--accent)' }}>
-              <Clock size={28} />
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: 'var(--bg-elevated)',
+              borderRadius: 'var(--radius-full)',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                width: `${Math.round((confirmedCount / (totalMembersCount || 1)) * 100)}%`,
+                height: '100%',
+                background: 'var(--accent)',
+                transition: 'width 0.3s ease',
+              }} />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-              Confirm Settlement
-            </h3>
-            <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
-              All members need to confirm they've paid. Confirm when you've made your payments.
-            </p>
-            <button
-              className="btn btn-primary btn-full"
-              onClick={() => handleConfirm(user.id)}
-              disabled={confirmingMemberId === user.id}
-              id="confirm-payment-btn"
-            >
-              {confirmingMemberId === user.id ? t('loading') : 'Confirm My Payment'}
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="success-icon-wrapper" style={{ margin: '0 auto 12px auto', background: 'rgba(204, 255, 0, 0.12)', color: 'var(--accent)' }}>
-              <Check size={28} />
-            </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-              Confirm Settlement
-            </h3>
-            <p className="text-accent text-xs fw-700" style={{ margin: '0 0 4px 0' }}>
-              ✓ You confirmed your payment
-            </p>
-            <p className="text-secondary text-sm" style={{ margin: 0 }}>
-              Waiting for remaining members ({pendingCount})
-            </p>
-          </>
-        )}
-      </div>
+          </div>
 
-      {/* Member List */}
-      <div className="card" style={{ padding: '0 16px', marginBottom: '20px' }}>
-        {members.map((member) => {
-          const isMe = member.id === user.id;
-          const isConfirmed = settlement.confirmations.includes(member.id);
-          return (
-            <div
-              key={member.id}
-              className="settle-member"
-              onClick={() => !isConfirmed && isMe && handleConfirm(member.id)}
-              style={{ cursor: (!isConfirmed && isMe) ? 'pointer' : 'default', padding: '14px 0' }}
-              id={`settle-member-${member.id}`}
-            >
-              <Avatar user={member} />
-              <div className="member-info" style={{ flex: 1 }}>
-                <h3>{isMe ? `You (${member.firstName})` : member.name}</h3>
-                <p className={`text-sm ${isConfirmed ? 'text-accent' : 'text-secondary'}`}>
-                  {isConfirmed
-                    ? (isMe ? '✓ You confirmed' : '✓ Confirmed')
-                    : confirmingMemberId === member.id
-                    ? t('loading')
-                    : isMe
-                    ? 'Waiting for your confirmation'
-                    : 'Waiting for confirmation'}
+          {/* HERO STATUS & SINGLE DOMINANT PRIMARY CTA */}
+          <div className="card text-center page-section" style={{ padding: '24px 20px' }}>
+            {allConfirmed ? (
+              /* STATE D — ALL REQUIRED MEMBERS CONFIRMED */
+              <>
+                <div className="success-icon-wrapper" style={{ margin: '0 auto 14px auto', background: 'var(--accent-dim)', color: 'var(--accent)' }}>
+                  <Check size={32} strokeWidth={2.5} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+                  Everyone is confirmed
+                </h3>
+                <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
+                  Settlement is ready to be completed.
                 </p>
-              </div>
-              <div className={`status-badge ${isConfirmed ? 'status-confirmed' : 'status-pending'}`}>
-                {isConfirmed ? <Check size={16} /> : <Clock size={16} />}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                <button
+                  className="btn btn-primary btn-full"
+                  onClick={handleComplete}
+                  id="complete-settlement-btn"
+                  style={{ minHeight: '48px', fontSize: '1rem', fontWeight: 800 }}
+                >
+                  Complete Settlement
+                </button>
+              </>
+            ) : !isUserConfirmed ? (
+              /* STATE B — USER CONFIRMATION REQUIRED */
+              <>
+                <div className="success-icon-wrapper" style={{ margin: '0 auto 14px auto', background: 'rgba(255, 165, 2, 0.12)', color: 'var(--warning)' }}>
+                  <Clock size={32} strokeWidth={2.5} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+                  Your confirmation is needed
+                </h3>
+                <p className="text-secondary text-sm" style={{ margin: '0 0 20px 0' }}>
+                  Confirm that you have completed your payment.
+                </p>
+                <button
+                  className="btn btn-primary btn-full"
+                  onClick={() => handleConfirm(user?.id)}
+                  disabled={confirmingMemberId === user?.id}
+                  id="confirm-payment-btn"
+                  style={{ minHeight: '48px', fontSize: '1rem', fontWeight: 800 }}
+                >
+                  {confirmingMemberId === user?.id ? 'Confirming...' : 'Confirm Payment'}
+                </button>
+              </>
+            ) : (
+              /* STATE C — CURRENT USER ALREADY CONFIRMED */
+              <>
+                <div className="success-icon-wrapper" style={{ margin: '0 auto 14px auto', background: 'var(--accent-dim)', color: 'var(--accent)' }}>
+                  <Check size={32} strokeWidth={2.5} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+                  You're all set
+                </h3>
+                <p className="text-accent text-xs fw-700" style={{ margin: '0 0 6px 0' }}>
+                  ✓ You confirmed
+                </p>
+                <p className="text-secondary text-sm" style={{ margin: 0 }}>
+                  Waiting for remaining members ({pendingCount})
+                </p>
+              </>
+            )}
+          </div>
 
-      {/* Contextual Send Reminder Action */}
-      {!allConfirmed && (
-        <button
-          className="btn-link text-xs text-secondary flex justify-center items-center gap-4"
-          style={{ width: '100%', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}
-          onClick={async () => {
-            try {
-              const res = await notificationsApi.sendReminder(groupId);
-              showToast(res?.message || 'Notifications sent to pending members!');
-            } catch (err) {
-              showToast(err.message || 'Failed to send reminders');
-            }
-          }}
-          id="notify-pending-btn"
-        >
-          <Send size={13} /> Send Reminder
-        </button>
+          {/* MEMBER CONFIRMATION STATUS LIST */}
+          <div className="card page-section" style={{ padding: '0 16px' }}>
+            <div style={{ padding: '14px 0 10px 0', borderBottom: '1px solid var(--border-color)' }}>
+              <span className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Member Confirmation Status
+              </span>
+            </div>
+            {members.map((member) => {
+              const isMe = member.id === user?.id;
+              const isConfirmed = settlement.confirmations.includes(member.id);
+              const memberName = isMe ? 'You' : member.firstName || member.name;
+
+              const statusLabel = isConfirmed
+                ? (isMe ? '✓ You confirmed' : '✓ Confirmed')
+                : (isMe ? 'Waiting for your confirmation' : 'Waiting for confirmation');
+
+              const statusColorClass = isConfirmed ? 'text-accent' : 'text-secondary';
+
+              return (
+                <div
+                  key={member.id}
+                  className="flex justify-between items-center"
+                  style={{ padding: '14px 0', borderBottom: '1px solid var(--border-color)' }}
+                  id={`settle-member-${member.id}`}
+                >
+                  <div className="flex items-center gap-10">
+                    <Avatar user={member} size="sm" />
+                    <div>
+                      <h4 style={{ fontSize: '0.88rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                        {memberName}
+                      </h4>
+                      <p className={`text-xs ${statusColorClass}`} style={{ margin: 0, marginTop: '2px', fontWeight: 600 }}>
+                        {statusLabel}
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: isConfirmed ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+                      color: isConfirmed ? 'var(--accent)' : 'var(--text-tertiary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {isConfirmed ? <Check size={16} strokeWidth={2.5} /> : <Clock size={16} />}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 5. CONTEXTUAL SEND REMINDER (Subtle Secondary Action) */}
+          {!allConfirmed && (
+            <div className="flex justify-center" style={{ paddingBottom: '12px' }}>
+              <button
+                className="btn btn-ghost text-xs flex items-center gap-6"
+                style={{ color: 'var(--text-secondary)', fontWeight: 600 }}
+                onClick={async () => {
+                  try {
+                    const res = await notificationsApi.sendReminder(groupId);
+                    showToast(res?.message || 'Reminders sent to pending members!');
+                  } catch (err) {
+                    showToast(err.message || 'Failed to send reminders');
+                  }
+                }}
+                id="notify-pending-btn"
+              >
+                <Send size={14} /> Send Reminder
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
