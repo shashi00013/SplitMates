@@ -159,7 +159,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-end gap-12">
             <div className="flex items-center gap-4 text-accent text-xs fw-600">
-              <span>Summary</span>
+              <span>Tap to see breakdown</span>
               <ArrowUpRight size={16} />
             </div>
             {memberBreakdownItems.length > 0 && (
