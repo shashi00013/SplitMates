@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, ArrowUpRight, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bell, ArrowUpRight, Clock, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency } from '../data/mockData';
@@ -295,86 +295,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Tier 3: My Groups */}
-      <div className="section-header">
-        <h2>{t('myGroups')}</h2>
-        <button className="see-all" onClick={() => navigate('/groups')} id="see-all-groups">
-          {t('viewAll')}
-        </button>
-      </div>
-      <div className="flex flex-col gap-10 page-section">
-        {isLoading ? (
-          <div className="card text-center" style={{ padding: '24px 16px' }}>
-            <p className="text-secondary text-sm">{t('loading')}</p>
-          </div>
-        ) : userGroups.length === 0 ? (
-          <div className="card text-center" style={{ padding: '24px 16px' }}>
-            <p className="text-secondary text-sm" style={{ marginBottom: '14px' }}>
-              No groups yet. Create or join a group to start splitting!
-            </p>
-            <button
-              className="btn btn-primary btn-full"
-              onClick={() => navigate('/groups')}
-              style={{ fontSize: '0.85rem', fontWeight: 700 }}
-            >
-              {t('groups')}
-            </button>
-          </div>
-        ) : (
-          userGroups.map((group) => {
-            const balances = getBalancesForGroup(group.id);
-            const groupExpenses = allExpenses.filter((e) => e.groupId === group.id);
-            const healthSignal = deriveGroupHealthSignal(group, groupExpenses, settlements[group.id]);
-
-            const myBalance = user ? balances[user.id] || 0 : 0;
-            const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
-            const statusText = myBalance > 0
-              ? `You'll get ${formatCurrency(Math.abs(myBalance))}`
-              : myBalance < 0
-              ? `You'll pay ${formatCurrency(Math.abs(myBalance))}`
-              : 'All settled';
-
-            return (
-              <div
-                key={group.id}
-                className="group-card card-hover"
-                onClick={() => {
-                  selectGroup(group.id);
-                  navigate(`/group/${group.id}`);
-                }}
-                id={`group-card-${group.id}`}
-              >
-                <div className="group-card-icon">{group.icon || '🏠'}</div>
-                <div className="group-card-info">
-                  <div className="flex items-center gap-6">
-                    <h3>{group.name}</h3>
-                    <span
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        color: healthSignal.color,
-                        background: healthSignal.badgeBg,
-                        padding: '2px 6px',
-                        borderRadius: 'var(--radius-sm)',
-                      }}
-                    >
-                      {healthSignal.label}
-                    </span>
-                  </div>
-                  <p>{group.memberIds.length} members</p>
-                </div>
-                <div className="group-card-balance" style={{ textAlign: 'right' }}>
-                  <p className={`fw-700 ${statusClass}`} style={{ fontSize: '0.88rem', margin: 0 }}>
-                    {statusText}
-                  </p>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Tier 4: Recent Activity Feed */}
+      {/* Recent Activity Feed (Moved up) */}
       <div className="section-header">
         <h2>{t('recentExpenses')}</h2>
         <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-expenses">
@@ -424,6 +345,154 @@ export default function Home() {
                   <p className="amount">{formatCurrency(exp.amount)}</p>
                   <p className={`date fw-600 ${impactClass}`} style={{ fontSize: '0.72rem', marginTop: '2px' }}>
                     {impactText}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* My Groups (Enhanced UI & Design) */}
+      <div className="section-header">
+        <h2>{t('myGroups')}</h2>
+        <button className="see-all" onClick={() => navigate('/groups')} id="see-all-groups">
+          {t('viewAll')}
+        </button>
+      </div>
+      <div className="flex flex-col gap-10 page-section">
+        {isLoading ? (
+          <div className="card text-center" style={{ padding: '24px 16px' }}>
+            <p className="text-secondary text-sm">{t('loading')}</p>
+          </div>
+        ) : userGroups.length === 0 ? (
+          <div className="card text-center" style={{ padding: '24px 16px' }}>
+            <p className="text-secondary text-sm" style={{ marginBottom: '14px' }}>
+              No groups yet. Create or join a group to start splitting!
+            </p>
+            <button
+              className="btn btn-primary btn-full"
+              onClick={() => navigate('/groups')}
+              style={{ fontSize: '0.85rem', fontWeight: 700 }}
+            >
+              {t('groups')}
+            </button>
+          </div>
+        ) : (
+          userGroups.map((group) => {
+            const balances = getBalancesForGroup(group.id);
+            const groupExpenses = allExpenses.filter((e) => e.groupId === group.id);
+            const healthSignal = deriveGroupHealthSignal(group, groupExpenses, settlements[group.id]);
+
+            const myBalance = user ? balances[user.id] || 0 : 0;
+            const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
+            const statusText = myBalance > 0
+              ? `↑ You'll get ${formatCurrency(Math.abs(myBalance))}`
+              : myBalance < 0
+              ? `↓ You'll pay ${formatCurrency(Math.abs(myBalance))}`
+              : 'All settled 🎉';
+
+            const statusBg = myBalance > 0
+              ? 'rgba(0, 210, 106, 0.12)'
+              : myBalance < 0
+              ? 'rgba(255, 71, 87, 0.12)'
+              : 'var(--bg-input)';
+
+            const statusBorder = myBalance > 0
+              ? '1px solid rgba(0, 210, 106, 0.25)'
+              : myBalance < 0
+              ? '1px solid rgba(255, 71, 87, 0.25)'
+              : '1px solid var(--border-light)';
+
+            const members = (group.memberIds || []).map((id) => getUserById(id)).filter(Boolean);
+            const previewMembers = members.slice(0, 3);
+
+            return (
+              <div
+                key={group.id}
+                className="card card-hover flex items-center justify-between"
+                onClick={() => {
+                  selectGroup(group.id);
+                  navigate(`/group/${group.id}`);
+                }}
+                id={`group-card-${group.id}`}
+                style={{
+                  padding: '14px 16px',
+                  background: 'var(--bg-card-alt)',
+                  border: '1px solid var(--border-color)',
+                  cursor: 'pointer',
+                  borderRadius: '16px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <div className="flex items-center gap-12" style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: '1.35rem',
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '14px',
+                      background: 'var(--bg-elevated)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid var(--border-light)',
+                      flexShrink: 0,
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
+                    {group.icon || '🏠'}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="flex items-center gap-6" style={{ flexWrap: 'wrap' }}>
+                      <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {group.name}
+                      </h3>
+                      <span
+                        style={{
+                          fontSize: '0.62rem',
+                          fontWeight: 700,
+                          color: healthSignal.color,
+                          background: healthSignal.badgeBg,
+                          padding: '2px 7px',
+                          borderRadius: '10px',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {healthSignal.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-8" style={{ marginTop: '4px' }}>
+                      <div className="flex items-center gap-4 text-secondary text-xs" style={{ fontWeight: 600 }}>
+                        <Users size={13} style={{ color: 'var(--accent)' }} />
+                        <span>{group.memberIds.length} members</span>
+                      </div>
+                      {previewMembers.length > 0 && (
+                        <div className="flex items-center" style={{ marginLeft: '2px' }}>
+                          {previewMembers.map((m, idx) => (
+                            <div key={m.id || idx} style={{ marginLeft: idx > 0 ? '-6px' : '0', border: '2px solid var(--bg-card)', borderRadius: '50%' }}>
+                              <Avatar user={m} size="xs" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    background: statusBg,
+                    border: statusBorder,
+                    textAlign: 'right',
+                    flexShrink: 0,
+                    marginLeft: '8px',
+                  }}
+                >
+                  <p className={`fw-800 ${statusClass}`} style={{ fontSize: '0.78rem', margin: 0, whiteSpace: 'nowrap' }}>
+                    {statusText}
                   </p>
                 </div>
               </div>
