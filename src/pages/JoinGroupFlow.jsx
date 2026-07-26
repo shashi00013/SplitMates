@@ -31,6 +31,8 @@ function playScanSuccessSound() {
   } catch (e) {}
 }
 
+import QRScannerModal from '../components/QRScannerModal';
+
 export default function JoinGroupFlow() {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -43,59 +45,12 @@ export default function JoinGroupFlow() {
   const [resolvedGroupId, setResolvedGroupId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Scanner state
-  const [facingMode, setFacingMode] = useState('environment');
-  const [torchOn, setTorchOn] = useState(false);
-  const [hasTorch, setHasTorch] = useState(false);
-
-  const scannerRef = useRef(null);
-  const isStoppingRef = useRef(false);
-
-  function extractCode(decodedText) {
-    if (!decodedText) return '';
-    const text = decodedText.trim();
-    if (text.includes('/join/')) {
-      const parts = text.split('/join/');
-      return parts[parts.length - 1].split('?')[0].split('#')[0].trim();
-    }
-    return text;
-  }
-
-  const stopScanner = async () => {
-    if (isStoppingRef.current) return;
-    isStoppingRef.current = true;
-    try {
-      const container = document.getElementById('qr-flow-reader-container');
-      const videoElem = container?.querySelector('video');
-      if (videoElem && videoElem.srcObject) {
-        const stream = videoElem.srcObject;
-        stream.getTracks().forEach((track) => {
-          try { track.stop(); } catch (e) {}
-        });
-        videoElem.srcObject = null;
-      }
-      if (scannerRef.current) {
-        if (scannerRef.current.isScanning) {
-          await scannerRef.current.stop().catch(() => {});
-        }
-        await scannerRef.current.clear().catch(() => {});
-        scannerRef.current = null;
-      }
-    } catch (err) {
-      console.warn('[QR STOP ERR]', err);
-    } finally {
-      setTorchOn(false);
-      isStoppingRef.current = false;
-    }
-  };
-
   // Resolve group preview details from code
   function resolveGroupInfo(codeToUse) {
-    const cleanCode = extractCode(codeToUse);
-    if (!cleanCode) return null;
+    if (!codeToUse) return null;
 
     const userGroups = getUserGroups ? getUserGroups() : [];
-    const found = userGroups.find((g) => g.inviteCode === cleanCode || g.id === cleanCode);
+    const found = userGroups.find((g) => g.inviteCode === codeToUse || g.id === codeToUse);
 
     const info = found
       ? {
@@ -104,76 +59,27 @@ export default function JoinGroupFlow() {
           icon: found.icon || '🏠',
           memberCount: found.memberIds?.length || 4,
           description: found.description || 'SplitMates Shared Expenses',
-          inviteCode: cleanCode,
+          inviteCode: codeToUse,
         }
       : {
-          id: cleanCode,
-          name: `Flat 4B`,
+          id: codeToUse,
+          name: `Group (${codeToUse})`,
           icon: '🏠',
           memberCount: 4,
           description: 'SplitMates Shared Expenses',
-          inviteCode: cleanCode,
+          inviteCode: codeToUse,
         };
 
     return info;
   }
 
-  // QR Scanner Lifecycle
-  useEffect(() => {
-    let isMounted = true;
-
-    if (step === 'scan') {
-      const timer = setTimeout(async () => {
-        if (!isMounted) return;
-        try {
-          await stopScanner();
-          const html5QrcodeInstance = new Html5Qrcode('qr-flow-reader-container');
-          scannerRef.current = html5QrcodeInstance;
-
-          await html5QrcodeInstance.start(
-            { facingMode: facingMode },
-            { fps: 15, aspectRatio: 1.0 },
-            (decodedText) => {
-              if (!isMounted) return;
-              const code = extractCode(decodedText);
-              if (code) {
-                playScanSuccessSound();
-                if (typeof navigator !== 'undefined' && navigator.vibrate) {
-                  navigator.vibrate([40, 60, 40]);
-                }
-                const info = resolveGroupInfo(code);
-                setScannedGroup(info);
-                setInviteCode(code);
-                stopScanner();
-                setStep('confirm');
-              }
-            },
-            () => {}
-          );
-        } catch (err) {
-          console.warn('[QR START ERR]', err);
-          showToast('Could not access camera for QR scan');
-        }
-      }, 150);
-
-      return () => {
-        isMounted = false;
-        clearTimeout(timer);
-        stopScanner();
-      };
-    } else {
-      stopScanner();
-    }
-  }, [step, facingMode]);
-
   function handleCodeSubmit(e) {
     e.preventDefault();
-    const clean = extractCode(inviteCode);
-    if (!clean || clean.length < 3) {
-      showToast('Please enter a valid 6-digit invite code');
+    if (!inviteCode || inviteCode.trim().length < 3) {
+      showToast('Please enter a valid invite code');
       return;
     }
-    const info = resolveGroupInfo(clean);
+    const info = resolveGroupInfo(inviteCode.trim());
     setScannedGroup(info);
     setStep('confirm');
   }
@@ -261,37 +167,18 @@ export default function JoinGroupFlow() {
           </div>
         )}
 
-        {/* STEP 2A: QR SCANNER VIEW */}
+        {/* STEP 2A: REUSABLE QR SCANNER VIEW */}
         {step === 'scan' && (
-          <div className="flex flex-col items-center">
-            <p className="text-secondary text-sm text-center" style={{ marginBottom: '16px' }}>
-              Position the group QR code inside the frame
-            </p>
-
-            <div
-              style={{
-                width: '260px',
-                height: '260px',
-                position: 'relative',
-                borderRadius: '24px',
-                overflow: 'hidden',
-                border: '2px solid var(--accent)',
-                boxShadow: 'var(--shadow-glow)',
-                marginBottom: '20px',
-                background: '#000',
-              }}
-            >
-              <div id="qr-flow-reader-container" style={{ width: '100%', height: '100%' }} />
-            </div>
-
-            <button
-              className="btn btn-secondary"
-              onClick={() => setStep('code')}
-              style={{ fontSize: '0.85rem' }}
-            >
-              Enter Code Manually Instead
-            </button>
-          </div>
+          <QRScannerModal
+            isOpen={true}
+            onClose={() => setStep('select')}
+            onScanSuccess={(code, info) => {
+              const resolved = info || resolveGroupInfo(code);
+              setScannedGroup(resolved);
+              setInviteCode(code);
+              setStep('confirm');
+            }}
+          />
         )}
 
         {/* STEP 2B: CODE ENTRY VIEW */}
