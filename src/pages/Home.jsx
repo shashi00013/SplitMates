@@ -284,8 +284,12 @@ export default function Home() {
             const balances = getBalancesForGroup(group.id);
             const myBalance = user ? balances[user.id] || 0 : 0;
             const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
-            const labelText = myBalance > 0 ? t('youGet') : myBalance < 0 ? t('youPay') : t('allSettled');
-            const displayAmount = myBalance === 0 ? '₹0.00' : formatCurrency(Math.abs(myBalance));
+            const statusText = myBalance > 0
+              ? `You'll get ${formatCurrency(Math.abs(myBalance))}`
+              : myBalance < 0
+              ? `You'll pay ${formatCurrency(Math.abs(myBalance))}`
+              : 'All settled';
+
             return (
               <div
                 key={group.id}
@@ -299,11 +303,12 @@ export default function Home() {
                 <div className="group-card-icon">{group.icon || '🏠'}</div>
                 <div className="group-card-info">
                   <h3>{group.name}</h3>
-                  <p>{group.memberIds.length} {t('peopleInGroup')}</p>
+                  <p>{group.memberIds.length} members</p>
                 </div>
-                <div className="group-card-balance">
-                  <p className={`balance-label ${statusClass}`}>{labelText}</p>
-                  <p className={`balance-amount ${statusClass}`}>{displayAmount}</p>
+                <div className="group-card-balance" style={{ textAlign: 'right' }}>
+                  <p className={`fw-700 ${statusClass}`} style={{ fontSize: '0.88rem', margin: 0 }}>
+                    {statusText}
+                  </p>
                 </div>
               </div>
             );
