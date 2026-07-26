@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MoreVertical, ShieldCheck, UserPlus, LogOut, QrCode, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, MoreVertical, LogOut, QrCode, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
@@ -25,11 +25,11 @@ export default function GroupDetails() {
     getGroupMembers,
     getBalancesForGroup,
     getGroupExpenses,
-    getActiveCycle,
     getSettlementHistory,
     leaveGroup,
     showToast,
     isLoading,
+    settlements,
   } = useApp();
 
   const group = groups.find((g) => g.id === groupId || String(g.id) === String(groupId));
@@ -58,16 +58,13 @@ export default function GroupDetails() {
 
   const members = getGroupMembers(groupId);
   const balances = getBalancesForGroup(groupId);
-  const myBalance = balances[user.id] || 0;
+  const myBalance = balances[user?.id] || 0;
   const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
-  const labelText = myBalance > 0 ? t('youGet') : myBalance < 0 ? t('youPay') : t('allSettled');
 
-  const activeCycle = getActiveCycle(groupId);
   const groupExpenses = getGroupExpenses(groupId);
   const activeCycleExpenses = groupExpenses.filter((e) => !e.settled);
-  const groupSettlements = getSettlementHistory(groupId);
 
-  const recentExpenses = [...activeCycleExpenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+  const recentExpenses = [...activeCycleExpenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
   async function handleLeaveGroup() {
     setShowMenu(false);
@@ -86,8 +83,8 @@ export default function GroupDetails() {
 
   return (
     <div className="page" id="group-details-page">
-      {/* Header */}
-      <div className="flex items-center justify-between" style={{ paddingBottom: '4px', position: 'relative' }}>
+      {/* TIER 1 — HEADER */}
+      <div className="flex items-center justify-between" style={{ paddingBottom: '8px', position: 'relative' }}>
         <button className="btn-icon" onClick={() => navigate('/groups')} id="group-back-btn">
           <ChevronLeft size={20} />
         </button>
@@ -95,7 +92,7 @@ export default function GroupDetails() {
         <div style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>{group.name}</h1>
           <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>
-            {members.length} {t('peopleInGroup')}
+            {members.length} members
           </p>
         </div>
 
@@ -103,132 +100,134 @@ export default function GroupDetails() {
           className="btn-icon"
           id="group-menu-btn"
           onClick={() => setShowMenu(!showMenu)}
+          aria-label="Group options"
         >
           <MoreVertical size={20} />
         </button>
 
-        {/* Dropdown Menu */}
+        {/* ⋯ Contextual Menu */}
         {showMenu && (
           <div
             style={{
               position: 'absolute',
-              top: '44px',
+              top: '48px',
               right: '0',
-              background: 'var(--bg-elevated)',
+              background: 'var(--bg-card)',
               border: '1px solid var(--border-light)',
               borderRadius: 'var(--radius-md)',
               padding: '8px',
               boxShadow: 'var(--shadow-card)',
               zIndex: 100,
-              minWidth: '180px',
+              minWidth: '190px',
             }}
             id="group-dropdown-menu"
           >
             <button
-              className="menu-item"
+              className="menu-item flex items-center gap-10"
               onClick={() => { setShowMenu(false); setIsInviteOpen(true); }}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
             >
-              <QrCode size={16} style={{ color: 'var(--accent)' }} /> {t('groupCode')} & QR
+              <QrCode size={16} style={{ color: 'var(--accent)' }} /> Group Code & QR
             </button>
             <button
-              className="menu-item"
+              className="menu-item flex items-center gap-10"
               onClick={() => { setShowMenu(false); navigate(`/settle/${groupId}`); }}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
             >
-              <CheckCircle2 size={16} style={{ color: 'var(--accent)' }} /> {t('settleUp')}
+              <CheckCircle2 size={16} style={{ color: 'var(--accent)' }} /> Settle Up
             </button>
             <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
             <button
-              className="menu-item"
+              className="menu-item flex items-center gap-10"
               onClick={handleLeaveGroup}
               disabled={isLeaving}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--negative)', fontSize: '0.85rem' }}
+              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--negative)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
             >
-              <LogOut size={16} /> {isLeaving ? 'Leaving...' : t('leaveGroup')}
+              <LogOut size={16} /> {isLeaving ? 'Leaving...' : 'Leave Group'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Net Balance Card */}
-      <div className="card card-glow" style={{ marginTop: '16px', marginBottom: '20px', padding: '20px' }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-              {t('netBalance')}
-            </p>
-            <p className="text-3xl financial-hero-amount" style={{ color: myBalance > 0 ? 'var(--accent)' : myBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
-              {myBalance === 0 ? '₹0.00' : formatCurrency(Math.abs(myBalance))}
-            </p>
-            {myBalance > 0 ? (
-              <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
-                ↑ {t('youGet')} {formatCurrency(myBalance)}
-              </p>
-            ) : myBalance < 0 ? (
-              <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
-                ↓ {t('youPay')} {formatCurrency(Math.abs(myBalance))}
-              </p>
-            ) : (
-              <p className="text-secondary text-sm fw-600" style={{ marginTop: '8px' }}>
-                {t('allSettled')}
-              </p>
-            )}
-          </div>
-        </div>
+      {/* TIER 2 — NET BALANCE HERO */}
+      <div className="card card-glow page-section" style={{ marginTop: '12px', padding: '20px' }} id="group-net-balance-card">
+        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+          {t('netBalance')}
+        </p>
+        <p className="financial-hero-amount" style={{ color: myBalance > 0 ? 'var(--accent)' : myBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
+          {formatCurrency(Math.abs(myBalance))}
+        </p>
+        {myBalance > 0 ? (
+          <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
+            ↑ You'll get {formatCurrency(Math.abs(myBalance))}
+          </p>
+        ) : myBalance < 0 ? (
+          <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
+            ↓ You'll pay {formatCurrency(Math.abs(myBalance))}
+          </p>
+        ) : (
+          <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
+            All settled
+          </p>
+        )}
       </div>
 
-      {/* Settlement Status (Rendered ONLY when real active settlement exists) */}
+      {/* TIER 3 — ACTIVE SETTLEMENT ATTENTION (Rendered ONLY when active) */}
       {settlements[groupId]?.status === 'pending' && (
         <div
-          className="card flex items-center justify-between"
+          className="card page-section flex items-center justify-between"
           style={{
-            marginBottom: '20px',
             padding: '14px 16px',
             background: 'rgba(255, 165, 2, 0.10)',
             border: '1px solid var(--warning)',
             cursor: 'pointer',
           }}
           onClick={() => navigate(`/settle/${groupId}`)}
-          id="active-settlement-card"
+          id="group-active-settlement-card"
         >
           <div>
             <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-              Active Settlement Pending
+              Settlement in progress
             </h4>
-            <p className="text-secondary text-xs" style={{ margin: 0 }}>
-              Tap to view and confirm settlement status
+            <p className="text-secondary text-xs" style={{ margin: 0, marginTop: '2px' }}>
+              Your confirmation is needed
             </p>
           </div>
-          <CheckCircle2 size={20} style={{ color: 'var(--warning)' }} />
+          <div className="flex items-center gap-4 text-accent text-xs fw-600" style={{ color: 'var(--warning)' }}>
+            <span>Tap to continue</span>
+            <ArrowUpRight size={16} />
+          </div>
         </div>
       )}
 
-      {/* Members & Dues Section */}
+      {/* TIER 4 — MEMBERS & DUES */}
       <div className="section-header">
-        <h2>{t('peopleInGroup')} ({members.length})</h2>
+        <h2>Members ({members.length})</h2>
       </div>
 
-      <div className="flex gap-12" style={{ overflowX: 'auto', paddingBottom: '16px', marginBottom: '20px' }}>
+      <div className="card page-section" style={{ padding: '8px 16px' }}>
         {members.map((m) => {
           const bal = balances[m.id] || 0;
-          const isMe = m.id === user.id;
+          const isMe = m.id === user?.id;
           const bClass = bal > 0 ? 'text-accent' : bal < 0 ? 'text-negative' : 'text-secondary';
+          const memberName = isMe ? 'You' : m.firstName || m.name || 'Member';
           const balText = isMe
-            ? (bal > 0 ? `↑ ${t('youGet')} ${formatCurrency(bal)}` : bal < 0 ? `↓ ${t('youPay')} ${formatCurrency(Math.abs(bal))}` : t('allSettled'))
-            : (bal > 0 ? `${m.firstName} owes you ${formatCurrency(bal)}` : bal < 0 ? `You owe ${m.firstName} ${formatCurrency(Math.abs(bal))}` : t('allSettled'));
+            ? (bal > 0 ? `Others owe you ${formatCurrency(bal)}` : bal < 0 ? `You owe others ${formatCurrency(Math.abs(bal))}` : 'All settled')
+            : (bal > 0 ? `${memberName} owes you ${formatCurrency(bal)}` : bal < 0 ? `You owe ${memberName} ${formatCurrency(Math.abs(bal))}` : 'All settled');
 
           return (
             <div
               key={m.id}
-              className="card flex flex-col items-center text-center"
-              style={{ minWidth: '115px', padding: '14px 10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)' }}
+              className="flex justify-between items-center"
+              style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}
             >
-              <Avatar user={m} size="md" />
-              <strong style={{ fontSize: '0.82rem', marginTop: '6px', color: 'var(--text-primary)' }}>
-                {isMe ? 'You' : m.firstName}
-              </strong>
-              <span className={`text-xs fw-600 ${bClass}`} style={{ marginTop: '4px' }}>
+              <div className="flex items-center gap-10">
+                <Avatar user={m} size="sm" />
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {memberName}
+                </span>
+              </div>
+              <span className={`text-xs fw-700 ${bClass}`}>
                 {balText}
               </span>
             </div>
@@ -236,13 +235,15 @@ export default function GroupDetails() {
         })}
       </div>
 
-      {/* Current Expenses Section */}
+      {/* TIER 5 — CURRENT EXPENSES */}
       <div className="section-header flex justify-between items-center">
-        <h2>{t('currentPeriod')} ({activeCycleExpenses.length})</h2>
-        <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-group-expenses">{t('viewAll')}</button>
+        <h2>Expenses ({activeCycleExpenses.length})</h2>
+        <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-group-expenses">
+          {t('viewAll')}
+        </button>
       </div>
 
-      <div className="card" style={{ padding: '0 16px', marginBottom: '24px' }}>
+      <div className="card page-section" style={{ padding: '0 16px' }}>
         {activeCycleExpenses.length === 0 ? (
           <p className="text-secondary text-center" style={{ padding: '24px 0' }}>{t('noExpensesYet')}</p>
         ) : (
@@ -265,6 +266,7 @@ export default function GroupDetails() {
                 className="expense-row"
                 onClick={() => setActiveExpense(exp)}
                 style={{ cursor: 'pointer' }}
+                id={`group-expense-${exp.id}`}
               >
                 <div className="expense-icon">{exp.emoji}</div>
                 <div className="expense-info">
@@ -283,8 +285,8 @@ export default function GroupDetails() {
         )}
       </div>
 
-      {/* Primary Action Button */}
-      <div style={{ marginTop: '20px' }}>
+      {/* TIER 6 — ONE PRIMARY ACTION */}
+      <div style={{ marginTop: '8px' }}>
         <button
           className="btn btn-primary btn-full"
           onClick={() => navigate('/add-expense', { state: { groupId } })}

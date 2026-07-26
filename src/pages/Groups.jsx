@@ -23,18 +23,21 @@ export default function Groups() {
 
   return (
     <div className="page" id="groups-page">
-      <div className="page-header">
+      {/* 1. Header */}
+      <div className="page-header flex items-center justify-between" style={{ paddingBottom: '16px' }}>
         <button className="btn-icon" onClick={() => navigate('/')} id="groups-back-btn">
           <ChevronLeft size={20} />
         </button>
-        <h1>{t('myGroups')}</h1>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {t('myGroups')}
+        </h1>
         <button className="btn-icon" onClick={refreshGroups} id="refresh-groups-btn" aria-label="Refresh Groups">
           <RefreshCw size={18} className={isLoadingGroups ? 'animate-spin' : ''} />
         </button>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex gap-10" style={{ marginBottom: '20px' }}>
+      {/* 2. Primary Action Area */}
+      <div className="flex gap-10 page-section">
         <button
           className="btn btn-primary flex-1"
           onClick={() => setShowCreateModal(true)}
@@ -60,7 +63,7 @@ export default function Groups() {
 
       {/* Error State */}
       {groupsError && (
-        <div className="card" style={{ padding: '16px 20px', marginBottom: '16px', border: '1px solid var(--negative)', background: 'rgba(255, 59, 48, 0.08)' }}>
+        <div className="card" style={{ padding: '16px 20px', marginBottom: '16px', border: '1px solid var(--negative)', background: 'rgba(255, 71, 87, 0.08)' }}>
           <div className="flex items-center gap-10 text-negative" style={{ marginBottom: '8px' }}>
             <AlertCircle size={18} />
             <span className="fw-600 text-sm">Failed to load groups</span>
@@ -72,49 +75,47 @@ export default function Groups() {
         </div>
       )}
 
-      {/* Groups List */}
-      <div className="flex flex-col gap-10">
+      {/* 3. Group Cards */}
+      <div className="flex flex-col gap-12">
         {!isLoadingGroups && userGroups.map((group) => {
           const balances = getBalancesForGroup(group.id);
           const myBalance = user ? (balances[user.id] || 0) : 0;
           const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
-          const labelText = myBalance > 0 ? t('youGet') : myBalance < 0 ? t('youPay') : t('allSettled');
-          const displayAmount = myBalance === 0 ? '₹0.00' : formatCurrency(Math.abs(myBalance));
+          const statusText = myBalance > 0
+            ? `↑ You'll get ${formatCurrency(Math.abs(myBalance))}`
+            : myBalance < 0
+            ? `↓ You'll pay ${formatCurrency(Math.abs(myBalance))}`
+            : 'All settled';
 
           return (
             <div
               key={group.id}
-              className="group-card"
+              className="group-card card-hover"
               onClick={() => handleSelectGroup(group.id)}
-              id={`group-link-${group.id}`}
-              style={{ cursor: 'pointer' }}
+              id={`group-card-${group.id}`}
             >
               <div className="group-card-icon">{group.icon || '🏠'}</div>
               <div className="group-card-info">
                 <h3>{group.name}</h3>
-                <p>
-                  {group.memberIds.length} {t('peopleInGroup')}
-                  {group.description ? ` · ${group.description}` : ''}
-                </p>
+                <p>{group.memberIds.length} members</p>
               </div>
-              <div className="group-card-balance">
-                <p className={`balance-label ${statusClass}`}>
-                  {labelText}
-                </p>
-                <p className={`balance-amount ${statusClass}`}>
-                  {displayAmount}
+              <div className="group-card-balance" style={{ textAlign: 'right' }}>
+                <p className={`fw-700 ${statusClass}`} style={{ fontSize: '0.88rem', margin: 0 }}>
+                  {statusText}
                 </p>
               </div>
             </div>
           );
         })}
 
-        {/* Empty State */}
+        {/* 4. Empty State */}
         {!isLoadingGroups && userGroups.length === 0 && (
           <div className="card text-center" style={{ padding: '40px 20px' }}>
-            <p style={{ fontSize: '2rem', marginBottom: '12px' }}>🏘️</p>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '6px' }}>No groups yet</h3>
-            <p className="text-secondary text-sm" style={{ marginBottom: '20px' }}>
+            <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🏘️</p>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary)' }}>
+              No groups yet
+            </h3>
+            <p className="text-secondary text-sm" style={{ marginBottom: '20px', maxWidth: '280px', margin: '0 auto 20px' }}>
               Create a group to start splitting expenses with your people.
             </p>
             <div className="flex gap-10">
@@ -123,7 +124,7 @@ export default function Groups() {
                 onClick={() => setShowCreateModal(true)}
                 id="empty-create-group-btn"
               >
-                {t('createGroup')}
+                + {t('createGroup')}
               </button>
               <button
                 className="btn btn-secondary flex-1"
