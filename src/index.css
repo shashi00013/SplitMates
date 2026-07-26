@@ -175,17 +175,25 @@ h3, .card-title { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 .relative { position: relative; }
 
 /* ---- Cards ---- */
+/* ---- Cards System ---- */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 20px;
   transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hover {
+  cursor: pointer;
 }
 
 .card-hover:active {
   transform: scale(0.98);
   background: var(--bg-elevated);
+  border-color: var(--border-light);
 }
 
 .card-glow {
