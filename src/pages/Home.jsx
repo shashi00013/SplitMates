@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, ArrowUpRight, Clock, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bell, ArrowUpRight, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency } from '../data/mockData';
@@ -8,7 +8,6 @@ import { calculateSettlementTransactions } from '../data/balanceEngine';
 import Avatar from '../components/Avatar';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 import NotificationsModal from '../components/NotificationsModal';
-import JoinGroupModal from '../components/JoinGroupModal';
 
 import { deriveProactiveActions, deriveFinancialInsights, deriveGroupHealthSignal } from '../utils/productIntelligence';
 
@@ -33,7 +32,6 @@ export default function Home() {
   const navigate = useNavigate();
   const [activeExpense, setActiveExpense] = useState(null);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [showJoinModal, setShowJoinModal] = useState(false);
   const [isBalanceExpanded, setIsBalanceExpanded] = useState(false);
 
   useEffect(() => {
@@ -99,17 +97,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Header Action Buttons (Quick QR Scan & Notifications) */}
+        {/* Header Action Buttons (Notifications) */}
         <div className="flex items-center gap-8">
-          <button
-            className="btn-icon"
-            id="home-scan-qr-btn"
-            aria-label="Scan QR Code"
-            title="Scan QR Code"
-            onClick={() => setShowJoinModal(true)}
-          >
-            <QrCode size={18} style={{ color: 'var(--accent)' }} />
-          </button>
           <button
             className="btn-icon"
             id="notifications-btn"
@@ -454,8 +443,6 @@ export default function Home() {
         onMarkRead={(id) => markNotificationRead(id)}
         onMarkAllRead={() => markNotificationRead('all')}
       />
-
-      <JoinGroupModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
     </div>
   );
 }
