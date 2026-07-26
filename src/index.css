@@ -97,6 +97,11 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   animation: fadeIn 0.3s ease;
+  box-sizing: border-box;
+}
+
+.page-section {
+  margin-bottom: 24px;
 }
 
 @keyframes fadeIn {
