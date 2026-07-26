@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, PlusCircle, ArrowUpRight, Users, Clock, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bell, ArrowUpRight, Clock, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
-import { formatCurrency, formatDate } from '../data/mockData';
+import { formatCurrency } from '../data/mockData';
 import { calculateSettlementTransactions } from '../data/balanceEngine';
 import Avatar from '../components/Avatar';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
@@ -39,7 +39,7 @@ export default function Home() {
   }, [fetchNotifications]);
 
   const userGroups = getUserGroups();
-  const { totalBalance, totalOwed, totalOwe } = getTotalBalances();
+  const { totalBalance } = getTotalBalances();
   const recentExpenses = getAllExpensesForUser().slice(0, 4);
 
   // Check if any group has an active pending settlement
@@ -73,13 +73,13 @@ export default function Home() {
   return (
     <div className="page" id="home-page">
       {/* Header / Greeting */}
-      <div className="flex items-center justify-between" style={{ marginBottom: '20px', paddingTop: '4px' }}>
+      <div className="flex items-center justify-between page-section" style={{ paddingTop: '4px' }}>
         <div className="flex items-center gap-12">
           <Avatar user={user} size="md" />
           <div>
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
               {t('welcomeBack')} {user?.firstName} 👋
-            </h2>
+            </h1>
             <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>SplitMates</p>
           </div>
         </div>
@@ -92,7 +92,6 @@ export default function Home() {
             aria-label="Scan QR Code"
             title="Scan QR Code"
             onClick={() => setShowJoinModal(true)}
-            style={{ position: 'relative', background: 'var(--bg-input)', border: '1px solid var(--border-light)' }}
           >
             <QrCode size={18} style={{ color: 'var(--accent)' }} />
           </button>
@@ -130,10 +129,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Net Balance Card with Expandable Dues Breakdown & Full Breakdown Navigation */}
+      {/* Tier 1: Unified Net Balance Card */}
       <div
-        className="card card-glow"
-        style={{ marginBottom: '20px', padding: '20px', cursor: 'pointer' }}
+        className="card card-glow page-section card-hover"
         id="total-balance-card"
         onClick={() => navigate('/balance-breakdown')}
       >
@@ -142,7 +140,7 @@ export default function Home() {
             <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
               {t('netBalance')}
             </p>
-            <p className="text-3xl financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
+            <p className="financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
               {formatCurrency(Math.abs(totalBalance))}
             </p>
             {totalBalance > 0 ? (
@@ -159,9 +157,24 @@ export default function Home() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-4 text-accent text-xs fw-600">
-            <span>Summary</span>
-            <ArrowUpRight size={16} />
+          <div className="flex flex-col items-end gap-12">
+            <div className="flex items-center gap-4 text-accent text-xs fw-600">
+              <span>Summary</span>
+              <ArrowUpRight size={16} />
+            </div>
+            {memberBreakdownItems.length > 0 && (
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsBalanceExpanded(!isBalanceExpanded);
+                }}
+                id="toggle-dues-breakdown"
+              >
+                {isBalanceExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+            )}
           </div>
         </div>
 
@@ -210,14 +223,11 @@ export default function Home() {
         )}
       </div>
 
-
-
-      {/* Pending Settlement Banner (if any) */}
+      {/* Tier 2: Contextual Attention Area (Action Required Cards) */}
       {pendingSettlementGroup && (
         <div
-          className="card flex items-center justify-between"
+          className="card page-section flex items-center justify-between"
           style={{
-            marginBottom: '24px',
             padding: '14px 16px',
             background: 'rgba(255, 165, 2, 0.10)',
             border: '1px solid var(--warning)',
@@ -225,7 +235,7 @@ export default function Home() {
           }}
           onClick={() => {
             selectGroup(pendingSettlementGroup.id);
-            navigate(`/settlement/${pendingSettlementGroup.id}`);
+            navigate(`/settle/${pendingSettlementGroup.id}`);
           }}
           id="pending-settlement-banner"
         >
@@ -244,14 +254,14 @@ export default function Home() {
         </div>
       )}
 
-      {/* Your Groups */}
+      {/* Tier 3: My Groups */}
       <div className="section-header">
         <h2>{t('myGroups')}</h2>
         <button className="see-all" onClick={() => navigate('/groups')} id="see-all-groups">
           {t('viewAll')}
         </button>
       </div>
-      <div className="flex flex-col gap-10" style={{ marginBottom: '24px' }}>
+      <div className="flex flex-col gap-10 page-section">
         {isLoading ? (
           <div className="card text-center" style={{ padding: '24px 16px' }}>
             <p className="text-secondary text-sm">{t('loading')}</p>
@@ -279,7 +289,7 @@ export default function Home() {
             return (
               <div
                 key={group.id}
-                className="group-card"
+                className="group-card card-hover"
                 onClick={() => {
                   selectGroup(group.id);
                   navigate(`/group/${group.id}`);
@@ -301,7 +311,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Recent Expenses */}
+      {/* Tier 4: Recent Activity Feed */}
       <div className="section-header">
         <h2>{t('recentExpenses')}</h2>
         <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-expenses">
