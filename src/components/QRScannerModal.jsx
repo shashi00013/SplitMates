@@ -57,10 +57,57 @@ export default function QRScannerModal({ isOpen, onClose, onScanSuccess }) {
   const [availableCameras, setAvailableCameras] = useState([]);
   const [isJoining, setIsJoining] = useState(false);
 
+  // Native Pinch-To-Zoom States & Refs
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
+  const initialTouchDistanceRef = useRef(null);
+  const initialZoomRef = useRef(1.0);
+  const zoomTimeoutRef = useRef(null);
+
   const scannerRef = useRef(null);
   const fileInputRef = useRef(null);
   const isStoppingRef = useRef(false);
   const isProcessingRef = useRef(false);
+
+  // Helper to calculate Euclidean distance between two touch points
+  function getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Native Camera Hardware Zoom Controller via MediaStreamTrack applyConstraints
+  const applyNativeZoom = async (newZoom) => {
+    try {
+      const container = document.getElementById('qr-reusable-container');
+      const videoElem = container?.querySelector('video');
+      if (videoElem && videoElem.srcObject) {
+        const track = videoElem.srcObject.getVideoTracks()[0];
+        if (track && track.getCapabilities) {
+          const caps = track.getCapabilities();
+          if (caps.zoom) {
+            const minZ = caps.zoom.min || 1.0;
+            const maxZ = caps.zoom.max || 5.0;
+            const clampedZoom = Math.min(Math.max(newZoom, minZ), maxZ);
+
+            await track.applyConstraints({
+              advanced: [{ zoom: clampedZoom }],
+            });
+
+            setZoomLevel(clampedZoom);
+            setShowZoomIndicator(true);
+
+            if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+            zoomTimeoutRef.current = setTimeout(() => {
+              setShowZoomIndicator(false);
+            }, 1200);
+          }
+        }
+      }
+    } catch (e) {
+      // Gracefully ignore zoom application failures if hardware rejects constraint
+    }
+  };
 
   // Teardown camera streams safely
   const stopScanner = async () => {
@@ -321,7 +368,58 @@ export default function QRScannerModal({ isOpen, onClose, onScanSuccess }) {
         id="qr-reusable-file-input"
       />
 
-      <div className="fullscreen-qr-scanner" id="fullscreen-qr-scanner-view">
+      <div
+        className="fullscreen-qr-scanner"
+        id="fullscreen-qr-scanner-view"
+        onTouchStart={(e) => {
+          if (e.touches.length === 2) {
+            const dist = getTouchDistance(e.touches);
+            initialTouchDistanceRef.current = dist;
+            initialZoomRef.current = zoomLevel;
+          }
+        }}
+        onTouchMove={(e) => {
+          if (e.touches.length === 2 && initialTouchDistanceRef.current) {
+            const currentDist = getTouchDistance(e.touches);
+            if (currentDist > 0) {
+              const scale = currentDist / initialTouchDistanceRef.current;
+              const targetZoom = initialZoomRef.current * scale;
+              applyNativeZoom(targetZoom);
+            }
+          }
+        }}
+        onTouchEnd={(e) => {
+          if (e.touches.length < 2) {
+            initialTouchDistanceRef.current = null;
+          }
+        }}
+      >
+        {/* Native Camera Zoom Level Indicator Pill */}
+        {showZoomIndicator && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '72px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0, 0, 0, 0.75)',
+              color: 'var(--accent)',
+              padding: '4px 14px',
+              borderRadius: '20px',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              backdropFilter: 'blur(8px)',
+              border: '1px solid var(--border-light)',
+              zIndex: 120,
+              pointerEvents: 'none',
+              transition: 'opacity 0.2s ease',
+            }}
+            id="zoom-indicator-pill"
+          >
+            {zoomLevel.toFixed(1)}×
+          </div>
+        )}
+
         {/* Full Screen Live Camera Background */}
         <div className="fullscreen-camera-bg">
           <div id="qr-reusable-container" style={{ width: '100%', height: '100%' }} />
