@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, Calendar, Check, Percent, Calculator, Scale, Users } from 'lucide-react';
+import { ChevronLeft, Calendar, Check, Percent, Calculator, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency } from '../data/mockData';
@@ -25,7 +25,7 @@ export default function AddExpense() {
   const [title, setTitle] = useState(editingExpense ? editingExpense.title : '');
   const [amount, setAmount] = useState(editingExpense ? editingExpense.amount.toString() : '');
   const [selectedGroup, setSelectedGroup] = useState(editingExpense ? editingExpense.groupId : preselectedGroupId);
-  const [paidBy, setPaidBy] = useState(editingExpense ? editingExpense.paidBy : user.id);
+  const [paidBy, setPaidBy] = useState(editingExpense ? editingExpense.paidBy : user?.id || '');
   const [splitType, setSplitType] = useState(editingExpense ? editingExpense.splitType || 'equal' : 'equal');
   const [date, setDate] = useState(editingExpense ? editingExpense.date : new Date().toISOString().split('T')[0]);
 
@@ -53,8 +53,8 @@ export default function AddExpense() {
     setSelectedGroup(groupId);
     const members = getGroupMembers(groupId);
     setSelectedParticipants(members.map((m) => m.id));
-    const userInGroup = members.some((m) => m.id === user.id);
-    setPaidBy(userInGroup ? user.id : members[0]?.id || '');
+    const userInGroup = members.some((m) => m.id === user?.id);
+    setPaidBy(userInGroup ? user?.id : members[0]?.id || '');
   }
 
   function toggleParticipant(memberId) {
@@ -90,7 +90,7 @@ export default function AddExpense() {
   const parsedAmount = parseFloat(amount) || 0;
   const participantCount = selectedParticipants.length;
 
-  // Split-type specific memoized share calculations
+  // Split-type specific share calculations
   const equalShares = useMemo(() => {
     if (participantCount === 0 || parsedAmount <= 0) return {};
     return calculateExpenseShares({
@@ -121,8 +121,6 @@ export default function AddExpense() {
 
   const computedShares = splitType === 'exact' ? exactShares : splitType === 'percentage' ? percentShares : equalShares;
 
-  const representativeShare = participantCount > 0 ? computedShares[selectedParticipants[0]] || 0 : 0;
-
   // Validate shares total
   const sharesTotal = useMemo(() => {
     if (splitType === 'equal') return parsedAmount;
@@ -143,7 +141,6 @@ export default function AddExpense() {
     participantCount > 0 &&
     isValidSharesTotal;
 
-  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function goBack() {
@@ -156,14 +153,29 @@ export default function AddExpense() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setHasAttemptedSubmit(true);
 
-    if (!isValid || isSubmitting) {
-      if (!title.trim()) showToast('Title is required');
-      else if (parsedAmount <= 0) showToast('Amount must be greater than 0');
-      else if (!isValidSharesTotal) showToast(`Sum of shares (${sharesTotal.toFixed(2)}) must equal total amount (${parsedAmount.toFixed(2)})`);
+    if (!selectedGroup) {
+      showToast('Choose a group');
       return;
     }
+    if (!title.trim()) {
+      showToast('Tell us what you bought');
+      return;
+    }
+    if (parsedAmount <= 0) {
+      showToast('Enter an amount');
+      return;
+    }
+    if (!paidBy) {
+      showToast('Choose who paid');
+      return;
+    }
+    if (!isValidSharesTotal) {
+      showToast(`Sum of shares (${sharesTotal.toFixed(2)}) must equal total amount (${parsedAmount.toFixed(2)})`);
+      return;
+    }
+
+    if (!isValid || isSubmitting) return;
 
     const expenseData = {
       groupId: selectedGroup,
@@ -183,8 +195,10 @@ export default function AddExpense() {
     try {
       if (editingExpenseId) {
         await updateExpense(editingExpenseId, expenseData);
+        showToast('Expense updated');
       } else {
         await addExpense(expenseData);
+        showToast('Expense added');
       }
       goBack();
     } catch (err) {
@@ -196,20 +210,23 @@ export default function AddExpense() {
 
   return (
     <div className="page" id="add-expense-page">
-      <div className="page-header">
-        <button className="btn-icon" onClick={goBack} id="add-expense-back">
+      {/* HEADER (Minimal, no duplicate save/close buttons) */}
+      <div className="page-header flex items-center justify-between" style={{ paddingBottom: '16px' }}>
+        <button className="btn-icon" onClick={goBack} id="add-expense-back" aria-label="Go back">
           <ChevronLeft size={20} />
         </button>
-        <h1>{editingExpenseId ? t('editExpenseTitle') : t('addExpenseTitle')}</h1>
-        <div className="spacer" />
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {editingExpenseId ? 'Edit Expense' : 'Add Expense'}
+        </h1>
+        <div style={{ width: '42px' }} />
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-20">
-        {/* PRIMARY FIELDS (Always Shown) */}
-        
-        {/* Group Selector */}
+        {/* 1. GROUP SELECTOR */}
         <div className="input-group">
-          <label>{t('groups')}</label>
+          <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
+            Group
+          </label>
           <select
             className="input"
             value={selectedGroup}
@@ -218,18 +235,20 @@ export default function AddExpense() {
           >
             <option value="" disabled>Select a group</option>
             {userGroups.map((g) => (
-              <option key={g.id} value={g.id}>{g.icon} {g.name}</option>
+              <option key={g.id} value={g.id}>{g.icon || '🏠'} {g.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Title */}
+        {/* 2. EXPENSE TITLE */}
         <div className="input-group">
-          <label>{t('expenseTitle')}</label>
+          <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
+            What did you buy?
+          </label>
           <input
             className="input"
             type="text"
-            placeholder="What did you buy? (e.g. Dinner, Groceries)"
+            placeholder="Dinner, Groceries, Uber, etc."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             id="expense-title-input"
@@ -237,13 +256,15 @@ export default function AddExpense() {
           />
         </div>
 
-        {/* Amount */}
+        {/* 3. AMOUNT */}
         <div className="input-group">
-          <label>How much? (₹)</label>
+          <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
+            How much?
+          </label>
           <div style={{ position: 'relative' }}>
             <span style={{
               position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
-              color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: 600, pointerEvents: 'none',
+              color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: 700, pointerEvents: 'none',
             }}>₹</span>
             <input
               className="input"
@@ -254,28 +275,56 @@ export default function AddExpense() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               id="expense-amount-input"
-              style={{ paddingLeft: '30px' }}
+              style={{ paddingLeft: '32px', fontSize: '1.1rem', fontWeight: 700 }}
             />
           </div>
         </div>
 
-        {/* Paid By */}
+        {/* 4. WHO PAID? */}
         <div className="input-group">
-          <label>Who paid?</label>
-          <div className="paid-by-selector" id="paid-by-selector">
+          <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
+            Who paid?
+          </label>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+              gap: '10px',
+            }}
+            id="paid-by-selector"
+          >
             {allMembers.map((m) => {
-              const isMe = m.id === user.id;
+              const isMe = m.id === user?.id;
               const selected = paidBy === m.id;
+              const memberName = isMe ? 'You' : m.firstName || m.name;
+
               return (
                 <button
                   type="button"
                   key={m.id}
-                  className={`paid-by-option ${selected ? 'selected' : ''}`}
                   onClick={() => setPaidBy(m.id)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '12px 8px',
+                    borderRadius: 'var(--radius-md)',
+                    background: selected ? 'var(--bg-card)' : 'var(--bg-input)',
+                    border: selected ? '2px solid var(--accent)' : '1px solid var(--border-color)',
+                    cursor: 'pointer',
+                    transition: 'var(--transition)',
+                  }}
+                  id={`paid-by-${m.id}`}
                 >
                   <Avatar user={m} selected={selected} size="sm" />
-                  <span style={{ fontSize: '0.72rem', fontWeight: selected ? 600 : 400 }}>
-                    {isMe ? 'You' : m.firstName}
+                  <span style={{
+                    fontSize: '0.78rem',
+                    fontWeight: selected ? 700 : 500,
+                    marginTop: '6px',
+                    color: selected ? 'var(--accent)' : 'var(--text-primary)',
+                  }}>
+                    {memberName}
                   </span>
                 </button>
               );
@@ -283,86 +332,85 @@ export default function AddExpense() {
           </div>
         </div>
 
-        {/* More Options Toggle Link */}
-        <div className="flex justify-center" style={{ margin: '2px 0' }}>
+        {/* 5. ADVANCED OPTIONS TOGGLE (Collapsed by Default) */}
+        <div className="flex justify-center" style={{ margin: '4px 0' }}>
           <button
             type="button"
-            className="btn-link text-xs flex items-center gap-6"
+            className="btn btn-ghost text-xs flex items-center gap-6"
             onClick={() => setShowMoreOptions(!showMoreOptions)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', color: 'var(--accent)', fontWeight: 600 }}
+            style={{ color: 'var(--accent)', fontWeight: 600, fontSize: '0.82rem' }}
             id="toggle-more-options-btn"
           >
-            {showMoreOptions ? 'Hide Advanced Options ▲' : 'More Options (Split Type, Custom Shares, Date) ▼'}
+            {showMoreOptions ? (
+              <>Less options <ChevronUp size={16} /></>
+            ) : (
+              <>More options <ChevronDown size={16} /></>
+            )}
           </button>
         </div>
 
-        {/* ADVANCED OPTIONS (Hidden initially, expands on click) */}
+        {/* ADVANCED OPTIONS CONTAINER */}
         {showMoreOptions && (
           <div
             className="flex flex-col gap-20"
             style={{
-              padding: '16px',
+              padding: '18px',
               background: 'var(--bg-card-alt)',
               borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--border-color)',
+              border: '1px solid var(--border-light)',
             }}
             id="more-options-container"
           >
-            {/* Split Type Selector Cards */}
+            {/* OPTION A — SPLIT TYPE */}
             <div className="input-group">
-              <label style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.72rem', fontWeight: 600 }}>Split how?</label>
-              <div className="split-type-container" id="split-type-selector">
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Split type
+              </label>
+              <div className="flex gap-8" id="split-type-selector">
                 <button
                   type="button"
-                  className={`split-type-card ${splitType === 'equal' ? 'active' : ''}`}
+                  className={`btn flex-1 text-xs ${splitType === 'equal' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setSplitType('equal')}
                   id="split-tab-equal"
+                  style={{ padding: '8px 6px' }}
                 >
-                  <div className="split-icon-wrapper">
-                    <Users size={20} />
-                  </div>
-                  <span className="split-title">Equal Split</span>
-                  <span className="split-desc">Splits equally</span>
+                  <Users size={14} /> Split equally
                 </button>
 
                 <button
                   type="button"
-                  className={`split-type-card ${splitType === 'exact' ? 'active' : ''}`}
+                  className={`btn flex-1 text-xs ${splitType === 'exact' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setSplitType('exact')}
                   id="split-tab-exact"
+                  style={{ padding: '8px 6px' }}
                 >
-                  <div className="split-icon-wrapper">
-                    <Calculator size={20} />
-                  </div>
-                  <span className="split-title">Exact Amount</span>
-                  <span className="split-desc">Custom amounts</span>
+                  <Calculator size={14} /> Exact amounts
                 </button>
 
                 <button
                   type="button"
-                  className={`split-type-card ${splitType === 'percentage' ? 'active' : ''}`}
+                  className={`btn flex-1 text-xs ${splitType === 'percentage' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setSplitType('percentage')}
                   id="split-tab-percent"
+                  style={{ padding: '8px 6px' }}
                 >
-                  <div className="split-icon-wrapper">
-                    <Percent size={20} />
-                  </div>
-                  <span className="split-title">By Percentage</span>
-                  <span className="split-desc">Custom percentages</span>
+                  <Percent size={14} /> Percentage
                 </button>
               </div>
             </div>
 
-            {/* Split With */}
+            {/* OPTION B — PARTICIPANTS */}
             <div className="input-group">
               <div className="flex items-center justify-between">
-                <label style={{ marginBottom: 0 }}>Split with</label>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  Who is involved?
+                </label>
                 {selectedParticipants.length < allMembers.length && (
                   <button
                     type="button"
                     className="see-all"
                     onClick={selectAllParticipants}
-                    style={{ fontSize: '0.72rem' }}
+                    style={{ fontSize: '0.75rem' }}
                   >
                     Select All
                   </button>
@@ -370,25 +418,32 @@ export default function AddExpense() {
               </div>
               <div className="card" style={{ padding: '0 14px' }}>
                 {allMembers.map((m) => {
-                  const isMe = m.id === user.id;
+                  const isMe = m.id === user?.id;
                   const isSelected = selectedParticipants.includes(m.id);
+                  const memberName = isMe ? 'You' : m.firstName || m.name;
+
                   return (
                     <div key={m.id} style={{ borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
                       <div
-                        className="member-row"
+                        className="member-row flex items-center justify-between"
                         onClick={() => toggleParticipant(m.id)}
                         style={{ cursor: 'pointer' }}
                         id={`participant-${m.id}`}
                       >
-                        <Avatar user={m} size="sm" selected={isSelected} />
-                        <div className="member-info" style={{ flex: 1 }}>
-                          <h3 style={{ fontSize: '0.88rem' }}>{isMe ? 'You' : m.name}</h3>
-                          {isSelected && parsedAmount > 0 && splitType === 'equal' && (
-                            <p className="text-accent text-xs" style={{ marginTop: '2px' }}>
-                              {formatCurrency(computedShares[m.id] || 0)}
-                            </p>
-                          )}
+                        <div className="flex items-center gap-10">
+                          <Avatar user={m} size="sm" selected={isSelected} />
+                          <div>
+                            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                              {memberName}
+                            </span>
+                            {isSelected && parsedAmount > 0 && splitType === 'equal' && (
+                              <p className="text-accent text-xs" style={{ margin: 0, marginTop: '2px' }}>
+                                {formatCurrency(computedShares[m.id] || 0)}
+                              </p>
+                            )}
+                          </div>
                         </div>
+
                         <div
                           style={{
                             width: '24px',
@@ -444,9 +499,11 @@ export default function AddExpense() {
               </div>
             </div>
 
-            {/* Date */}
+            {/* OPTION C — DATE */}
             <div className="input-group">
-              <label>Date</label>
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Date
+              </label>
               <div style={{ position: 'relative' }}>
                 <Calendar
                   size={17}
@@ -466,15 +523,15 @@ export default function AddExpense() {
           </div>
         )}
 
-        {/* Submit */}
+        {/* 6. SINGLE PRIMARY SUBMIT ACTION */}
         <button
           type="submit"
           className="btn btn-primary btn-full"
           disabled={!isValid || isSubmitting}
           id="submit-expense-btn"
-          style={{ opacity: (isValid && !isSubmitting) ? 1 : 0.45, marginTop: '4px' }}
+          style={{ opacity: (isValid && !isSubmitting) ? 1 : 0.5, marginTop: '8px', minHeight: '48px', fontSize: '1rem', fontWeight: 800 }}
         >
-          {isSubmitting ? t('loading') : (editingExpenseId ? t('save') : t('addExpense'))}
+          {isSubmitting ? 'Adding expense...' : (editingExpenseId ? 'Save Changes' : 'Add Expense')}
         </button>
       </form>
     </div>
