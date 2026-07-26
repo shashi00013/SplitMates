@@ -48,6 +48,7 @@ export default function AddExpense() {
   });
 
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [repeatSchedule, setRepeatSchedule] = useState('never');
 
   function handleGroupChange(groupId) {
     setSelectedGroup(groupId);
@@ -518,6 +519,30 @@ export default function AddExpense() {
                   style={{ paddingLeft: '42px' }}
                   id="expense-date-input"
                 />
+              </div>
+            </div>
+
+            {/* OPTION D — REPEAT SCHEDULE */}
+            <div className="input-group">
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Repeat Expense?
+              </label>
+              <div className="flex gap-8">
+                {['never', 'weekly', 'monthly'].map((rep) => {
+                  const isActive = (repeatSchedule || 'never') === rep;
+                  return (
+                    <button
+                      key={rep}
+                      type="button"
+                      className={`btn flex-1 text-xs ${isActive ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setRepeatSchedule(rep)}
+                      id={`repeat-opt-${rep}`}
+                      style={{ textTransform: 'capitalize', padding: '8px 4px' }}
+                    >
+                      {rep}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

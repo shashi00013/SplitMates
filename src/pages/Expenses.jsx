@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Search } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
@@ -11,20 +11,29 @@ export default function Expenses() {
   const { t } = useLanguage();
   const { user, getAllExpensesForUser, groups, getUserById, isLoading } = useApp();
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeExpense, setActiveExpense] = useState(null);
 
   const allExpenses = getAllExpensesForUser();
 
   const filtered = allExpenses.filter((exp) => {
-    if (filter === 'all') return true;
-    if (filter === 'current') return !exp.settled;
-    if (filter === 'historical') return exp.settled;
+    if (filter === 'current' && exp.settled) return false;
+    if (filter === 'historical' && !exp.settled) return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const group = groups.find((g) => g.id === exp.groupId);
+      const matchesTitle = exp.title?.toLowerCase().includes(q);
+      const matchesGroup = group?.name?.toLowerCase().includes(q);
+      if (!matchesTitle && !matchesGroup) return false;
+    }
+
     return true;
   });
 
   return (
     <div className="page" id="expenses-page">
-      {/* 1. Header (Minimal, no duplicate Add Expense button) */}
+      {/* 1. Header */}
       <div className="page-header flex items-center justify-between" style={{ paddingBottom: '12px' }}>
         <button className="btn-icon" onClick={() => navigate('/')} id="expenses-back-btn" aria-label="Go back">
           <ChevronLeft size={20} />
@@ -33,6 +42,22 @@ export default function Expenses() {
           {t('expenses')}
         </h1>
         <div style={{ width: '42px' }} />
+      </div>
+
+      {/* Search Input Bar */}
+      <div className="input-group" style={{ marginBottom: '14px' }}>
+        <div style={{ position: 'relative' }}>
+          <input
+            className="input"
+            type="text"
+            placeholder="Search expenses by title or group..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ paddingLeft: '40px', fontSize: '0.85rem', background: 'var(--bg-card-alt)', border: '1px solid var(--border-color)' }}
+            id="expense-search-input"
+          />
+          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+        </div>
       </div>
 
       {/* 2. Compact Segmented Filter Control */}
