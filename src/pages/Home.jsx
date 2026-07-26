@@ -10,6 +10,8 @@ import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 import NotificationsModal from '../components/NotificationsModal';
 import JoinGroupModal from '../components/JoinGroupModal';
 
+import { deriveProactiveActions, deriveFinancialInsights, deriveGroupHealthSignal } from '../utils/productIntelligence';
+
 export default function Home() {
   const {
     user,
@@ -40,10 +42,23 @@ export default function Home() {
 
   const userGroups = getUserGroups();
   const { totalBalance } = getTotalBalances();
-  const recentExpenses = getAllExpensesForUser().slice(0, 4);
+  const allExpenses = getAllExpensesForUser();
+  const recentExpenses = allExpenses.slice(0, 4);
 
-  // Check if any group has an active pending settlement
-  const pendingSettlementGroup = userGroups.find((g) => settlements[g.id]?.status === 'pending');
+  // Derive proactive actions & real-data insights using product intelligence layer
+  const proactiveActions = deriveProactiveActions({
+    user,
+    userGroups,
+    settlements,
+    allExpenses,
+    getBalancesForGroup,
+    getUserById,
+  });
+
+  const financialInsights = deriveFinancialInsights({
+    userGroups,
+    allExpenses,
+  });
 
   // Compute aggregated per-member breakdown across all user groups
   const memberDuesMap = {};
@@ -223,34 +238,71 @@ export default function Home() {
         )}
       </div>
 
-      {/* Tier 2: Contextual Attention Area (Action Required Cards) */}
-      {pendingSettlementGroup && (
-        <div
-          className="card page-section flex items-center justify-between"
-          style={{
-            padding: '14px 16px',
-            background: 'rgba(255, 165, 2, 0.10)',
-            border: '1px solid var(--warning)',
-            cursor: 'pointer',
-          }}
-          onClick={() => {
-            selectGroup(pendingSettlementGroup.id);
-            navigate(`/settle/${pendingSettlementGroup.id}`);
-          }}
-          id="pending-settlement-banner"
-        >
-          <div className="flex items-center gap-12">
-            <Clock size={20} style={{ color: 'var(--warning)' }} />
-            <div>
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                Settlement in Progress
-              </h4>
-              <p className="text-secondary text-xs" style={{ margin: 0 }}>
-                "{pendingSettlementGroup.name}" has an active settlement pending confirmations
-              </p>
+      {/* Tier 2: Proactive Action Center (Contextual Prioritized Actions) */}
+      {proactiveActions.length > 0 && (
+        <div className="flex flex-col gap-10 page-section" id="proactive-action-center">
+          {proactiveActions.slice(0, 2).map((action) => (
+            <div
+              key={action.id}
+              className="card flex items-center justify-between card-hover"
+              style={{
+                padding: '14px 16px',
+                background: 'var(--bg-card-alt)',
+                border: '1px solid var(--border-color)',
+                cursor: 'pointer',
+              }}
+              onClick={() => navigate(action.targetRoute)}
+              id={`action-item-${action.id}`}
+            >
+              <div className="flex items-center gap-12">
+                <div
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: action.badgeColor ? `${action.badgeColor}20` : 'var(--bg-card)',
+                    color: action.badgeColor || 'var(--accent)',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {action.badge}
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '0.88rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    {action.title}
+                  </h4>
+                  <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>
+                    {action.subtitle}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-accent text-xs fw-700" style={{ whiteSpace: 'nowrap', paddingLeft: '8px' }}>
+                <span>{action.ctaLabel}</span>
+                <ArrowUpRight size={16} />
+              </div>
             </div>
+          ))}
+        </div>
+      )}
+
+      {/* Financial Activity Insights (Real Data Only) */}
+      {financialInsights.length > 0 && (
+        <div className="card page-section" style={{ padding: '12px 16px', background: 'var(--bg-card-alt)' }} id="financial-insights-card">
+          <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            Spending Insights
+          </p>
+          <div className="flex flex-col gap-6">
+            {financialInsights.map((insight) => (
+              <div key={insight.id} className="flex items-center gap-8 text-xs">
+                <span>{insight.icon}</span>
+                <span className="text-primary fw-600">{insight.title}:</span>
+                <span className="text-secondary">{insight.text}</span>
+              </div>
+            ))}
           </div>
-          <ArrowUpRight size={18} style={{ color: 'var(--warning)' }} />
         </div>
       )}
 
@@ -282,6 +334,9 @@ export default function Home() {
         ) : (
           userGroups.map((group) => {
             const balances = getBalancesForGroup(group.id);
+            const groupExpenses = allExpenses.filter((e) => e.groupId === group.id);
+            const healthSignal = deriveGroupHealthSignal(group, groupExpenses, settlements[group.id]);
+
             const myBalance = user ? balances[user.id] || 0 : 0;
             const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
             const statusText = myBalance > 0
@@ -302,7 +357,21 @@ export default function Home() {
               >
                 <div className="group-card-icon">{group.icon || '🏠'}</div>
                 <div className="group-card-info">
-                  <h3>{group.name}</h3>
+                  <div className="flex items-center gap-6">
+                    <h3>{group.name}</h3>
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        color: healthSignal.color,
+                        background: healthSignal.badgeBg,
+                        padding: '2px 6px',
+                        borderRadius: 'var(--radius-sm)',
+                      }}
+                    >
+                      {healthSignal.label}
+                    </span>
+                  </div>
                   <p>{group.memberIds.length} members</p>
                 </div>
                 <div className="group-card-balance" style={{ textAlign: 'right' }}>
