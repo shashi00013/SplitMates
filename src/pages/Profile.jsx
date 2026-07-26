@@ -29,9 +29,6 @@ export default function Profile() {
   const {
     user,
     setUser,
-    getUserGroups,
-    getAllExpensesForUser,
-    getSettlementHistory,
     getTotalBalances,
     logout,
     showToast,
@@ -43,11 +40,7 @@ export default function Profile() {
   const { language, setLanguage, t, languages } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
 
-  const userGroups = getUserGroups();
-  const totalExpenses = getAllExpensesForUser().length;
-  const userSettlements = getSettlementHistory();
-  const totalSettlements = userSettlements.length;
-  const { totalOwed, totalOwe, totalBalance = 0 } = getTotalBalances();
+  const { totalBalance = 0 } = getTotalBalances();
 
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -99,14 +92,17 @@ export default function Profile() {
     };
     setUser(updatedUser);
     setShowEditModal(false);
-    showToast('Profile updated successfully!');
+    showToast('Profile updated!');
   }
 
   return (
     <div className="page" id="profile-page">
-      <div className="page-header">
-        <div className="spacer" />
-        <h1>{t('profile')}</h1>
+      {/* 1. Header (Minimal) */}
+      <div className="page-header flex items-center justify-between" style={{ paddingBottom: '12px' }}>
+        <div style={{ width: '42px' }} />
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {t('profile')}
+        </h1>
         <button
           className="btn-icon"
           id="edit-profile-btn"
@@ -117,8 +113,8 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* Profile Header */}
-      <div className="profile-header" style={{ marginBottom: '24px', paddingTop: '8px' }}>
+      {/* 2. User Identity Header */}
+      <div className="flex flex-col items-center text-center page-section" style={{ paddingTop: '8px' }}>
         <div
           style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }}
           onClick={handleOpenEditModal}
@@ -145,181 +141,142 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="text-center" style={{ marginTop: '10px' }}>
-          <h2 style={{ fontSize: '1.35rem', letterSpacing: '-0.01em', marginBottom: '4px', color: 'var(--text-primary)' }}>
-            {user?.name}
-          </h2>
-          <p className="text-secondary text-sm">{user?.email}</p>
-        </div>
+        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.01em', marginTop: '12px', marginBottom: '2px', color: 'var(--text-primary)' }}>
+          {user?.name}
+        </h2>
+        <p className="text-secondary text-sm">{user?.email}</p>
       </div>
 
-      {/* Unified Net Balance Summary Card */}
+      {/* 3. One Unified Net Balance Card (Matching Home Screen) */}
       <div
-        className="card card-glow text-center"
-        style={{ marginBottom: '20px', padding: '18px 20px', cursor: 'pointer' }}
+        className="card card-glow text-center page-section card-hover"
+        style={{ padding: '20px', cursor: 'pointer' }}
         onClick={() => navigate('/')}
         id="profile-net-balance-card"
       >
-        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
           {t('netBalance')}
         </p>
-        <p className="text-2xl financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
+        <p className="financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
           {formatCurrency(Math.abs(totalBalance))}
         </p>
         {totalBalance > 0 ? (
-          <p className="text-accent text-xs fw-600" style={{ marginTop: '4px' }}>
+          <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
             ↑ {t('youGet')} {formatCurrency(Math.abs(totalBalance))}
           </p>
         ) : totalBalance < 0 ? (
-          <p className="text-negative text-xs fw-600" style={{ marginTop: '4px' }}>
+          <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
             ↓ {t('youPay')} {formatCurrency(Math.abs(totalBalance))}
           </p>
         ) : (
-          <p className="text-secondary text-xs fw-600" style={{ marginTop: '4px' }}>
+          <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
             All settled up 🎉
           </p>
         )}
       </div>
 
-      {/* 4-Column Side-by-Side Stats Row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '8px',
-          marginBottom: '24px',
-        }}
-        id="profile-4col-stats"
-      >
-        <div
-          className="card"
-          onClick={() => navigate('/groups')}
-          style={{ cursor: 'pointer', padding: '12px 6px', textAlign: 'center' }}
-          id="stat-card-groups"
-        >
-          <p className="text-accent fw-800" style={{ fontSize: '1.15rem', marginBottom: '2px' }}>
-            {userGroups.length}
-          </p>
-          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
-            Groups
-          </p>
-        </div>
-
-        <div
-          className="card"
-          onClick={() => navigate('/expenses')}
-          style={{ cursor: 'pointer', padding: '12px 6px', textAlign: 'center' }}
-          id="stat-card-expenses"
-        >
-          <p className="text-accent fw-800" style={{ fontSize: '1.15rem', marginBottom: '2px' }}>
-            {totalExpenses}
-          </p>
-          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
-            Expenses
-          </p>
-        </div>
-
-        <div
-          className="card"
-          onClick={() => navigate('/history')}
-          style={{ cursor: 'pointer', padding: '12px 6px', textAlign: 'center' }}
-          id="stat-card-settled"
-        >
-          <p className="text-accent fw-800" style={{ fontSize: '1.15rem', marginBottom: '2px' }}>
-            {totalSettlements}
-          </p>
-          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
-            Settled
-          </p>
-        </div>
-
-        <div
-          className="card"
-          style={{ padding: '12px 6px', textAlign: 'center' }}
-          id="stat-card-total"
-        >
-          <p
-            className={totalBalance > 0 ? 'text-accent fw-800' : totalBalance < 0 ? 'text-negative fw-800' : 'text-secondary fw-800'}
-            style={{ fontSize: '0.95rem', marginBottom: '2px', whiteSpace: 'nowrap' }}
+      {/* 4. Clean Single-Tap Settings List */}
+      <div className="page-section">
+        <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
+          Settings & Preferences
+        </p>
+        <div className="card" style={{ padding: '0 16px' }} id="preferences-menu">
+          {/* Appearance / Theme */}
+          <div
+            className="flex justify-between items-center"
+            style={{ padding: '14px 0', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
+            onClick={() => setShowThemeModal(true)}
+            id="menu-theme"
           >
-            {formatCurrency(totalBalance)}
-          </p>
-          <p className="text-secondary text-xs fw-600" style={{ fontSize: '0.72rem' }}>
-            Net Balance
-          </p>
+            <div className="flex items-center gap-12">
+              <div style={{ color: 'var(--accent)' }}>
+                {themeMode === 'light' ? <Sun size={20} /> : themeMode === 'dark' ? <Moon size={20} /> : <Monitor size={20} />}
+              </div>
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Appearance</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className="text-secondary text-xs fw-600" style={{ textTransform: 'capitalize' }}>
+                {themeMode === 'system' ? 'System' : `${themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}`}
+              </span>
+              <ChevronRight size={16} className="text-secondary" />
+            </div>
+          </div>
+
+          {/* Language */}
+          <div
+            className="flex justify-between items-center"
+            style={{ padding: '14px 0', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
+            onClick={() => setShowLanguageModal(true)}
+            id="menu-language"
+          >
+            <div className="flex items-center gap-12">
+              <Globe size={20} style={{ color: 'var(--accent)' }} />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Language</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className="text-secondary text-xs fw-600">
+                {languages.find((l) => l.code === language)?.nativeLabel}
+              </span>
+              <ChevronRight size={16} className="text-secondary" />
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div
+            className="flex justify-between items-center"
+            style={{ padding: '14px 0', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
+            onClick={() => setShowNotificationsModal(true)}
+            id="menu-notifications"
+          >
+            <div className="flex items-center gap-12">
+              <Bell size={20} style={{ color: 'var(--accent)' }} />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</span>
+            </div>
+            <div className="flex items-center gap-6">
+              {unreadCount > 0 && (
+                <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFFFFF', padding: '2px 8px', borderRadius: '10px' }}>
+                  {unreadCount} new
+                </span>
+              )}
+              <ChevronRight size={16} className="text-secondary" />
+            </div>
+          </div>
+
+          {/* History */}
+          <div
+            className="flex justify-between items-center"
+            style={{ padding: '14px 0', cursor: 'pointer' }}
+            onClick={() => navigate('/history')}
+            id="menu-history"
+          >
+            <div className="flex items-center gap-12">
+              <HistoryIcon size={20} style={{ color: 'var(--accent)' }} />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Settlement History</span>
+            </div>
+            <ChevronRight size={16} className="text-secondary" />
+          </div>
         </div>
       </div>
 
-      {/* Settings Sections */}
-      <div style={{ marginBottom: '24px' }}>
-        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
-          Preferences
-        </p>
-        <div className="menu-list" style={{ marginBottom: '20px' }} id="preferences-menu">
-          <button className="menu-item" id="menu-language" onClick={() => setShowLanguageModal(true)}>
-            <Globe size={20} style={{ color: 'var(--accent)' }} />
-            <span className="menu-label">{t('language')}</span>
-            <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)' }}>
-              {languages.find((l) => l.code === language)?.nativeLabel}
-            </span>
-            <ChevronRight size={16} className="menu-chevron" />
-          </button>
-
-          <button className="menu-item" id="menu-theme" onClick={() => setShowThemeModal(true)}>
-            {themeMode === 'light' ? <Sun size={20} style={{ color: 'var(--accent)' }} /> : themeMode === 'dark' ? <Moon size={20} style={{ color: 'var(--accent)' }} /> : <Monitor size={20} style={{ color: 'var(--accent)' }} />}
-            <span className="menu-label">App Theme</span>
-            <span className="text-secondary text-sm" style={{ fontWeight: 600, color: 'var(--accent)', textTransform: 'capitalize' }}>
-              {themeMode === 'system' ? 'System' : `${themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}`}
-            </span>
-            <ChevronRight size={16} className="menu-chevron" />
-          </button>
-
-          <button className="menu-item" id="menu-notifications" onClick={() => setShowNotificationsModal(true)}>
-            <Bell size={20} />
-            <span className="menu-label">{t('notifications')}</span>
-            {unreadCount > 0 && (
-              <span className="text-xs fw-700" style={{ background: 'var(--negative)', color: '#FFFFFF', padding: '2px 8px', borderRadius: '10px' }}>
-                {unreadCount} new
-              </span>
-            )}
-            <ChevronRight size={16} className="menu-chevron" />
-          </button>
-
-          <button className="menu-item" id="menu-history" onClick={() => navigate('/history')}>
-            <HistoryIcon size={20} />
-            <span className="menu-label">{t('history')}</span>
-            <ChevronRight size={16} className="menu-chevron" />
-          </button>
-        </div>
-
-        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
-          Account
-        </p>
-        <div className="menu-list" style={{ marginBottom: '20px' }} id="account-menu">
-          <button className="menu-item" id="menu-edit-profile" onClick={handleOpenEditModal}>
-            <Edit3 size={20} style={{ color: 'var(--accent)' }} />
-            <span className="menu-label">{t('edit')} {t('profile')}</span>
-            <ChevronRight size={16} className="menu-chevron" />
-          </button>
-        </div>
-
+      {/* 5. Logout Action */}
+      <div style={{ marginTop: '8px' }}>
         <button
-          className="btn btn-danger-text btn-full"
+          className="btn btn-secondary btn-full"
           id="logout-btn"
           onClick={logout}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}
+          style={{ color: 'var(--negative)', fontWeight: 700, minHeight: '46px' }}
         >
-          <LogOut size={17} /> {t('logOut')}
+          <LogOut size={16} /> {t('logOut')}
         </button>
       </div>
 
       {/* Language Selector Modal */}
       {showLanguageModal && (
         <div className="modal-overlay" onClick={() => setShowLanguageModal(false)} id="language-modal-overlay">
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
-            <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('selectLanguage')}</h2>
-              <button className="btn-icon" onClick={() => setShowLanguageModal(false)} style={{ color: 'var(--text-secondary)' }}>
+          <div className="modal-content flex flex-col gap-16" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '380px' }}>
+            <div className="flex justify-between items-center">
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>Select Language</h2>
+              <button className="btn-icon" onClick={() => setShowLanguageModal(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
@@ -340,9 +297,9 @@ export default function Profile() {
                     style={{
                       padding: '14px 16px',
                       background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
-                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-light)',
+                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-color)',
                       cursor: 'pointer',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--radius-md)',
                     }}
                     id={`lang-option-${lang.code}`}
                   >
@@ -362,10 +319,10 @@ export default function Profile() {
       {/* Theme Selector Modal */}
       {showThemeModal && (
         <div className="modal-overlay" onClick={() => setShowThemeModal(false)} id="theme-modal-overlay">
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px', maxWidth: '380px' }}>
-            <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Select App Theme</h2>
-              <button className="btn-icon" onClick={() => setShowThemeModal(false)} style={{ color: 'var(--text-secondary)' }}>
+          <div className="modal-content flex flex-col gap-16" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '380px' }}>
+            <div className="flex justify-between items-center">
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>App Theme</h2>
+              <button className="btn-icon" onClick={() => setShowThemeModal(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
@@ -374,7 +331,7 @@ export default function Profile() {
               {[
                 { code: 'light', label: 'Light Mode', sub: 'Bright, clean layout', icon: <Sun size={18} /> },
                 { code: 'dark', label: 'Dark Mode', sub: 'Sleek, low-light theme', icon: <Moon size={18} /> },
-                { code: 'system', label: 'System Default', sub: 'Matches your OS preference', icon: <Monitor size={18} /> },
+                { code: 'system', label: 'System Default', sub: 'Matches OS preference', icon: <Monitor size={18} /> },
               ].map((tOption) => {
                 const isSelected = themeMode === tOption.code;
                 return (
@@ -390,9 +347,9 @@ export default function Profile() {
                     style={{
                       padding: '14px 16px',
                       background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
-                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-light)',
+                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-color)',
                       cursor: 'pointer',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--radius-md)',
                     }}
                     id={`theme-option-${tOption.code}`}
                   >
@@ -414,17 +371,17 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Edit Profile & Avatar Selection Modal */}
+      {/* Edit Profile Modal */}
       {showEditModal && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)} id="edit-profile-modal-overlay">
           <div
-            className="modal-content"
+            className="modal-content flex flex-col gap-16"
             onClick={(e) => e.stopPropagation()}
-            style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '400px', width: '92%' }}
+            style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '400px' }}
           >
-            <div className="flex justify-between items-center" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('edit')} {t('profile')}</h2>
-              <button className="btn-icon" onClick={() => setShowEditModal(false)} style={{ color: 'var(--text-secondary)' }}>
+            <div className="flex justify-between items-center">
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>Edit Profile</h2>
+              <button className="btn-icon" onClick={() => setShowEditModal(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
@@ -438,116 +395,79 @@ export default function Profile() {
               id="avatar-file-input"
             />
 
-            <div className="flex flex-col gap-16">
-              {/* Current Avatar Preview & Upload Action */}
-              <div className="flex flex-col items-center gap-10">
-                <div style={{ position: 'relative' }}>
-                  <Avatar user={{ ...user, avatar: draftAvatar }} size="xl" />
-                </div>
+            <div className="flex flex-col items-center gap-10">
+              <Avatar user={{ ...user, avatar: draftAvatar }} size="xl" />
+              <button
+                type="button"
+                className="btn btn-outline text-xs"
+                onClick={() => fileInputRef.current?.click()}
+                style={{ borderRadius: 'var(--radius-full)', borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 600 }}
+                id="upload-photo-btn"
+              >
+                <Upload size={14} /> Upload Custom Photo
+              </button>
+            </div>
 
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    fontSize: '0.8rem',
-                    padding: '6px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    borderRadius: '20px',
-                    borderColor: 'var(--accent)',
-                    color: 'var(--accent)',
-                    fontWeight: 600,
-                  }}
-                  id="upload-photo-btn"
-                >
-                  <Upload size={14} /> Upload Custom Photo
-                </button>
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
+              <p className="text-secondary text-xs fw-700" style={{ marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Character Avatar
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
+                {PRESET_CHARACTERS.map((char) => {
+                  const isSelected = draftAvatar === char;
+                  return (
+                    <button
+                      key={char}
+                      type="button"
+                      onClick={() => setDraftAvatar(char)}
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        fontSize: '1.3rem',
+                        background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
+                        border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border-color)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      id={`avatar-char-${char}`}
+                    >
+                      {char}
+                    </button>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Character Avatar Presets Grid */}
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
-                <p className="text-secondary text-xs fw-600" style={{ marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Or Choose a Character Avatar
-                </p>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(5, 1fr)',
-                    gap: '10px',
-                  }}
-                >
-                  {PRESET_CHARACTERS.map((char) => {
-                    const isSelected = draftAvatar === char;
-                    return (
-                      <button
-                        key={char}
-                        type="button"
-                        onClick={() => setDraftAvatar(char)}
-                        style={{
-                          width: '46px',
-                          height: '46px',
-                          borderRadius: '50%',
-                          fontSize: '1.4rem',
-                          background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
-                          border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border-light)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.2s ease',
-                        }}
-                        id={`avatar-char-${char}`}
-                      >
-                        {char}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="input-group">
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Your Name</label>
+              <input
+                className="input"
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                placeholder="Enter your name"
+                id="edit-profile-name-input"
+              />
+            </div>
 
-              {/* Name Field */}
-              <div className="input-group">
-                <label style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600 }}>Your Name</label>
-                <input
-                  className="input"
-                  value={draftName}
-                  onChange={(e) => setDraftName(e.target.value)}
-                  placeholder="Enter your name"
-                  style={{ background: 'var(--bg-input)', border: '1px solid var(--border-light)', color: 'var(--text-primary)' }}
-                  id="edit-profile-name-input"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-10" style={{ marginTop: '4px' }}>
-                {draftAvatar && (
-                  <button
-                    type="button"
-                    className="btn btn-outline"
-                    onClick={() => setDraftAvatar(null)}
-                    style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-secondary)', borderColor: 'var(--border-light)' }}
-                  >
-                    Reset Initial
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSaveProfile}
-                  style={{ flex: 2, fontWeight: 700 }}
-                  id="save-profile-btn"
-                >
-                  Save Profile
-                </button>
-              </div>
+            <div className="flex gap-10">
+              <button
+                type="button"
+                className="btn btn-primary btn-full"
+                onClick={handleSaveProfile}
+                style={{ fontWeight: 800 }}
+                id="save-profile-btn"
+              >
+                Save Profile
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Real Working Notifications Modal */}
+      {/* Notifications Modal */}
       <NotificationsModal
         isOpen={showNotificationsModal}
         onClose={() => setShowNotificationsModal(false)}

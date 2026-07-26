@@ -9,7 +9,7 @@ import Avatar from './Avatar';
 export default function ExpenseDetailsModal({ expense, onClose }) {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { user, deleteExpense, getGroupMembers, getUserById, showToast } = useApp();
+  const { user, deleteExpense, getGroupMembers, getUserById, groups, showToast } = useApp();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -18,6 +18,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
   const payer = getUserById(expense.paidBy);
   const participants = expense.participants || expense.splitAmong || [];
   const members = getGroupMembers(expense.groupId);
+  const group = groups.find((g) => g.id === expense.groupId);
 
   function handleEdit() {
     onClose();
@@ -29,6 +30,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
     setIsDeleting(true);
     try {
       await deleteExpense(expense.id);
+      showToast('Expense deleted');
       onClose();
     } catch (err) {
       showToast(err.message || 'Failed to delete expense');
@@ -37,164 +39,175 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
     }
   }
 
+  const isPayer = expense.paidBy === user?.id;
+  const isParticipant = participants.includes(user?.id);
+  const userShare = expense.shares?.[user?.id] || (isParticipant ? (expense.amount / (participants.length || 1)) : 0);
+  const receivableAmount = isPayer ? Math.max(0, expense.amount - userShare) : 0;
+  const impactClass = isPayer ? (receivableAmount > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
+  const impactText = isPayer
+    ? (receivableAmount > 0 ? `Others owe you ${formatCurrency(receivableAmount)}` : 'All settled')
+    : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved');
+
   return (
     <div className="modal-overlay" onClick={onClose} id="expense-details-overlay">
       <div
-        className="modal-content"
+        className="modal-content flex flex-col gap-16"
         onClick={(e) => e.stopPropagation()}
         id="expense-details-content"
-        style={{ background: 'var(--bg-card)', borderRadius: '20px', padding: '24px' }}
+        style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '400px' }}
       >
-        <div className="modal-drag-handle" />
-
         {!showConfirmDelete ? (
           <>
-            {/* Header */}
-            <div className="flex justify-between items-center" style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Expense Details</h2>
-              <button className="btn-icon" onClick={onClose} id="close-details-btn" style={{ color: 'var(--text-secondary)' }}>
+            {/* Header & Close */}
+            <div className="flex justify-between items-center">
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                Expense Details
+              </h2>
+              <button className="btn-icon" onClick={onClose} id="close-details-btn" aria-label="Close details">
                 <X size={18} />
               </button>
             </div>
 
-            {/* Expense Hero */}
-            <div style={{ display: 'flex', flexDirection: 'column', items: 'center', marginBottom: '20px', textAlign: 'center' }}>
-              <div className="expense-hero-icon-large" style={{ fontSize: '3rem', margin: '0 auto 8px' }}>{expense.emoji}</div>
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 700, marginTop: '8px', marginBottom: '4px', color: 'var(--text-primary)' }}>
+            {/* Emoji & Title Header */}
+            <div className="flex flex-col items-center text-center" style={{ padding: '8px 0' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '8px' }}>{expense.emoji || '💰'}</div>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                 {expense.title}
               </h3>
-              <p className="text-secondary text-xs fw-600" style={{ marginBottom: '4px' }}>{t('totalExpense')}</p>
-              <p className="text-3xl text-accent fw-700">{formatCurrency(expense.amount)}</p>
-              <div className="flex items-center justify-center gap-6 text-secondary text-xs" style={{ marginTop: '8px' }}>
-                <Calendar size={14} />
-                <span>{formatDate(expense.date)}</span>
+              <p className="text-secondary text-xs fw-600" style={{ marginTop: '4px' }}>
+                {group?.name || 'Group'} · {formatDate(expense.date)}
+              </p>
+            </div>
+
+            {/* Total Expense Hero Card */}
+            <div className="card text-center" style={{ padding: '16px', background: 'var(--bg-card-alt)' }}>
+              <span className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                TOTAL EXPENSE
+              </span>
+              <p className="financial-hero-amount" style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
+                {formatCurrency(expense.amount)}
+              </p>
+            </div>
+
+            {/* Financial Impact Banner */}
+            <div
+              className="card"
+              style={{
+                padding: '14px 16px',
+                background: isPayer ? 'var(--accent-dim)' : userShare > 0 ? 'rgba(255, 71, 87, 0.10)' : 'var(--bg-input)',
+                border: isPayer ? '1px solid var(--accent)' : userShare > 0 ? '1px solid var(--negative)' : '1px solid var(--border-color)',
+              }}
+              id="expense-impact-banner"
+            >
+              <div className="flex justify-between items-center" style={{ marginBottom: '6px' }}>
+                <span className="text-secondary text-xs fw-600">Your share</span>
+                <span className="fw-700 text-sm" style={{ color: 'var(--text-primary)' }}>
+                  {formatCurrency(userShare)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-secondary text-xs fw-600">Financial Impact</span>
+                <span className={`fw-800 text-sm ${impactClass}`}>
+                  {impactText}
+                </span>
               </div>
             </div>
 
-            {/* User Financial Impact Summary Card */}
-            {(() => {
-              const isPayer = expense.paidBy === user?.id;
-              const isParticipant = participants.includes(user?.id);
-              const userShare = expense.shares?.[user?.id] || (isParticipant ? (expense.amount / (participants.length || 1)) : 0);
-              const receivableAmount = isPayer ? Math.max(0, expense.amount - userShare) : 0;
-              return (
-                <div
-                  style={{
-                    background: isPayer ? 'var(--accent-dim)' : userShare > 0 ? 'rgba(255, 71, 87, 0.10)' : 'var(--bg-input)',
-                    border: isPayer ? '1px solid var(--accent)' : userShare > 0 ? '1px solid var(--negative)' : '1px solid var(--border-light)',
-                    borderRadius: '16px',
-                    padding: '12px 16px',
-                    marginBottom: '20px',
-                  }}
-                  id="expense-impact-banner"
-                >
-                  <div className="flex justify-between items-center" style={{ marginBottom: '6px' }}>
-                    <span className="text-secondary text-xs fw-600">{t('yourShare')}</span>
-                    <span className="fw-700 text-sm" style={{ color: 'var(--text-primary)' }}>{formatCurrency(userShare)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-secondary text-xs fw-600">Balance Impact</span>
-                    <span className={`fw-800 text-sm ${isPayer ? 'text-accent' : userShare > 0 ? 'text-negative' : 'text-secondary'}`}>
-                      {isPayer
-                        ? (receivableAmount > 0 ? `Others owe you ${formatCurrency(receivableAmount)}` : 'All settled')
-                        : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved')}
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Payer Card */}
-            <div className="input-group" style={{ marginBottom: '20px' }}>
-              <label style={{ color: 'var(--text-secondary)' }}>{t('paidBy')}</label>
-              <div className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-input)' }}>
+            {/* Paid By */}
+            <div className="input-group">
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Paid by
+              </label>
+              <div className="flex items-center gap-10" style={{ padding: '10px 12px', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <Avatar user={payer} size="sm" />
-                <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-                    {expense.paidBy === user?.id ? 'You' : payer?.name || payer?.firstName || 'Unknown'}
-                  </h4>
-                  <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>
-                    Paid total {formatCurrency(expense.amount)}
-                  </p>
-                </div>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {expense.paidBy === user?.id ? 'You' : payer?.firstName || payer?.name || 'Member'}
+                </span>
               </div>
             </div>
 
             {/* Split Breakdown */}
-            <div className="input-group" style={{ marginBottom: '28px' }}>
-              <label style={{ color: 'var(--text-secondary)' }}>{t('splitWith')} ({participants.length} {t('peopleInGroup')})</label>
-              <div className="card" style={{ padding: '0 16px', maxHeight: '180px', overflowY: 'auto', background: 'var(--bg-input)' }}>
+            <div className="input-group">
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Split with ({participants.length})
+              </label>
+              <div className="card" style={{ padding: '0 14px', maxHeight: '160px', overflowY: 'auto' }}>
                 {participants.map((pid) => {
                   const m = members.find((u) => u.id === pid) || getUserById(pid);
-                  const share = expense.shares?.[pid] || (expense.amount / participants.length);
+                  const share = expense.shares?.[pid] || (expense.amount / (participants.length || 1));
+                  const isMe = pid === user?.id;
+
                   return (
-                    <div key={pid} className="member-row" style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
-                      <Avatar user={m} size="sm" />
-                      <div className="member-info" style={{ flex: 1 }}>
-                        <h4 style={{ fontSize: '0.88rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                          {pid === user?.id ? 'You' : m?.name || m?.firstName || 'Member'}
-                        </h4>
+                    <div key={pid} className="flex justify-between items-center" style={{ padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
+                      <div className="flex items-center gap-8">
+                        <Avatar user={m} size="sm" />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {isMe ? 'You' : m?.firstName || m?.name || 'Member'}
+                        </span>
                       </div>
-                      <p className="fw-600 text-sm text-accent">{formatCurrency(share)}</p>
+                      <span className="fw-700 text-xs text-accent">
+                        {formatCurrency(share)}
+                      </span>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-12" style={{ marginTop: 'auto' }}>
+            {/* Contextual Actions (Edit / Delete) */}
+            <div className="flex gap-10" style={{ marginTop: '4px' }}>
               <button
-                className="btn btn-secondary flex-1"
+                className="btn btn-secondary flex-1 text-xs"
                 onClick={() => setShowConfirmDelete(true)}
                 id="delete-expense-action"
-                style={{ display: 'flex', itemsCenter: 'center', justifyContent: 'center', gap: '8px', color: 'var(--negative)' }}
+                style={{ color: 'var(--negative)' }}
               >
-                <Trash2 size={16} /> {t('delete')}
+                <Trash2 size={14} /> {t('delete')}
               </button>
               <button
-                className="btn btn-primary flex-1"
+                className="btn btn-primary flex-1 text-xs fw-700"
                 onClick={handleEdit}
                 id="edit-expense-action"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 700 }}
               >
-                <Edit3 size={16} /> {t('edit')}
+                <Edit3 size={14} /> {t('edit')}
               </button>
             </div>
           </>
         ) : (
           /* Confirm Delete View */
-          <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
+          <div className="text-center" style={{ padding: '12px 0' }}>
             <div
               style={{
-                width: '64px',
-                height: '64px',
+                width: '56px',
+                height: '56px',
                 borderRadius: '50%',
-                background: 'rgba(255, 71, 87, 0.1)',
+                background: 'rgba(255, 71, 87, 0.12)',
+                color: 'var(--negative)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 20px',
-                color: 'var(--negative)',
+                margin: '0 auto 16px',
               }}
             >
-              <ShieldAlert size={32} />
+              <ShieldAlert size={28} />
             </div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>{t('delete')} Expense?</h2>
-            <p className="text-secondary text-sm" style={{ lineHeight: 1.5, maxWidth: '280px', margin: '0 auto 24px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
+              Delete Expense?
+            </h3>
+            <p className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: '20px' }}>
               Are you sure you want to delete <strong>"{expense.title}"</strong> of{' '}
-              <strong className="text-accent">{formatCurrency(expense.amount)}</strong>? This action cannot be undone.
+              <strong className="text-accent">{formatCurrency(expense.amount)}</strong>? This cannot be undone.
             </p>
 
             <div className="flex flex-col gap-10">
               <button
-                className="btn btn-danger btn-full"
+                className="btn btn-primary btn-full"
                 onClick={handleDelete}
                 id="confirm-delete-btn"
                 disabled={isDeleting}
-                style={{ opacity: isDeleting ? 0.55 : 1, background: 'var(--negative)', color: '#FFF', fontWeight: 700 }}
+                style={{ background: 'var(--negative)', borderColor: 'var(--negative)', minHeight: '44px', fontWeight: 700 }}
               >
-                {isDeleting ? t('loading') : t('delete')}
+                {isDeleting ? 'Deleting...' : 'Delete Expense'}
               </button>
               <button
                 className="btn btn-secondary btn-full"

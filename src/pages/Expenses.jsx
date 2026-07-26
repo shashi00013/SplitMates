@@ -1,93 +1,90 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, SlidersHorizontal } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
-import MiniChart from '../components/MiniChart';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 
 export default function Expenses() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { user, getAllExpensesForUser, groups, getUserById, isLoading, showToast } = useApp();
+  const { user, getAllExpensesForUser, groups, getUserById, isLoading } = useApp();
   const [filter, setFilter] = useState('all');
   const [activeExpense, setActiveExpense] = useState(null);
 
   const allExpenses = getAllExpensesForUser();
 
-  const now = new Date();
   const filtered = allExpenses.filter((exp) => {
     if (filter === 'all') return true;
     if (filter === 'current') return !exp.settled;
     if (filter === 'historical') return exp.settled;
-    const d = new Date(exp.date);
-    if (filter === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     return true;
   });
 
-  const totalExpenses = filtered.reduce((sum, e) => sum + e.amount, 0);
-
-  function cycleFilter() {
-    const filters = ['all', 'current', 'historical', 'month'];
-    const nextIdx = (filters.indexOf(filter) + 1) % filters.length;
-    setFilter(filters[nextIdx]);
-    showToast(`Filter: ${filters[nextIdx]}`);
-  }
-
   return (
     <div className="page" id="expenses-page">
-      <div className="page-header">
-        <button className="btn-icon" onClick={() => navigate('/')} id="expenses-back-btn">
+      {/* 1. Header (Minimal, no duplicate Add Expense button) */}
+      <div className="page-header flex items-center justify-between" style={{ paddingBottom: '12px' }}>
+        <button className="btn-icon" onClick={() => navigate('/')} id="expenses-back-btn" aria-label="Go back">
           <ChevronLeft size={20} />
         </button>
-        <h1>{t('expenses')}</h1>
-        <div className="spacer" />
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {t('expenses')}
+        </h1>
+        <div style={{ width: '42px' }} />
       </div>
 
-      {/* Filter Tabs */}
-      <div className="filter-tabs" style={{ marginBottom: '20px' }} id="expense-filters">
+      {/* 2. Compact Segmented Filter Control */}
+      <div
+        className="flex gap-4"
+        style={{
+          background: 'var(--bg-card-alt)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-md)',
+          padding: '4px',
+          marginBottom: '20px',
+        }}
+        id="expense-filters"
+      >
         {[
           { key: 'all', label: 'All' },
           { key: 'current', label: t('currentPeriod') },
           { key: 'historical', label: t('history') },
-        ].map((f) => (
-          <button
-            key={f.key}
-            className={`filter-tab ${filter === f.key ? 'active' : ''}`}
-            onClick={() => setFilter(f.key)}
-            id={`expense-filter-${f.key}`}
-          >
-            {f.label}
-          </button>
-        ))}
+        ].map((f) => {
+          const isActive = filter === f.key;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              className={`flex-1 text-xs fw-700`}
+              onClick={() => setFilter(f.key)}
+              id={`expense-filter-${f.key}`}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                background: isActive ? 'var(--bg-card)' : 'transparent',
+                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                boxShadow: isActive ? 'var(--shadow-card)' : 'none',
+                cursor: 'pointer',
+                transition: 'var(--transition)',
+              }}
+            >
+              {f.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Total Summary Card */}
-      <div className="card card-glow" style={{ marginBottom: '20px', padding: '18px 20px' }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-              Total Expenses
-            </p>
-            <p className="text-2xl" style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
-              {formatCurrency(totalExpenses)}
-            </p>
-            <p className="text-secondary text-xs" style={{ marginTop: '4px' }}>
-              {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Expense List */}
+      {/* 3. Expense List (Single-tap clickable surfaces) */}
       {isLoading ? (
         <div className="card text-center" style={{ padding: '40px 20px' }}>
-          <p className="text-secondary">{t('loading')}</p>
+          <p className="text-secondary text-sm">{t('loading')}</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="card text-center" style={{ padding: '40px 20px' }}>
-          <p style={{ fontSize: '2rem', marginBottom: '12px' }}>📭</p>
+          <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</p>
           <p className="text-secondary text-sm" style={{ fontWeight: 600 }}>
             {filter === 'all'
               ? 'No expenses yet'
@@ -97,15 +94,15 @@ export default function Expenses() {
           </p>
         </div>
       ) : (
-        <div className="card" style={{ padding: '0 16px' }}>
+        <div className="card" style={{ padding: '0 16px', marginBottom: '24px' }}>
           {filtered.map((exp) => {
             const payer = getUserById(exp.paidBy);
             const group = groups.find((g) => g.id === exp.groupId);
-            const paidByLabel = exp.paidBy === user.id ? 'You' : payer?.firstName || 'Member';
+            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Member';
             const participants = exp.participants || exp.splitAmong || [];
-            const isPayer = exp.paidBy === user.id;
-            const isParticipant = participants.includes(user.id);
-            const userShare = exp.shares?.[user.id] || (isParticipant ? (exp.amount / (participants.length || 1)) : 0);
+            const isPayer = exp.paidBy === user?.id;
+            const isParticipant = participants.includes(user?.id);
+            const userShare = exp.shares?.[user?.id] || (isParticipant ? (exp.amount / (participants.length || 1)) : 0);
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
@@ -120,10 +117,10 @@ export default function Expenses() {
                 onClick={() => setActiveExpense(exp)}
                 style={{ cursor: 'pointer' }}
               >
-                <div className="expense-icon">{exp.emoji}</div>
+                <div className="expense-icon">{exp.emoji || '💰'}</div>
                 <div className="expense-info">
                   <h3>{exp.title}</h3>
-                  <p>{t('paidBy')} {paidByLabel}{group ? ` · ${group.name}` : ''}</p>
+                  <p>{group?.name || 'Group'} · {t('paidBy')} {paidByLabel}</p>
                 </div>
                 <div className="expense-amount" style={{ textAlign: 'right' }}>
                   <p className="amount">{formatCurrency(exp.amount)}</p>
