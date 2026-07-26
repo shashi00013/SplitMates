@@ -389,7 +389,7 @@ select.input {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-light);
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   padding: 6px 6px;
   pointer-events: auto;
   box-shadow: var(--shadow-card);
