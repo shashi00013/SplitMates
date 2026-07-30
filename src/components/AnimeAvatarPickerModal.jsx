@@ -297,7 +297,7 @@ export default function AnimeAvatarPickerModal({ isOpen, onClose, currentAvatarI
 
                   <span
                     style={{
-                      fontSize: '0.72rem',
+                      fontSize: '0.75rem',
                       fontWeight: 800,
                       color: isSelected ? 'var(--accent)' : 'var(--text-primary)',
                       marginTop: '6px',
@@ -308,11 +308,11 @@ export default function AnimeAvatarPickerModal({ isOpen, onClose, currentAvatarI
                       maxWidth: '96%',
                     }}
                   >
-                    {av.name.split(' ')[0]}
+                    {av.name}
                   </span>
                   <span
                     style={{
-                      fontSize: '0.62rem',
+                      fontSize: '0.65rem',
                       fontWeight: 600,
                       color: 'var(--text-secondary)',
                       textAlign: 'center',

@@ -4,9 +4,9 @@ import { DEFAULT_AVATAR_ID } from '../data/avatars';
 export default function Avatar({ user, size = 'md', selected = false, className = '', onClick }) {
   if (!user) return null;
 
-  // Determine avatar ID with fallback to avatar_naruto_01
+  // Determine avatar ID with fallback to naruto_uzumaki
   let avatarId = user.avatarId || user.avatar;
-  if (!avatarId || typeof avatarId !== 'string' || !avatarId.startsWith('avatar_')) {
+  if (!avatarId || typeof avatarId !== 'string') {
     avatarId = DEFAULT_AVATAR_ID;
   }
 

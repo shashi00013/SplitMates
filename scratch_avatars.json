@@ -1,0 +1,163 @@
+[
+  {
+    "id": "gojo_satoru",
+    "query": "Gojo Satoru",
+    "name": "Gojo Satoru",
+    "anime": "Jujutsu Kaisen",
+    "category": "jjk"
+  },
+  {
+    "id": "sukuna",
+    "query": "Ryomen Sukuna",
+    "name": "Ryomen Sukuna",
+    "anime": "Jujutsu Kaisen",
+    "category": "jjk"
+  },
+  {
+    "id": "itachi_uchiha",
+    "query": "Itachi Uchiha",
+    "name": "Itachi Uchiha",
+    "anime": "Naruto",
+    "category": "naruto"
+  },
+  {
+    "id": "kakashi_hatake",
+    "query": "Kakashi Hatake",
+    "name": "Kakashi Hatake",
+    "anime": "Naruto",
+    "category": "naruto"
+  },
+  {
+    "id": "naruto_uzumaki",
+    "query": "Naruto Uzumaki",
+    "name": "Naruto Uzumaki",
+    "anime": "Naruto",
+    "category": "naruto"
+  },
+  {
+    "id": "sasuke_uchiha",
+    "query": "Sasuke Uchiha",
+    "name": "Sasuke Uchiha",
+    "anime": "Naruto",
+    "category": "naruto"
+  },
+  {
+    "id": "madara_uchiha",
+    "query": "Madara Uchiha",
+    "name": "Madara Uchiha",
+    "anime": "Naruto",
+    "category": "naruto"
+  },
+  {
+    "id": "levi_ackerman",
+    "query": "Levi Ackerman",
+    "name": "Levi Ackerman",
+    "anime": "Attack On Titan",
+    "category": "aot"
+  },
+  {
+    "id": "eren_yeager",
+    "query": "Eren Yeager",
+    "name": "Eren Yeager",
+    "anime": "Attack On Titan",
+    "category": "aot"
+  },
+  {
+    "id": "mikasa_ackerman",
+    "query": "Mikasa Ackerman",
+    "name": "Mikasa Ackerman",
+    "anime": "Attack On Titan",
+    "category": "aot"
+  },
+  {
+    "id": "luffy",
+    "query": "Monkey D. Luffy",
+    "name": "Monkey D. Luffy",
+    "anime": "One Piece",
+    "category": "onepiece"
+  },
+  {
+    "id": "zoro",
+    "query": "Roronoa Zoro",
+    "name": "Roronoa Zoro",
+    "anime": "One Piece",
+    "category": "onepiece"
+  },
+  {
+    "id": "sanji",
+    "query": "Vinsmoke Sanji",
+    "name": "Vinsmoke Sanji",
+    "anime": "One Piece",
+    "category": "onepiece"
+  },
+  {
+    "id": "ace",
+    "query": "Portgas D. Ace",
+    "name": "Portgas D. Ace",
+    "anime": "One Piece",
+    "category": "onepiece"
+  },
+  {
+    "id": "shanks",
+    "query": "Shanks",
+    "name": "Shanks",
+    "anime": "One Piece",
+    "category": "onepiece"
+  },
+  {
+    "id": "tanjiro",
+    "query": "Tanjirou Kamado",
+    "name": "Tanjiro Kamado",
+    "anime": "Demon Slayer",
+    "category": "ds"
+  },
+  {
+    "id": "rengoku",
+    "query": "Kyoujuro Rengoku",
+    "name": "Kyojuro Rengoku",
+    "anime": "Demon Slayer",
+    "category": "ds"
+  },
+  {
+    "id": "giyu",
+    "query": "Giyuu Tomioka",
+    "name": "Giyu Tomioka",
+    "anime": "Demon Slayer",
+    "category": "ds"
+  },
+  {
+    "id": "zenitsu",
+    "query": "Zenitsu Agatsuma",
+    "name": "Zenitsu Agatsuma",
+    "anime": "Demon Slayer",
+    "category": "ds"
+  },
+  {
+    "id": "light_yagami",
+    "query": "Light Yagami",
+    "name": "Light Yagami",
+    "anime": "Death Note",
+    "category": "deathnote"
+  },
+  {
+    "id": "l_lawliet",
+    "query": "L Lawliet",
+    "name": "L Lawliet",
+    "anime": "Death Note",
+    "category": "deathnote"
+  },
+  {
+    "id": "hinata_shoyo",
+    "query": "Shouyou Hinata",
+    "name": "Shoyo Hinata",
+    "anime": "Haikyuu",
+    "category": "haikyuu"
+  },
+  {
+    "id": "kageyama_tobio",
+    "query": "Tobio Kageyama",
+    "name": "Tobio Kageyama",
+    "anime": "Haikyuu",
+    "category": "haikyuu"
+  }
+]
