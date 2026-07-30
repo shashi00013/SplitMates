@@ -398,27 +398,25 @@ export default function AddExpense() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '5px',
+                        gap: '4px',
                         width: '100%',
                         minWidth: 0,
                         boxSizing: 'border-box',
-                        padding: '10px 4px',
+                        padding: '10px 2px',
                         borderRadius: 'var(--radius-sm)',
                         border: 'none',
                         background: isActive ? 'var(--accent)' : 'transparent',
                         color: isActive ? '#000' : 'var(--text-secondary)',
                         fontFamily: 'var(--font)',
-                        fontSize: '0.78rem',
+                        fontSize: '0.75rem',
                         fontWeight: isActive ? 700 : 600,
                         cursor: 'pointer',
                         transition: 'var(--transition)',
-                        whiteSpace: 'nowrap',
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis',
                       }}
                     >
-                      {opt.icon}
-                      {opt.label}
+                      <span style={{ display: 'inline-flex', flexShrink: 0 }}>{opt.icon}</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
                     </button>
                   );
                 })}
