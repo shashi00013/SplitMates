@@ -37,9 +37,9 @@ export function deriveProactiveActions({
           id: `settle-confirm-${group.id}`,
           priority: 1,
           type: 'required',
-          title: 'Your confirmation is needed',
-          subtitle: `Confirm your payment to complete settlement in "${group.name}".`,
-          ctaLabel: 'Review & Confirm',
+          title: 'Please confirm your payment',
+          subtitle: `Confirm your payment to finish clearing bills in "${group.name}".`,
+          ctaLabel: 'Confirm Now',
           targetRoute: `/settle/${group.id}`,
           badge: 'Action Required',
           badgeColor: 'var(--warning)',
@@ -73,25 +73,25 @@ export function deriveProactiveActions({
   });
 
   if (maxReceivable.amount > 0 && maxReceivable.member) {
-    const name = maxReceivable.member.firstName || maxReceivable.member.name || 'A member';
+    const name = maxReceivable.member.firstName || maxReceivable.member.name || 'A person';
     actions.push({
       id: `financial-receivable-${maxReceivable.groupId}`,
       priority: 2,
       type: 'financial',
-      title: `${name} owes you ${formatCurrency(maxReceivable.amount)}`,
-      subtitle: `Settle up whenever you're ready.`,
-      ctaLabel: 'Settle Up',
+      title: `${name} needs to pay you ${formatCurrency(maxReceivable.amount)}`,
+      subtitle: `Clear bills whenever you're ready.`,
+      ctaLabel: 'Clear bills',
       targetRoute: `/settle/${maxReceivable.groupId}`,
-      badge: 'You Receive',
+      badge: 'You Get',
       badgeColor: 'var(--accent)',
     });
   } else if (maxPayable.amount > 0 && maxPayable.member) {
-    const name = maxPayable.member.firstName || maxPayable.member.name || 'a member';
+    const name = maxPayable.member.firstName || maxPayable.member.name || 'a person';
     actions.push({
       id: `financial-payable-${maxPayable.groupId}`,
       priority: 2,
       type: 'financial',
-      title: `You owe ${name} ${formatCurrency(maxPayable.amount)}`,
+      title: `You need to pay ${name} ${formatCurrency(maxPayable.amount)}`,
       subtitle: `Clear your balance to keep things simple.`,
       ctaLabel: 'Pay Now',
       targetRoute: `/settle/${maxPayable.groupId}`,
@@ -108,9 +108,9 @@ export function deriveProactiveActions({
         id: `reminder-no-expenses-${group.id}`,
         priority: 3,
         type: 'reminder',
-        title: `No expenses in "${group.name}" yet`,
-        subtitle: 'Add your first shared expense to start splitting.',
-        ctaLabel: 'Add Expense',
+        title: `No bills in "${group.name}" yet`,
+        subtitle: 'Add your first bill to start splitting.',
+        ctaLabel: 'Add a bill',
         targetRoute: `/add-expense?groupId=${group.id}`,
         badge: 'New Group',
         badgeColor: 'var(--accent)',
@@ -129,7 +129,7 @@ export function deriveGroupHealthSignal(group, groupExpenses = [], settlement = 
   if (settlement && settlement.status === 'pending') {
     return {
       key: 'settlement_in_progress',
-      label: 'Settlement in progress',
+      label: 'Clearing bills...',
       color: 'var(--warning)',
       badgeBg: 'rgba(255, 165, 2, 0.12)',
     };
@@ -139,7 +139,7 @@ export function deriveGroupHealthSignal(group, groupExpenses = [], settlement = 
   if (activeUnsettled.length > 0) {
     return {
       key: 'active_expenses',
-      label: `${activeUnsettled.length} active ${activeUnsettled.length === 1 ? 'expense' : 'expenses'}`,
+      label: `${activeUnsettled.length} ${activeUnsettled.length === 1 ? 'bill' : 'bills'}`,
       color: 'var(--accent)',
       badgeBg: 'rgba(204, 255, 0, 0.12)',
     };
@@ -147,7 +147,7 @@ export function deriveGroupHealthSignal(group, groupExpenses = [], settlement = 
 
   return {
     key: 'all_settled',
-    label: 'All settled',
+    label: 'All clear',
     color: 'var(--positive)',
     badgeBg: 'rgba(46, 213, 115, 0.12)',
   };
@@ -160,7 +160,7 @@ export function deriveFinancialInsights({ userGroups = [], allExpenses = [] }) {
   const insights = [];
   if (allExpenses.length === 0) return insights;
 
-  // 1. Most active group by expense count
+  // 1. Most used group by expense count
   const groupCounts = {};
   allExpenses.forEach((exp) => {
     groupCounts[exp.groupId] = (groupCounts[exp.groupId] || 0) + 1;
@@ -179,13 +179,13 @@ export function deriveFinancialInsights({ userGroups = [], allExpenses = [] }) {
   if (topGroup && topCount > 1) {
     insights.push({
       id: 'insight-most-active-group',
-      title: 'Most active group',
-      text: `"${topGroup.name}" has ${topCount} shared expenses logged.`,
+      title: 'Most used group',
+      text: `"${topGroup.name}" has ${topCount} bills added.`,
       icon: '🔥',
     });
   }
 
-  // 2. Largest recent expense
+  // 2. Biggest bill
   let maxExpense = null;
   allExpenses.forEach((exp) => {
     if (!maxExpense || exp.amount > maxExpense.amount) {
@@ -197,7 +197,7 @@ export function deriveFinancialInsights({ userGroups = [], allExpenses = [] }) {
     const expGroup = userGroups.find((g) => g.id === maxExpense.groupId);
     insights.push({
       id: 'insight-largest-expense',
-      title: 'Largest expense',
+      title: 'Biggest bill',
       text: `"${maxExpense.title}" (${formatCurrency(maxExpense.amount)}) in ${expGroup?.name || 'Group'}.`,
       icon: '💎',
     });
@@ -205,3 +205,4 @@ export function deriveFinancialInsights({ userGroups = [], allExpenses = [] }) {
 
   return insights;
 }
+

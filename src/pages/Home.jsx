@@ -149,21 +149,21 @@ export default function Home() {
             </p>
             {totalBalance > 0 ? (
               <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
-                ↑ {t('youGet')} {formatCurrency(Math.abs(totalBalance))}
+                {t('youGet')} {formatCurrency(Math.abs(totalBalance))}
               </p>
             ) : totalBalance < 0 ? (
               <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
-                ↓ {t('youPay')} {formatCurrency(Math.abs(totalBalance))}
+                {t('youPay')} {formatCurrency(Math.abs(totalBalance))}
               </p>
             ) : (
               <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
-                All settled up 🎉
+                {t('allSettledUp')}
               </p>
             )}
           </div>
           <div className="flex flex-col items-end gap-12">
             <div className="flex items-center gap-4 text-accent text-xs fw-600">
-              <span>Tap to see breakdown</span>
+              <span>See who owes what</span>
               <ArrowUpRight size={16} />
             </div>
             {memberBreakdownItems.length > 0 && (
@@ -194,10 +194,10 @@ export default function Home() {
             id="balance-breakdown-list"
           >
             <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
-              Pending Dues Breakdown
+              See who owes what
             </p>
             {memberBreakdownItems.length === 0 ? (
-              <p className="text-secondary text-xs">No pending member balances 🎉</p>
+              <p className="text-secondary text-xs">All clear 🎉</p>
             ) : (
               <div className="flex flex-col gap-8">
                 {memberBreakdownItems.map(({ member, amount }) => {
@@ -206,10 +206,10 @@ export default function Home() {
                   const absVal = formatCurrency(Math.abs(amount));
                   const bClass = isOwed ? 'text-accent' : isOwe ? 'text-negative' : 'text-secondary';
                   const bText = isOwed
-                    ? `${member.firstName || 'Member'} owes you ${absVal}`
+                    ? `${member.firstName || 'Person'} needs to pay you ${absVal}`
                     : isOwe
-                    ? `You owe ${member.firstName || 'Member'} ${absVal}`
-                    : 'All settled';
+                    ? `You need to pay ${member.firstName || 'Person'} ${absVal}`
+                    : 'All clear 🎉';
 
                   return (
                     <div key={member.id} className="flex justify-between items-center text-xs">
@@ -281,7 +281,7 @@ export default function Home() {
       {financialInsights.length > 0 && (
         <div className="card page-section" style={{ padding: '12px 16px', background: 'var(--bg-card-alt)' }} id="financial-insights-card">
           <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-            Spending Insights
+            Your spending
           </p>
           <div className="flex flex-col gap-6">
             {financialInsights.map((insight) => (
@@ -323,9 +323,9 @@ export default function Home() {
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? 'text-accent' : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
-              ? `Others owe you ${formatCurrency(receivable)}`
+              ? `You get ${formatCurrency(receivable)}`
               : userShare > 0
-              ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}`
+              ? `You need to pay ${payer?.firstName || 'person'} ${formatCurrency(userShare)}`
               : 'Not involved';
 
             return (
@@ -387,10 +387,10 @@ export default function Home() {
             const myBalance = user ? balances[user.id] || 0 : 0;
             const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
             const statusText = myBalance > 0
-              ? `↑ You'll get ${formatCurrency(Math.abs(myBalance))}`
+              ? `You get ${formatCurrency(Math.abs(myBalance))}`
               : myBalance < 0
-              ? `↓ You'll pay ${formatCurrency(Math.abs(myBalance))}`
-              : 'All settled 🎉';
+              ? `You need to pay ${formatCurrency(Math.abs(myBalance))}`
+              : 'All clear 🎉';
 
             const statusBg = myBalance > 0
               ? 'rgba(0, 210, 106, 0.12)'
@@ -465,7 +465,7 @@ export default function Home() {
                     <div className="flex items-center gap-8" style={{ marginTop: '4px' }}>
                       <div className="flex items-center gap-4 text-secondary text-xs" style={{ fontWeight: 600 }}>
                         <Users size={13} style={{ color: 'var(--accent)' }} />
-                        <span>{group.memberIds.length} members</span>
+                        <span>{group.memberIds.length} {group.memberIds.length === 1 ? 'person' : 'people'}</span>
                       </div>
                       {previewMembers.length > 0 && (
                         <div className="flex items-center" style={{ marginLeft: '2px' }}>

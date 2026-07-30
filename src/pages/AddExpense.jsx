@@ -196,14 +196,14 @@ export default function AddExpense() {
     try {
       if (editingExpenseId) {
         await updateExpense(editingExpenseId, expenseData);
-        showToast('Expense updated');
+        showToast('Bill updated');
       } else {
         await addExpense(expenseData);
-        showToast('Expense added');
+        showToast('Bill added');
       }
       goBack();
     } catch (err) {
-      showToast(err.message || 'Failed to save expense');
+      showToast(err.message || "Couldn't save this bill. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -217,7 +217,7 @@ export default function AddExpense() {
           <ChevronLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-          {editingExpenseId ? 'Edit Expense' : 'Add Expense'}
+          {editingExpenseId ? 'Edit bill' : 'Add a bill'}
         </h1>
         <div style={{ width: '42px' }} />
       </div>
@@ -226,7 +226,7 @@ export default function AddExpense() {
         {/* 1. GROUP SELECTOR */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Group
+            Which group?
           </label>
           <select
             className="input"
@@ -244,12 +244,12 @@ export default function AddExpense() {
         {/* 2. EXPENSE TITLE */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            What did you buy?
+            What was the bill for?
           </label>
           <input
             className="input"
             type="text"
-            placeholder="Dinner, Groceries, Uber, etc."
+            placeholder="Dinner, groceries, Uber..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             id="expense-title-input"
@@ -260,7 +260,7 @@ export default function AddExpense() {
         {/* 3. AMOUNT */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            How much?
+            How much was it?
           </label>
           <div style={{ position: 'relative' }}>
             <span style={{
@@ -284,7 +284,7 @@ export default function AddExpense() {
         {/* 4. WHO PAID? */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Who paid?
+            Who paid the bill?
           </label>
           <div
             style={{
@@ -365,38 +365,63 @@ export default function AddExpense() {
             {/* OPTION A — SPLIT TYPE */}
             <div className="input-group">
               <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                Split type
+                How should we split it?
               </label>
-              <div className="flex gap-8" id="split-type-selector">
-                <button
-                  type="button"
-                  className={`btn flex-1 text-xs ${splitType === 'equal' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setSplitType('equal')}
-                  id="split-tab-equal"
-                  style={{ padding: '8px 6px' }}
-                >
-                  <Users size={14} /> Split equally
-                </button>
-
-                <button
-                  type="button"
-                  className={`btn flex-1 text-xs ${splitType === 'exact' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setSplitType('exact')}
-                  id="split-tab-exact"
-                  style={{ padding: '8px 6px' }}
-                >
-                  <Calculator size={14} /> Exact amounts
-                </button>
-
-                <button
-                  type="button"
-                  className={`btn flex-1 text-xs ${splitType === 'percentage' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setSplitType('percentage')}
-                  id="split-tab-percent"
-                  style={{ padding: '8px 6px' }}
-                >
-                  <Percent size={14} /> Percentage
-                </button>
+              <div
+                id="split-type-selector"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: '6px',
+                  width: '100%',
+                  overflow: 'hidden',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '4px',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {[
+                  { key: 'equal', label: 'Equal', icon: <Users size={14} /> },
+                  { key: 'exact', label: 'Exact', icon: <Calculator size={14} /> },
+                  { key: 'percentage', label: 'Percent', icon: <Percent size={14} /> },
+                ].map((opt) => {
+                  const isActive = splitType === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSplitType(opt.key)}
+                      id={`split-tab-${opt.key === 'percentage' ? 'percent' : opt.key}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '5px',
+                        width: '100%',
+                        minWidth: 0,
+                        boxSizing: 'border-box',
+                        padding: '10px 4px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: 'none',
+                        background: isActive ? 'var(--accent)' : 'transparent',
+                        color: isActive ? '#000' : 'var(--text-secondary)',
+                        fontFamily: 'var(--font)',
+                        fontSize: '0.78rem',
+                        fontWeight: isActive ? 700 : 600,
+                        cursor: 'pointer',
+                        transition: 'var(--transition)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {opt.icon}
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -404,7 +429,7 @@ export default function AddExpense() {
             <div className="input-group">
               <div className="flex items-center justify-between">
                 <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                  Who is involved?
+                  Who was part of this bill?
                 </label>
                 {selectedParticipants.length < allMembers.length && (
                   <button
@@ -503,7 +528,7 @@ export default function AddExpense() {
             {/* OPTION C — DATE */}
             <div className="input-group">
               <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                Date
+                When was it?
               </label>
               <div style={{ position: 'relative' }}>
                 <Calendar
@@ -525,7 +550,7 @@ export default function AddExpense() {
             {/* OPTION D — REPEAT SCHEDULE */}
             <div className="input-group">
               <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                Repeat Expense?
+                Add this again later?
               </label>
               <div className="flex gap-8">
                 {['never', 'weekly', 'monthly'].map((rep) => {
@@ -556,7 +581,7 @@ export default function AddExpense() {
           id="submit-expense-btn"
           style={{ opacity: (isValid && !isSubmitting) ? 1 : 0.5, marginTop: '8px', minHeight: '48px', fontSize: '1rem', fontWeight: 800 }}
         >
-          {isSubmitting ? 'Adding expense...' : (editingExpenseId ? 'Save Changes' : 'Add Expense')}
+          {isSubmitting ? 'Adding bill...' : (editingExpenseId ? 'Save Changes' : 'Add bill')}
         </button>
       </form>
     </div>

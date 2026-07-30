@@ -82,10 +82,10 @@ export default function Groups() {
           const myBalance = user ? (balances[user.id] || 0) : 0;
           const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
           const statusText = myBalance > 0
-            ? `↑ You'll get ${formatCurrency(Math.abs(myBalance))}`
+            ? `You get ${formatCurrency(Math.abs(myBalance))}`
             : myBalance < 0
-            ? `↓ You'll pay ${formatCurrency(Math.abs(myBalance))}`
-            : 'All settled';
+            ? `You need to pay ${formatCurrency(Math.abs(myBalance))}`
+            : 'All clear 🎉';
 
           return (
             <div
@@ -97,7 +97,7 @@ export default function Groups() {
               <div className="group-card-icon">{group.icon || '🏠'}</div>
               <div className="group-card-info">
                 <h3>{group.name}</h3>
-                <p>{group.memberIds.length} members</p>
+                <p>{group.memberIds.length} {group.memberIds.length === 1 ? 'person' : 'people'}</p>
               </div>
               <div className="group-card-balance" style={{ textAlign: 'right' }}>
                 <p className={`fw-700 ${statusClass}`} style={{ fontSize: '0.88rem', margin: 0 }}>

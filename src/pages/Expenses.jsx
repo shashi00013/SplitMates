@@ -50,7 +50,7 @@ export default function Expenses() {
           <input
             className="input"
             type="text"
-            placeholder="Search expenses by title or group..."
+            placeholder="Find a bill..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ paddingLeft: '40px', fontSize: '0.85rem', background: 'var(--bg-card-alt)', border: '1px solid var(--border-color)' }}
@@ -73,9 +73,9 @@ export default function Expenses() {
         id="expense-filters"
       >
         {[
-          { key: 'all', label: 'All' },
-          { key: 'current', label: t('currentPeriod') },
-          { key: 'historical', label: t('history') },
+          { key: 'all', label: 'All bills' },
+          { key: 'current', label: 'This month' },
+          { key: 'historical', label: 'Old bills' },
         ].map((f) => {
           const isActive = filter === f.key;
           return (
@@ -112,10 +112,10 @@ export default function Expenses() {
           <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</p>
           <p className="text-secondary text-sm" style={{ fontWeight: 600 }}>
             {filter === 'all'
-              ? 'No expenses yet'
+              ? 'No bills yet'
               : filter === 'current'
-              ? 'No current expenses'
-              : 'No expense history'}
+              ? 'No bills this month'
+              : 'No old bills'}
           </p>
         </div>
       ) : (
@@ -123,7 +123,7 @@ export default function Expenses() {
           {filtered.map((exp) => {
             const payer = getUserById(exp.paidBy);
             const group = groups.find((g) => g.id === exp.groupId);
-            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Member';
+            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Person';
             const participants = exp.participants || exp.splitAmong || [];
             const isPayer = exp.paidBy === user?.id;
             const isParticipant = participants.includes(user?.id);
@@ -131,8 +131,8 @@ export default function Expenses() {
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
-              ? (receivable > 0 ? `Others owe you ${formatCurrency(receivable)}` : 'All settled')
-              : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved');
+              ? (receivable > 0 ? `You get ${formatCurrency(receivable)}` : 'All clear 🎉')
+              : (userShare > 0 ? `You need to pay ${payer?.firstName || 'person'} ${formatCurrency(userShare)}` : 'Not involved');
 
             return (
               <div

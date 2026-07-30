@@ -40,10 +40,10 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
     setIsDeleting(true);
     try {
       await deleteExpense(expense.id);
-      showToast('Expense deleted');
+      showToast('Bill deleted');
       onClose();
     } catch (err) {
-      showToast(err.message || 'Failed to delete expense');
+      showToast(err.message || "Couldn't delete this bill. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -55,8 +55,8 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
   const receivableAmount = isPayer ? Math.max(0, expense.amount - userShare) : 0;
   const impactClass = isPayer ? (receivableAmount > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
   const impactText = isPayer
-    ? (receivableAmount > 0 ? `Others owe you ${formatCurrency(receivableAmount)}` : 'All settled')
-    : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved');
+    ? (receivableAmount > 0 ? `You get ${formatCurrency(receivableAmount)}` : 'All clear 🎉')
+    : (userShare > 0 ? `You need to pay ${payer?.firstName || 'person'} ${formatCurrency(userShare)}` : 'Not involved');
 
   return (
     <div className="modal-overlay" onClick={onClose} id="expense-details-overlay">
@@ -71,7 +71,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
             {/* Header & Close */}
             <div className="flex justify-between items-center">
               <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                Expense Details
+                Bill Details
               </h2>
               <button className="btn-icon" onClick={onClose} id="close-details-btn" aria-label="Close details">
                 <X size={18} />
@@ -92,7 +92,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
             {/* Total Expense Hero Card */}
             <div className="card text-center" style={{ padding: '16px', background: 'var(--bg-card-alt)' }}>
               <span className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                TOTAL EXPENSE
+                TOTAL BILL
               </span>
               <p className="financial-hero-amount" style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
                 {formatCurrency(expense.amount)}
@@ -110,13 +110,13 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
               id="expense-impact-banner"
             >
               <div className="flex justify-between items-center" style={{ marginBottom: '6px' }}>
-                <span className="text-secondary text-xs fw-600">Your share</span>
+                <span className="text-secondary text-xs fw-600">Your part</span>
                 <span className="fw-700 text-sm" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(userShare)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-secondary text-xs fw-600">Financial Impact</span>
+                <span className="text-secondary text-xs fw-600">Status</span>
                 <span className={`fw-800 text-sm ${impactClass}`}>
                   {impactText}
                 </span>
@@ -131,7 +131,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
               <div className="flex items-center gap-10" style={{ padding: '10px 12px', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <Avatar user={payer} size="sm" />
                 <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {expense.paidBy === user?.id ? 'You' : payer?.firstName || payer?.name || 'Member'}
+                  {expense.paidBy === user?.id ? 'You' : payer?.firstName || payer?.name || 'Person'}
                 </span>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
             {/* Split Breakdown */}
             <div className="input-group">
               <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                Split with ({participants.length})
+                Part of this bill ({participants.length})
               </label>
               <div className="card" style={{ padding: '0 14px', maxHeight: '160px', overflowY: 'auto' }}>
                 {participants.map((pid) => {
@@ -152,7 +152,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
                       <div className="flex items-center gap-8">
                         <Avatar user={m} size="sm" />
                         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          {isMe ? 'You' : m?.firstName || m?.name || 'Member'}
+                          {isMe ? 'You' : m?.firstName || m?.name || 'Person'}
                         </span>
                       </div>
                       <span className="fw-700 text-xs text-accent">
@@ -202,7 +202,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
               <ShieldAlert size={28} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
-              Delete Expense?
+              Delete Bill?
             </h3>
             <p className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: '20px' }}>
               Are you sure you want to delete <strong>"{expense.title}"</strong> of{' '}
@@ -217,7 +217,7 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
                 disabled={isDeleting}
                 style={{ background: 'var(--negative)', borderColor: 'var(--negative)', minHeight: '44px', fontWeight: 700 }}
               >
-                {isDeleting ? 'Deleting...' : 'Delete Expense'}
+                {isDeleting ? 'Deleting...' : 'Delete Bill'}
               </button>
               <button
                 className="btn btn-secondary btn-full"

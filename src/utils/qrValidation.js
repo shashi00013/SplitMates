@@ -14,7 +14,7 @@ export function validateSplitMatesQR(decodedText) {
     return {
       isValid: false,
       errorTitle: 'Invalid SplitMates QR',
-      errorMessage: "This QR code isn't a SplitMates group invite. Please scan a group QR generated from SplitMates.",
+      errorMessage: "This QR code is not a SplitMates group code.",
     };
   }
 
@@ -33,7 +33,7 @@ export function validateSplitMatesQR(decodedText) {
     return {
       isValid: false,
       errorTitle: 'Invalid SplitMates QR',
-      errorMessage: "This QR code isn't a SplitMates group invite. Please scan a group QR generated from SplitMates.",
+      errorMessage: "This QR code is not a SplitMates group code.",
     };
   }
 
@@ -56,7 +56,7 @@ export function validateSplitMatesQR(decodedText) {
     return {
       isValid: false,
       errorTitle: 'Invalid SplitMates QR',
-      errorMessage: "This QR code isn't a SplitMates group invite. Please scan a group QR generated from SplitMates.",
+      errorMessage: "This QR code is not a SplitMates group code.",
     };
   }
 
@@ -84,7 +84,7 @@ export function validateSplitMatesQR(decodedText) {
     return {
       isValid: false,
       errorTitle: 'Invalid SplitMates QR',
-      errorMessage: "This QR code isn't a SplitMates group invite. Please scan a group QR generated from SplitMates.",
+      errorMessage: "This QR code is not a SplitMates group code.",
     };
   }
 
@@ -98,6 +98,6 @@ export function validateSplitMatesQR(decodedText) {
   return {
     isValid: false,
     errorTitle: 'Invalid SplitMates QR',
-    errorMessage: "This QR code isn't a SplitMates group invite. Please scan a group QR generated from SplitMates.",
+    errorMessage: "This QR code is not a SplitMates group code.",
   };
 }

@@ -92,7 +92,7 @@ export default function GroupDetails() {
         <div style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>{group.name}</h1>
           <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>
-            {members.length} members
+            {members.length} {members.length === 1 ? 'person' : 'people'}
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export default function GroupDetails() {
               onClick={() => { setShowMenu(false); navigate(`/settle/${groupId}`); }}
               style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
             >
-              <CheckCircle2 size={16} style={{ color: 'var(--accent)' }} /> Settle Up
+              <CheckCircle2 size={16} style={{ color: 'var(--accent)' }} /> Clear bills
             </button>
             <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
             <button
@@ -159,15 +159,15 @@ export default function GroupDetails() {
         </p>
         {myBalance > 0 ? (
           <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
-            ↑ You'll get {formatCurrency(Math.abs(myBalance))}
+            You get {formatCurrency(Math.abs(myBalance))}
           </p>
         ) : myBalance < 0 ? (
           <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
-            ↓ You'll pay {formatCurrency(Math.abs(myBalance))}
+            You need to pay {formatCurrency(Math.abs(myBalance))}
           </p>
         ) : (
           <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
-            All settled
+            All clear 🎉
           </p>
         )}
       </div>
@@ -187,10 +187,10 @@ export default function GroupDetails() {
         >
           <div>
             <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-              Settlement in progress
+              Clearing bills...
             </h4>
             <p className="text-secondary text-xs" style={{ margin: 0, marginTop: '2px' }}>
-              Your confirmation is needed
+              Please confirm your payment
             </p>
           </div>
           <div className="flex items-center gap-4 text-accent text-xs fw-600" style={{ color: 'var(--warning)' }}>
@@ -202,7 +202,7 @@ export default function GroupDetails() {
 
       {/* TIER 4 — MEMBERS & DUES */}
       <div className="section-header">
-        <h2>Members ({members.length})</h2>
+        <h2>People ({members.length})</h2>
       </div>
 
       <div className="card page-section" style={{ padding: '8px 16px' }}>
@@ -210,10 +210,10 @@ export default function GroupDetails() {
           const bal = balances[m.id] || 0;
           const isMe = m.id === user?.id;
           const bClass = bal > 0 ? 'text-accent' : bal < 0 ? 'text-negative' : 'text-secondary';
-          const memberName = isMe ? 'You' : m.firstName || m.name || 'Member';
+          const memberName = isMe ? 'You' : m.firstName || m.name || 'Person';
           const balText = isMe
-            ? (bal > 0 ? `Others owe you ${formatCurrency(bal)}` : bal < 0 ? `You owe others ${formatCurrency(Math.abs(bal))}` : 'All settled')
-            : (bal > 0 ? `${memberName} owes you ${formatCurrency(bal)}` : bal < 0 ? `You owe ${memberName} ${formatCurrency(Math.abs(bal))}` : 'All settled');
+            ? (bal > 0 ? `You get ${formatCurrency(bal)}` : bal < 0 ? `You need to pay ${formatCurrency(Math.abs(bal))}` : 'All clear 🎉')
+            : (bal > 0 ? `${memberName} needs to pay you ${formatCurrency(bal)}` : bal < 0 ? `You need to pay ${memberName} ${formatCurrency(Math.abs(bal))}` : 'All clear 🎉');
 
           return (
             <div
@@ -237,7 +237,7 @@ export default function GroupDetails() {
 
       {/* TIER 5 — CURRENT EXPENSES */}
       <div className="section-header flex justify-between items-center">
-        <h2>Expenses ({activeCycleExpenses.length})</h2>
+        <h2>Recent bills ({activeCycleExpenses.length})</h2>
         <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-group-expenses">
           {t('viewAll')}
         </button>
@@ -249,7 +249,7 @@ export default function GroupDetails() {
         ) : (
           recentExpenses.map((exp) => {
             const payer = members.find((m) => m.id === exp.paidBy);
-            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Member';
+            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Person';
             const participants = exp.participants || exp.splitAmong || [];
             const isPayer = exp.paidBy === user?.id;
             const isParticipant = participants.includes(user?.id);
@@ -257,8 +257,8 @@ export default function GroupDetails() {
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
-              ? (receivable > 0 ? `Others owe you ${formatCurrency(receivable)}` : 'All settled')
-              : (userShare > 0 ? `You owe ${payer?.firstName || 'member'} ${formatCurrency(userShare)}` : 'Not involved');
+              ? (receivable > 0 ? `You get ${formatCurrency(receivable)}` : 'All clear 🎉')
+              : (userShare > 0 ? `You need to pay ${payer?.firstName || 'person'} ${formatCurrency(userShare)}` : 'Not involved');
 
             return (
               <div

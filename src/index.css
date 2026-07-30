@@ -109,6 +109,15 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* ---- Skeleton Loader ---- */
 .skeleton {
   background: var(--bg-input);
@@ -371,6 +380,7 @@ select {
 }
 
 .avatar-sm { width: 34px; height: 34px; font-size: 0.72rem; }
+.avatar-xs { width: 24px; height: 24px; font-size: 0.6rem; border-width: 1.5px; }
 .avatar-lg { width: 56px; height: 56px; font-size: 1.1rem; }
 .avatar-xl { width: 88px; height: 88px; font-size: 1.6rem; border-width: 3px; }
 .avatar-selected { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-dim); }
@@ -989,7 +999,8 @@ select {
   z-index: 200;
   animation: slideUp 0.3s ease, slideDown 0.3s ease 2s forwards;
   box-shadow: 0 8px 30px rgba(204, 255, 0, 0.3);
-  white-space: nowrap;
+  max-width: calc(100vw - 40px);
+  text-align: center;
 }
 
 @keyframes slideUp {

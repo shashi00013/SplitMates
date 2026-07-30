@@ -16,25 +16,28 @@ export default function Settlement() {
     user, groups, expenses, settlements,
     getGroupMembers, getBalancesForGroup,
     initiateSettlement, confirmSettlement, completeSettlement,
-    cancelSettlement, showToast,
+    cancelSettlement, showToast, isLoading,
   } = useApp();
 
-  const group = groups.find((g) => g.id === groupId);
+  // All hooks MUST be called unconditionally at the top (Rules of Hooks)
+  const [isInitiating, setIsInitiating] = useState(false);
+  const [confirmingMemberId, setConfirmingMemberId] = useState(null);
+  const hasCompletedRef = useRef(false);
+
+  const group = groups.find((g) => g.id === groupId || String(g.id) === String(groupId));
   const members = group ? getGroupMembers(groupId) : [];
   const settlement = settlements[groupId];
   const groupExpenses = expenses.filter((e) => e.groupId === groupId);
 
   const confirmedCount = settlement ? settlement.confirmations.length : 0;
   const totalMembersCount = members.length;
-  const allConfirmed = settlement ? confirmedCount >= totalMembersCount : false;
+  const allConfirmed = settlement ? confirmedCount >= totalMembersCount && totalMembersCount > 0 : false;
   const isCompleted = settlement?.status === 'completed';
-
-  const hasCompletedRef = useRef(false);
 
   useEffect(() => {
     let isSubscribed = true;
     async function finalizeSettlement() {
-      if (allConfirmed && !isCompleted && !hasCompletedRef.current) {
+      if (allConfirmed && !isCompleted && !hasCompletedRef.current && group) {
         hasCompletedRef.current = true;
         try {
           const historyEntry = await completeSettlement(groupId);
@@ -52,20 +55,44 @@ export default function Settlement() {
     }
     finalizeSettlement();
     return () => { isSubscribed = false; };
-  }, [allConfirmed, isCompleted, groupId, completeSettlement, navigate, group?.name, showToast]);
+  }, [allConfirmed, isCompleted, groupId, completeSettlement, navigate, group?.name, showToast, group]);
 
+  // Loading state — data not yet hydrated after refresh
   if (!group) {
+    if (isLoading || groups.length === 0) {
+      return (
+        <div className="page flex items-center justify-center" style={{ minHeight: '60vh' }}>
+          <div className="text-center">
+            <div style={{
+              width: '32px',
+              height: '32px',
+              border: '3px solid var(--border-color)',
+              borderTopColor: 'var(--accent)',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite',
+              margin: '0 auto 12px auto'
+            }} />
+            <p className="text-secondary text-xs fw-600">Loading settlement...</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="page">
         <p className="text-secondary text-center mt-24">Group not found</p>
+        <div className="flex justify-center mt-16">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/groups', { replace: true })}
+          >
+            Back to Groups
+          </button>
+        </div>
       </div>
     );
   }
 
   if (allConfirmed && isCompleted) return null;
-
-  const [isInitiating, setIsInitiating] = useState(false);
-  const [confirmingMemberId, setConfirmingMemberId] = useState(null);
 
   async function handleInitiate() {
     if (isInitiating) return;

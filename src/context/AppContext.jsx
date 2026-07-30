@@ -54,7 +54,7 @@ export function AppProvider({ children }) {
   const [settlementHistory, setSettlementHistory] = useState([]);
   const [groupMembers, setGroupMembers] = useState({});
   const [selectedGroupId, setSelectedGroupId] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!token);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const [groupsError, setGroupsError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!token && !!initialUser);
