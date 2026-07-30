@@ -11,6 +11,19 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email('Invalid email address'),
+});
+
+export const resetPasswordSchema = z.object({
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
 export const createGroupSchema = z.object({
   name: z.string().trim().min(1, 'Group name is required'),
   description: z.string().trim().optional(),

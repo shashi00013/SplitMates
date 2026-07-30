@@ -14,6 +14,8 @@ import {
   Check,
   Camera,
   Upload,
+  KeyRound,
+  Shield,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
@@ -175,7 +177,28 @@ export default function Profile() {
         )}
       </div>
 
-      {/* 4. Clean Single-Tap Settings List */}
+      {/* 4. Account Security Section */}
+      <div className="page-section">
+        <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
+          Account Security
+        </p>
+        <div className="card" style={{ padding: '0 16px' }} id="account-security-menu">
+          <div
+            className="flex justify-between items-center"
+            style={{ padding: '14px 0', cursor: 'pointer' }}
+            onClick={() => navigate('/change-password')}
+            id="menu-change-password"
+          >
+            <div className="flex items-center gap-12">
+              <KeyRound size={20} style={{ color: 'var(--accent)' }} />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Change Password</span>
+            </div>
+            <ChevronRight size={16} className="text-secondary" />
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Clean Single-Tap Settings List */}
       <div className="page-section">
         <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px', paddingLeft: '4px' }}>
           Settings & Preferences

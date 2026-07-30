@@ -102,6 +102,67 @@ export const authApi = {
     api.setToken(null);
     localStorage.removeItem('splitly_mock_user');
   },
+
+  async changePassword(currentPassword, newPassword) {
+    try {
+      const data = await api.put('/auth/change-password', { currentPassword, newPassword });
+      return data;
+    } catch (err) {
+      if (err.status === 0) {
+        if (currentPassword === 'wrong') {
+          const e = new Error('Current password is incorrect');
+          e.status = 400;
+          throw e;
+        }
+        return { message: 'Password updated successfully ✅' };
+      }
+      throw err;
+    }
+  },
+
+  async forgotPassword(email) {
+    try {
+      const data = await api.post('/auth/forgot-password', { email });
+      return data;
+    } catch (err) {
+      if (err.status === 0) {
+        return { message: 'If an account exists for this email, a reset link has been sent.' };
+      }
+      throw err;
+    }
+  },
+
+  async resetPassword(token, newPassword) {
+    try {
+      const data = await api.post(`/auth/reset-password/${token}`, { newPassword });
+      return data;
+    } catch (err) {
+      if (err.status === 0) {
+        if (token === 'invalid' || token === 'expired') {
+          const e = new Error('Reset token is invalid or has expired');
+          e.status = 400;
+          throw e;
+        }
+        return { message: 'Password reset successfully ✅' };
+      }
+      throw err;
+    }
+  },
+
+  async verifyResetToken(token) {
+    try {
+      const data = await api.get(`/auth/verify-reset-token/${token}`);
+      return data;
+    } catch (err) {
+      if (err.status === 0) {
+        if (token === 'invalid' || token === 'expired') {
+          return { valid: false, message: 'Reset token is invalid or has expired' };
+        }
+        return { valid: true };
+      }
+      throw err;
+    }
+  },
 };
 
 export const groupsApi = {

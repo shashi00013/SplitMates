@@ -19,6 +19,9 @@ const Profile = lazy(() => import('./pages/Profile'));
 const History = lazy(() => import('./pages/History'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 const BalanceBreakdown = lazy(() => import('./pages/BalanceBreakdown'));
 const JoinGroupFlow = lazy(() => import('./pages/JoinGroupFlow'));
 const JoinGroupConfirm = lazy(() => import('./pages/JoinGroupConfirm'));
@@ -50,7 +53,7 @@ export default function App() {
   // Hide bottom nav on auth pages, settlement-success page, or when unauthenticated
   const hideNav =
     !isAuthenticated ||
-    ['/login', '/register', '/settlement-success', '/join'].some((p) => location.pathname.startsWith(p));
+    ['/login', '/register', '/forgot-password', '/reset-password', '/change-password', '/settlement-success', '/join'].some((p) => location.pathname.startsWith(p));
 
   return (
     <div className="app-shell">
@@ -73,6 +76,22 @@ export default function App() {
               </PublicOnlyRoute>
             }
           />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicOnlyRoute>
+                <ForgotPassword />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={
+              <PublicOnlyRoute>
+                <ResetPassword />
+              </PublicOnlyRoute>
+            }
+          />
 
           {/* Join Group Invite Route */}
           <Route path="/join/:inviteCode" element={<JoinGroupConfirm />} />
@@ -91,6 +110,7 @@ export default function App() {
             <Route path="/settlement-success/:groupId" element={<SettlementSuccess />} />
             <Route path="/history" element={<History />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Route>
 
           {/* Fallback route */}

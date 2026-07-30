@@ -430,6 +430,27 @@ export function AppProvider({ children }) {
     navigate('/login', { replace: true });
   }, [showToast, clearUserData, navigate]);
 
+  const changePassword = useCallback(async (currentPassword, newPassword) => {
+    const res = await authApi.changePassword(currentPassword, newPassword);
+    showToast('Password updated successfully ✅');
+    return res;
+  }, [showToast]);
+
+  const forgotPassword = useCallback(async (email) => {
+    const res = await authApi.forgotPassword(email);
+    return res;
+  }, []);
+
+  const resetPassword = useCallback(async (token, newPassword) => {
+    const res = await authApi.resetPassword(token, newPassword);
+    showToast('Password reset successfully ✅');
+    return res;
+  }, [showToast]);
+
+  const verifyResetToken = useCallback(async (token) => {
+    return await authApi.verifyResetToken(token);
+  }, []);
+
   // ── Dynamic User Lookup ───────────────────────────────────────────────────
 
   const getUserById = useCallback((id) => {
@@ -1002,6 +1023,10 @@ export function AppProvider({ children }) {
     login,
     register,
     logout,
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    verifyResetToken,
     createGroup,
     joinGroup,
     leaveGroup,

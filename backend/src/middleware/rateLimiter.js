@@ -10,3 +10,14 @@ export const authRateLimiter = rateLimit({
     message: 'Too many authentication attempts. Please try again after 15 minutes.',
   },
 });
+
+export const forgotPasswordRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // max 5 requests per hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Too Many Requests',
+    message: 'Too many password reset requests. Please try again after 1 hour.',
+  },
+});
