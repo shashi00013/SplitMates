@@ -1,15 +1,9 @@
 import { getAvatarById } from '../data/avatars';
 
-export default function AvatarGraphic({ avatarId = 'avatar_01', size = 48, className = '' }) {
+export default function AvatarGraphic({ avatarId = 'avatar_naruto_01', size = 48, className = '' }) {
   const avatar = getAvatarById(avatarId);
-  const { bg, skin, index } = avatar;
-
-  // Derive SVG visual features based on index modulo
-  const hairColor = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#CCFF00', '#F43F5E', '#06B6D4', '#E11D48'][(index - 1) % 10];
-  const visorColor = ['#CCFF00', '#00E5FF', '#FF007F', '#F59E0B', '#10B981', '#A855F7'][(index - 1) % 6];
-  const featureType = (index - 1) % 5; // 0: Visor/Headphones, 1: Ninja Headband, 2: Neko Ears, 3: Spiky Hair/Glasses, 4: Crown/Horns
-
-  const gradientId = `grad-${avatar.id}`;
+  const { bg, hair, skin, detail } = avatar;
+  const gradientId = `grad-${avatar.id.replace(/[^a-zA-Z0-9]/g, '-')}`;
 
   return (
     <svg
@@ -19,7 +13,7 @@ export default function AvatarGraphic({ avatarId = 'avatar_01', size = 48, class
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={{ borderRadius: '50%', display: 'block' }}
+      style={{ borderRadius: '50%', display: 'block', flexShrink: 0 }}
       aria-hidden="true"
     >
       <defs>
@@ -29,114 +23,145 @@ export default function AvatarGraphic({ avatarId = 'avatar_01', size = 48, class
         </linearGradient>
       </defs>
 
-      {/* Background Circle */}
+      {/* Background Gradient */}
       <circle cx="50" cy="50" r="50" fill={`url(#${gradientId})`} />
 
-      {/* Body / Shoulders */}
+      {/* Shoulders / Clothing Base */}
       <path
-        d="M20 90 C 20 70, 32 64, 50 64 C 68 64, 80 70, 80 90 Z"
-        fill="#1E293B"
-      />
-      {/* Armor / Collar Accent */}
-      <path
-        d="M36 65 L 50 78 L 64 65 L 50 72 Z"
-        fill={hairColor}
+        d="M20 92 C 20 70, 32 64, 50 64 C 68 64, 80 92, 80 92 Z"
+        fill="#0F172A"
       />
 
-      {/* Face Head Base */}
+      {/* Specific Accessory / Collar Details */}
+      {detail === 'straw_hat' && (
+        <path d="M15 42 Q 50 20 85 42 L 92 46 Q 50 36 8 46 Z" fill="#EAB308" />
+      )}
+      {detail === 'straw_hat' && (
+        <path d="M22 40 Q 50 26 78 40" stroke="#DC2626" strokeWidth="4" fill="none" />
+      )}
+      {detail === 'red_scarf' && (
+        <path d="M30 62 C 30 62, 42 74, 50 74 C 58 74, 70 62, 70 62 L 70 76 L 30 76 Z" fill="#DC2626" />
+      )}
+      {detail === 'cravat' && (
+        <path d="M42 64 L 50 78 L 58 64 Z" fill="#F8FAFC" />
+      )}
+      {detail === 'bamboo' && (
+        <rect x="36" y="52" width="28" height="10" rx="4" fill="#15803D" stroke="#09090B" strokeWidth="1.5" />
+      )}
+
+      {/* Head / Face Base */}
       <circle cx="50" cy="46" r="22" fill={skin} />
 
       {/* Ears */}
       <circle cx="27" cy="46" r="4.5" fill={skin} />
       <circle cx="73" cy="46" r="4.5" fill={skin} />
 
-      {/* Feature Type 0: Gaming Headphones & Cyber Visor */}
-      {featureType === 0 && (
+      {/* Specific Hanafuda Earrings for Tanjiro */}
+      {detail === 'hanafuda' && (
         <>
-          {/* Hair top */}
-          <path d="M30 38 Q 50 20 70 38 Q 50 28 30 38" fill={hairColor} />
-          {/* Headphones Band */}
-          <path d="M24 44 Q 50 16 76 44" stroke="#0F172A" strokeWidth="5" strokeLinecap="round" fill="none" />
-          <rect x="20" y="38" width="8" height="14" rx="3" fill={hairColor} />
-          <rect x="72" y="38" width="8" height="14" rx="3" fill={hairColor} />
-          {/* Cyber Visor */}
-          <rect x="32" y="40" width="36" height="12" rx="4" fill="#0F172A" />
-          <rect x="34" y="42" width="32" height="8" rx="2" fill={visorColor} opacity="0.9" />
-          {/* Smile */}
-          <path d="M44 56 Q 50 60 56 56" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          <rect x="23" y="48" width="4" height="9" fill="#F8FAFC" stroke="#000" strokeWidth="1" />
+          <circle cx="25" cy="51" r="1" fill="#DC2626" />
+          <rect x="73" y="48" width="4" height="9" fill="#F8FAFC" stroke="#000" strokeWidth="1" />
+          <circle cx="75" cy="51" r="1" fill="#DC2626" />
         </>
       )}
 
-      {/* Feature Type 1: Ninja Headband & Anime Eyes */}
-      {featureType === 1 && (
+      {/* Hair Base Render */}
+      {detail === 'bald_hero' ? (
+        // Saitama Glossy Reflection
+        <path d="M36 28 Q 50 22 64 28" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
+      ) : detail === 'straw_hat' ? (
+        // Strawhat Bangs
+        <path d="M32 38 Q 40 46 50 38 Q 60 46 68 38" fill={hair} />
+      ) : detail === 'dbz_spikes' ? (
+        // Goku DBZ Spikes
+        <path d="M14 36 L 24 16 L 36 26 L 50 6 L 64 26 L 76 16 L 86 36 L 74 38 L 50 28 L 26 38 Z" fill={hair} />
+      ) : detail === 'owl_hair' ? (
+        // Bokuto Horn Hair
+        <path d="M26 36 L 32 14 L 46 28 L 54 28 L 68 14 L 74 36 Z" fill={hair} stroke="#09090B" strokeWidth="2" />
+      ) : (
+        // Default Anime Spiky / Bangs Hair
+        <path d="M26 38 L 32 20 L 42 30 L 52 16 L 62 30 L 72 20 L 74 38 L 50 28 Z" fill={hair} />
+      )}
+
+      {/* Headbands / Eyewear / Masks */}
+      {detail === 'headband' && (
+        <g>
+          <rect x="26" y="30" width="48" height="10" fill="#1E293B" rx="2" />
+          <rect x="42" y="32" width="16" height="6" fill="#94A3B8" rx="1" />
+          <circle cx="50" cy="35" r="1.5" fill="#1E293B" />
+        </g>
+      )}
+
+      {detail === 'blindfold' && (
+        <rect x="28" y="38" width="44" height="14" rx="4" fill="#09090B" />
+      )}
+
+      {detail === 'mask' && (
+        <g>
+          <rect x="26" y="28" width="48" height="10" fill="#1E3A8A" rx="2" />
+          <polygon points="26,38 50,48 50,38" fill="#1E3A8A" />
+          <path d="M30 50 C 30 50, 42 62, 50 62 C 58 62, 70 50, 70 50 L 70 65 L 30 65 Z" fill="#1E293B" />
+        </g>
+      )}
+
+      {detail === 'orange_mask' && (
+        <circle cx="50" cy="46" r="18" fill="#EA580C" stroke="#000" strokeWidth="1.5" />
+      )}
+
+      {/* Eyes Layer */}
+      {detail !== 'blindfold' && detail !== 'mask' && detail !== 'orange_mask' && (
         <>
-          {/* Spiky Top Hair */}
-          <path d="M26 38 L 34 22 L 44 30 L 52 18 L 62 30 L 70 22 L 74 38 Z" fill={hairColor} />
-          {/* Headband */}
-          <rect x="26" y="32" width="48" height="10" fill="#0F172A" rx="2" />
-          <rect x="42" y="34" width="16" height="6" fill="#94A3B8" rx="1" />
-          {/* Anime Eyes */}
-          <ellipse cx="38" cy="48" rx="3.5" ry="5" fill="#0F172A" />
-          <ellipse cx="62" cy="48" rx="3.5" ry="5" fill="#0F172A" />
-          <circle cx="39" cy="46" r="1.5" fill="#FFFFFF" />
-          <circle cx="63" cy="46" r="1.5" fill="#FFFFFF" />
-          {/* Mask / Scarf */}
-          <path d="M30 52 C 30 52, 42 62, 50 62 C 58 62, 70 52, 70 52 L 70 65 L 30 65 Z" fill={hairColor} />
+          {detail === 'sharingan' ? (
+            <>
+              <circle cx="38" cy="46" r="4.5" fill="#DC2626" />
+              <circle cx="62" cy="46" r="4.5" fill="#DC2626" />
+              <circle cx="38" cy="46" r="1.5" fill="#000" />
+              <circle cx="62" cy="46" r="1.5" fill="#000" />
+            </>
+          ) : detail === 'rinnegan' ? (
+            <>
+              <circle cx="38" cy="46" r="5" fill="#A855F7" stroke="#000" strokeWidth="1" />
+              <circle cx="62" cy="46" r="5" fill="#A855F7" stroke="#000" strokeWidth="1" />
+              <circle cx="38" cy="46" r="2.5" fill="none" stroke="#000" strokeWidth="1" />
+              <circle cx="62" cy="46" r="2.5" fill="none" stroke="#000" strokeWidth="1" />
+            </>
+          ) : (
+            <>
+              <ellipse cx="38" cy="46" rx="3.5" ry="4.5" fill="#0F172A" />
+              <ellipse cx="62" cy="46" rx="3.5" ry="4.5" fill="#0F172A" />
+              <circle cx="39" cy="44.5" r="1.2" fill="#FFFFFF" />
+              <circle cx="63" cy="44.5" r="1.2" fill="#FFFFFF" />
+            </>
+          )}
         </>
       )}
 
-      {/* Feature Type 2: Neko Cat Ears & Cute Anime Expression */}
-      {featureType === 2 && (
-        <>
-          {/* Cat Ears */}
-          <path d="M26 34 L 20 16 L 38 26 Z" fill={hairColor} />
-          <path d="M74 34 L 80 16 L 62 26 Z" fill={hairColor} />
-          <path d="M27 31 L 23 19 L 35 26 Z" fill="#FFD1DC" />
-          <path d="M73 31 L 77 19 L 65 26 Z" fill="#FFD1DC" />
-          {/* Bangs */}
-          <path d="M30 36 Q 40 44 50 36 Q 60 44 70 36 Q 50 28 30 36" fill={hairColor} />
-          {/* Happy Anime Eyes */}
-          <path d="M34 46 Q 40 40 44 46" stroke="#0F172A" strokeWidth="3" strokeLinecap="round" fill="none" />
-          <path d="M56 46 Q 60 40 66 46" stroke="#0F172A" strokeWidth="3" strokeLinecap="round" fill="none" />
-          {/* Blush */}
-          <circle cx="33" cy="52" r="3.5" fill="#FF4D4D" opacity="0.5" />
-          <circle cx="67" cy="52" r="3.5" fill="#FF4D4D" opacity="0.5" />
-          {/* Cat Mouth */}
-          <path d="M44 54 Q 47 57 50 54 Q 53 57 56 54" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" fill="none" />
-        </>
+      {/* Facial Marks / Whiskers / Scars */}
+      {detail === 'headband' && (
+        <g stroke="#D97706" strokeWidth="1">
+          <line x1="30" y1="46" x2="35" y2="47" />
+          <line x1="30" y1="49" x2="35" y2="50" />
+          <line x1="65" y1="47" x2="70" y2="46" />
+          <line x1="65" y1="50" x2="70" y2="49" />
+        </g>
       )}
 
-      {/* Feature Type 3: Cyberpunk Glasses & Cool Hair */}
-      {featureType === 3 && (
-        <>
-          {/* Side Swept Hair */}
-          <path d="M25 40 C 25 20, 50 16, 75 28 C 65 30, 45 28, 30 46 Z" fill={hairColor} />
-          {/* Round Cool Sunglasses */}
-          <circle cx="38" cy="46" r="7" fill="#0F172A" stroke="#CBD5E1" strokeWidth="1.5" />
-          <circle cx="62" cy="46" r="7" fill="#0F172A" stroke="#CBD5E1" strokeWidth="1.5" />
-          <line x1="45" y1="46" x2="55" y2="46" stroke="#0F172A" strokeWidth="2" />
-          <path d="M34 44 Q 38 42 42 46" stroke={visorColor} strokeWidth="1.5" fill="none" />
-          <path d="M58 44 Q 62 42 66 46" stroke={visorColor} strokeWidth="1.5" fill="none" />
-          {/* Cool Smirk */}
-          <path d="M45 57 Q 52 60 56 55" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-        </>
+      {detail === 'sukuna_tattoos' && (
+        <g stroke="#000" strokeWidth="1.5">
+          <line x1="35" y1="52" x2="41" y2="52" />
+          <line x1="59" y1="52" x2="65" y2="52" />
+          <line x1="50" y1="36" x2="50" y2="40" />
+        </g>
       )}
 
-      {/* Feature Type 4: Crown / Horns & Heroic Eyes */}
-      {featureType === 4 && (
-        <>
-          {/* Horns or Crown */}
-          <path d="M30 30 L 36 14 L 42 26 L 50 10 L 58 26 L 64 14 L 70 30 Z" fill="#F59E0B" stroke="#0F172A" strokeWidth="1.5" />
-          {/* Hair Base */}
-          <path d="M28 36 Q 50 30 72 36 Q 50 28 28 36" fill={hairColor} />
-          {/* Heroic Sharp Eyes */}
-          <polygon points="34,44 44,47 36,49" fill="#0F172A" />
-          <polygon points="66,44 56,47 64,49" fill="#0F172A" />
-          <circle cx="39" cy="46" r="2" fill={visorColor} />
-          <circle cx="61" cy="46" r="2" fill={visorColor} />
-          {/* Determined Mouth */}
-          <line x1="43" y1="56" x2="57" y2="56" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" />
-        </>
+      {detail === 'eye_scar' && (
+        <line x1="38" y1="40" x2="38" y2="52" stroke="#991B1B" strokeWidth="2" strokeLinecap="round" />
+      )}
+
+      {/* Mouth */}
+      {detail !== 'bamboo' && detail !== 'mask' && (
+        <path d="M44 56 Q 50 59 56 56" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" fill="none" />
       )}
     </svg>
   );

@@ -1,12 +1,13 @@
 import AvatarGraphic from './AvatarGraphic';
+import { DEFAULT_AVATAR_ID } from '../data/avatars';
 
 export default function Avatar({ user, size = 'md', selected = false, className = '', onClick }) {
   if (!user) return null;
 
-  // Determine avatar ID with fallback to avatar_01
+  // Determine avatar ID with fallback to avatar_naruto_01
   let avatarId = user.avatarId || user.avatar;
   if (!avatarId || typeof avatarId !== 'string' || !avatarId.startsWith('avatar_')) {
-    avatarId = 'avatar_01';
+    avatarId = DEFAULT_AVATAR_ID;
   }
 
   // Size mapping for pixel dimensions

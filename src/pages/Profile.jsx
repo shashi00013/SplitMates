@@ -24,7 +24,7 @@ import { authApi } from '../services/apiService';
 import { getAvatarById } from '../data/avatars';
 import Avatar from '../components/Avatar';
 import NotificationsModal from '../components/NotificationsModal';
-import AvatarPickerModal from '../components/AvatarPickerModal';
+import AnimeAvatarPickerModal from '../components/AnimeAvatarPickerModal';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function Profile() {
   // Draft profile edit state
   const [draftName, setDraftName] = useState(user?.name || '');
 
-  const currentAvatarInfo = getAvatarById(user?.avatarId || user?.avatar || 'avatar_01');
+  const currentAvatarInfo = getAvatarById(user?.avatarId || user?.avatar || 'avatar_naruto_01');
 
   function handleOpenEditModal() {
     setDraftName(user?.name || '');
@@ -68,7 +68,7 @@ export default function Profile() {
       avatarId: newAvatarId,
     };
     setUser(updatedUser);
-    showToast('Avatar updated!');
+    showToast('Anime avatar updated!');
     try {
       await authApi.updateProfile({ avatarId: newAvatarId, avatar: newAvatarId });
     } catch (err) {
@@ -125,7 +125,13 @@ export default function Profile() {
         <h2 style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.01em', marginTop: '12px', marginBottom: '2px', color: 'var(--text-primary)' }}>
           {user?.name}
         </h2>
-        <p className="text-secondary text-xs" style={{ marginBottom: '10px' }}>{user?.email}</p>
+
+        <div className="flex items-center gap-6" style={{ margin: '4px 0 10px 0' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--accent)' }}>
+            👤 {currentAvatarInfo.name}
+          </span>
+          <span className="text-secondary text-xs">• {currentAvatarInfo.anime}</span>
+        </div>
 
         <button
           type="button"
@@ -440,11 +446,11 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Avatar Picker Modal */}
-      <AvatarPickerModal
+      {/* Anime Avatar Picker Modal */}
+      <AnimeAvatarPickerModal
         isOpen={showAvatarModal}
         onClose={() => setShowAvatarModal(false)}
-        currentAvatarId={user?.avatarId || user?.avatar || 'avatar_01'}
+        currentAvatarId={user?.avatarId || user?.avatar || 'avatar_naruto_01'}
         onSelectAvatar={handleSelectAvatar}
       />
 
