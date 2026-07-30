@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MoreVertical, LogOut, QrCode, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, LogOut, QrCode, CheckCircle2, ChevronDown, ChevronUp, Users, ArrowUpRight, PlusCircle, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCurrency, formatDate } from '../data/mockData';
+import { calculateSettlementTransactions } from '../data/balanceEngine';
 import Avatar from '../components/Avatar';
 import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 import SettlementDetailsModal from '../components/SettlementDetailsModal';
@@ -16,7 +17,7 @@ export default function GroupDetails() {
   const [activeExpense, setActiveExpense] = useState(null);
   const [activeSettlement, setActiveSettlement] = useState(null);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
 
   const {
@@ -25,7 +26,7 @@ export default function GroupDetails() {
     getGroupMembers,
     getBalancesForGroup,
     getGroupExpenses,
-    getSettlementHistory,
+    getUserById,
     leaveGroup,
     showToast,
     isLoading,
@@ -59,15 +60,36 @@ export default function GroupDetails() {
   const members = getGroupMembers(groupId);
   const balances = getBalancesForGroup(groupId);
   const myBalance = balances[user?.id] || 0;
-  const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
 
   const groupExpenses = getGroupExpenses(groupId);
   const activeCycleExpenses = groupExpenses.filter((e) => !e.settled);
-
   const recentExpenses = [...activeCycleExpenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
+  // Compute exact simplified pair-wise dues for this group
+  const groupTxs = calculateSettlementTransactions(balances);
+  const memberDuesSentences = groupTxs.map((tx) => {
+    const fromUser = getUserById(tx.from);
+    const toUser = getUserById(tx.to);
+
+    if (tx.from === user?.id) {
+      return {
+        type: 'owe',
+        text: `Tumhe ${toUser?.firstName || 'Dost'} ko ${formatCurrency(tx.amount)} dene hain`,
+        amount: tx.amount,
+        targetUser: toUser,
+      };
+    } else if (tx.to === user?.id) {
+      return {
+        type: 'owed',
+        text: `Tumhe ${fromUser?.firstName || 'Dost'} se ${formatCurrency(tx.amount)} lene hain`,
+        amount: tx.amount,
+        targetUser: fromUser,
+      };
+    }
+    return null;
+  }).filter(Boolean);
+
   async function handleLeaveGroup() {
-    setShowMenu(false);
     if (isLeaving) return;
     setIsLeaving(true);
     try {
@@ -83,96 +105,68 @@ export default function GroupDetails() {
 
   return (
     <div className="page" id="group-details-page">
-      {/* TIER 1 — HEADER */}
-      <div className="flex items-center justify-between" style={{ paddingBottom: '8px', position: 'relative' }}>
+      {/* ── HEADER ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between" style={{ paddingBottom: '8px' }}>
         <button className="btn-icon" onClick={() => navigate('/groups')} id="group-back-btn">
           <ChevronLeft size={20} />
         </button>
 
-        <div style={{ textAlign: 'center' }}>
+        <div className="flex items-center gap-8">
+          <span style={{ fontSize: '1.4rem' }}>{group.icon || '🏠'}</span>
           <h1 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>{group.name}</h1>
-          <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>
-            {members.length} {members.length === 1 ? 'person' : 'people'}
-          </p>
         </div>
 
-        <button
-          className="btn-icon"
-          id="group-menu-btn"
-          onClick={() => setShowMenu(!showMenu)}
-          aria-label="Group options"
-        >
-          <MoreVertical size={20} />
-        </button>
-
-        {/* ⋯ Contextual Menu */}
-        {showMenu && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '48px',
-              right: '0',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-md)',
-              padding: '8px',
-              boxShadow: 'var(--shadow-card)',
-              zIndex: 100,
-              minWidth: '190px',
-            }}
-            id="group-dropdown-menu"
-          >
-            <button
-              className="menu-item flex items-center gap-10"
-              onClick={() => { setShowMenu(false); setIsInviteOpen(true); }}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
-            >
-              <QrCode size={16} style={{ color: 'var(--accent)' }} /> Group Code & QR
-            </button>
-            <button
-              className="menu-item flex items-center gap-10"
-              onClick={() => { setShowMenu(false); navigate(`/settle/${groupId}`); }}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
-            >
-              <CheckCircle2 size={16} style={{ color: 'var(--accent)' }} /> Clear bills
-            </button>
-            <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
-            <button
-              className="menu-item flex items-center gap-10"
-              onClick={handleLeaveGroup}
-              disabled={isLeaving}
-              style={{ padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', color: 'var(--negative)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left' }}
-            >
-              <LogOut size={16} /> {isLeaving ? 'Leaving...' : 'Leave Group'}
-            </button>
-          </div>
-        )}
+        <div style={{ width: '36px' }} />
       </div>
 
-      {/* TIER 2 — NET BALANCE HERO */}
+      {/* ── DEFAULT VIEW: Simple Balance Summary Card ───────────────────── */}
       <div className="card card-glow page-section" style={{ marginTop: '12px', padding: '20px' }} id="group-net-balance-card">
-        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-          {t('netBalance')}
+        <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+          Group Balance
         </p>
-        <p className="financial-hero-amount" style={{ color: myBalance > 0 ? 'var(--accent)' : myBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
-          {formatCurrency(Math.abs(myBalance))}
-        </p>
-        {myBalance > 0 ? (
-          <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
-            You get {formatCurrency(Math.abs(myBalance))}
-          </p>
-        ) : myBalance < 0 ? (
-          <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
-            You need to pay {formatCurrency(Math.abs(myBalance))}
-          </p>
+
+        {memberDuesSentences.length > 0 ? (
+          <div className="flex flex-col gap-6">
+            {memberDuesSentences.map((sentence, idx) => (
+              <p
+                key={idx}
+                className={sentence.type === 'owed' ? 'text-accent fw-700' : 'text-negative fw-700'}
+                style={{ fontSize: '1.05rem', margin: 0 }}
+              >
+                {sentence.text}
+              </p>
+            ))}
+          </div>
         ) : (
-          <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
-            All clear 🎉
+          <p className="text-sm fw-600" style={{ color: 'var(--positive)', margin: 0 }}>
+            Sab cleared hai 🎉
           </p>
         )}
       </div>
 
-      {/* TIER 3 — ACTIVE SETTLEMENT ATTENTION (Rendered ONLY when active) */}
+      {/* ── DEFAULT VIEW: Main Action Buttons ───────────────────────────── */}
+      <div className="grid grid-2 gap-12 page-section" style={{ marginTop: '-4px' }}>
+        <button
+          className="btn btn-primary flex items-center justify-center gap-6"
+          onClick={() => navigate('/add-expense', { state: { groupId } })}
+          id="group-add-expense-btn"
+          style={{ padding: '12px', fontWeight: 700, fontSize: '0.9rem' }}
+        >
+          <PlusCircle size={18} />
+          + Add Expense
+        </button>
+        <button
+          className="btn btn-secondary flex items-center justify-center gap-6"
+          onClick={() => navigate(`/settle/${groupId}`)}
+          id="group-settle-up-btn"
+          style={{ padding: '12px', fontWeight: 700, fontSize: '0.9rem', borderColor: 'var(--accent)', color: 'var(--accent)' }}
+        >
+          <CheckCircle2 size={18} />
+          Settle Up
+        </button>
+      </div>
+
+      {/* Active Settlement Attention (If pending) */}
       {settlements[groupId]?.status === 'pending' && (
         <div
           className="card page-section flex items-center justify-between"
@@ -187,65 +181,32 @@ export default function GroupDetails() {
         >
           <div>
             <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-              Clearing bills...
+              Payment Pending...
             </h4>
             <p className="text-secondary text-xs" style={{ margin: 0, marginTop: '2px' }}>
-              Please confirm your payment
+              Rahul ko ₹250 dene hain
             </p>
           </div>
           <div className="flex items-center gap-4 text-accent text-xs fw-600" style={{ color: 'var(--warning)' }}>
-            <span>Tap to continue</span>
+            <span>Mark Paid</span>
             <ArrowUpRight size={16} />
           </div>
         </div>
       )}
 
-      {/* TIER 4 — MEMBERS & DUES */}
-      <div className="section-header">
-        <h2>People ({members.length})</h2>
-      </div>
-
-      <div className="card page-section" style={{ padding: '8px 16px' }}>
-        {members.map((m) => {
-          const bal = balances[m.id] || 0;
-          const isMe = m.id === user?.id;
-          const bClass = bal > 0 ? 'text-accent' : bal < 0 ? 'text-negative' : 'text-secondary';
-          const memberName = isMe ? 'You' : m.firstName || m.name || 'Person';
-          const balText = isMe
-            ? (bal > 0 ? `You get ${formatCurrency(bal)}` : bal < 0 ? `You need to pay ${formatCurrency(Math.abs(bal))}` : 'All clear 🎉')
-            : (bal > 0 ? `${memberName} needs to pay you ${formatCurrency(bal)}` : bal < 0 ? `You need to pay ${memberName} ${formatCurrency(Math.abs(bal))}` : 'All clear 🎉');
-
-          return (
-            <div
-              key={m.id}
-              className="flex justify-between items-center"
-              style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}
-            >
-              <div className="flex items-center gap-10">
-                <Avatar user={m} size="sm" />
-                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {memberName}
-                </span>
-              </div>
-              <span className={`text-xs fw-700 ${bClass}`}>
-                {balText}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* TIER 5 — CURRENT EXPENSES */}
+      {/* ── DEFAULT VIEW: Recent Bills ──────────────────────────────────── */}
       <div className="section-header flex justify-between items-center">
-        <h2>Recent bills ({activeCycleExpenses.length})</h2>
-        <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-group-expenses">
-          {t('viewAll')}
-        </button>
+        <h2>Recent Bills ({activeCycleExpenses.length})</h2>
+        {activeCycleExpenses.length > 0 && (
+          <button className="see-all" onClick={() => navigate('/expenses')} id="see-all-group-expenses">
+            {t('viewAll')}
+          </button>
+        )}
       </div>
 
       <div className="card page-section" style={{ padding: '0 16px' }}>
         {activeCycleExpenses.length === 0 ? (
-          <p className="text-secondary text-center" style={{ padding: '24px 0' }}>{t('noExpensesYet')}</p>
+          <p className="text-secondary text-center" style={{ padding: '24px 0' }}>No bills added yet</p>
         ) : (
           recentExpenses.map((exp) => {
             const payer = members.find((m) => m.id === exp.paidBy);
@@ -257,8 +218,8 @@ export default function GroupDetails() {
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
-              ? (receivable > 0 ? `You get ${formatCurrency(receivable)}` : 'All clear 🎉')
-              : (userShare > 0 ? `You need to pay ${payer?.firstName || 'person'} ${formatCurrency(userShare)}` : 'Not involved');
+              ? (receivable > 0 ? `Tumhe ${formatCurrency(receivable)} milne hain` : 'Sab cleared hai 🎉')
+              : (userShare > 0 ? `Tumhe ${formatCurrency(userShare)} dene hain` : 'Not involved');
 
             return (
               <div
@@ -271,7 +232,7 @@ export default function GroupDetails() {
                 <div className="expense-icon">{exp.emoji}</div>
                 <div className="expense-info">
                   <h3>{exp.title}</h3>
-                  <p>{t('paidBy')} {paidByLabel} · {formatDate(exp.date)}</p>
+                  <p>{paidByLabel} ne diya · {formatDate(exp.date)}</p>
                 </div>
                 <div className="expense-amount" style={{ textAlign: 'right' }}>
                   <p className="amount">{formatCurrency(exp.amount)}</p>
@@ -285,17 +246,107 @@ export default function GroupDetails() {
         )}
       </div>
 
-      {/* TIER 6 — ONE PRIMARY ACTION */}
-      <div style={{ marginTop: '8px' }}>
+      {/* ── MORE OPTIONS: Collapsible Section (Members, Invite Code, Detailed Balances, Leave) ── */}
+      <div className="page-section" id="group-more-options-section">
         <button
-          className="btn btn-primary btn-full"
-          onClick={() => navigate('/add-expense', { state: { groupId } })}
-          id="add-expense-btn"
+          type="button"
+          className="btn btn-secondary btn-full flex items-center justify-between"
+          onClick={() => setShowMoreOptions((prev) => !prev)}
+          id="toggle-group-more-options-btn"
+          style={{ padding: '12px 16px', fontSize: '0.85rem', fontWeight: 700 }}
         >
-          + {t('addExpense')}
+          <span>More Options (Members, QR & Details)</span>
+          {showMoreOptions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
+
+        {showMoreOptions && (
+          <div className="flex flex-col gap-16" style={{ marginTop: '14px' }}>
+            {/* Group Members */}
+            <div className="card" style={{ padding: '0 16px' }}>
+              <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', padding: '12px 0 6px 0' }}>
+                Group Members ({members.length})
+              </p>
+              {members.map((m) => {
+                const bal = balances[m.id] || 0;
+                const isMe = m.id === user?.id;
+                const bClass = bal > 0 ? 'text-accent' : bal < 0 ? 'text-negative' : 'text-secondary';
+                const memberName = isMe ? 'You' : m.firstName || m.name || 'Person';
+                const balText = isMe
+                  ? (bal > 0 ? `Tumhe ${formatCurrency(bal)} milne hain` : bal < 0 ? `Tumhe ${formatCurrency(Math.abs(bal))} dene hain` : 'All clear 🎉')
+                  : (bal > 0 ? `${memberName} se ${formatCurrency(bal)} milne hain` : bal < 0 ? `${memberName} ko ${formatCurrency(Math.abs(bal))} dene hain` : 'All clear 🎉');
+
+                return (
+                  <div
+                    key={m.id}
+                    className="flex justify-between items-center"
+                    style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}
+                  >
+                    <div className="flex items-center gap-10">
+                      <Avatar user={m} size="sm" />
+                      <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {memberName}
+                      </span>
+                    </div>
+                    <span className={`text-xs fw-700 ${bClass}`}>
+                      {balText}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Actions Grid: Invite & Detailed Balances */}
+            <div className="flex flex-col gap-8">
+              <button
+                className="btn btn-secondary flex items-center justify-between"
+                onClick={() => setIsInviteOpen(true)}
+                id="group-invite-qr-btn"
+                style={{ padding: '12px 16px', fontSize: '0.85rem' }}
+              >
+                <div className="flex items-center gap-10">
+                  <QrCode size={18} style={{ color: 'var(--accent)' }} />
+                  <span>Invite Friends & Show QR Code</span>
+                </div>
+                <ArrowUpRight size={16} />
+              </button>
+
+              <button
+                className="btn btn-secondary flex items-center justify-between"
+                onClick={() => navigate('/balance-breakdown')}
+                id="group-detailed-balances-btn"
+                style={{ padding: '12px 16px', fontSize: '0.85rem' }}
+              >
+                <div className="flex items-center gap-10">
+                  <ShieldCheck size={18} style={{ color: 'var(--accent)' }} />
+                  <span>Detailed Balance Breakdown</span>
+                </div>
+                <ArrowUpRight size={16} />
+              </button>
+            </div>
+
+            {/* Leave Group Button */}
+            <button
+              className="btn flex items-center justify-center gap-8"
+              onClick={handleLeaveGroup}
+              disabled={isLeaving}
+              id="leave-group-btn"
+              style={{
+                padding: '12px',
+                background: 'rgba(255, 71, 87, 0.08)',
+                border: '1px solid var(--negative)',
+                color: 'var(--negative)',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+              }}
+            >
+              <LogOut size={16} />
+              {isLeaving ? 'Leaving group...' : 'Leave Group'}
+            </button>
+          </div>
+        )}
       </div>
 
+      {/* Modals */}
       <ExpenseDetailsModal expense={activeExpense} onClose={() => setActiveExpense(null)} />
       <SettlementDetailsModal settlement={activeSettlement} onClose={() => setActiveSettlement(null)} />
       <InviteGroupModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} group={group} />

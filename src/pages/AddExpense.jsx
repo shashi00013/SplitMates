@@ -226,7 +226,7 @@ export default function AddExpense() {
         {/* 1. GROUP SELECTOR */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Which group?
+            Group
           </label>
           <select
             className="input"
@@ -244,12 +244,12 @@ export default function AddExpense() {
         {/* 2. EXPENSE TITLE */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            What was the bill for?
+            Kya kharida?
           </label>
           <input
             className="input"
             type="text"
-            placeholder="Dinner, groceries, Uber..."
+            placeholder="Dinner, groceries, rent..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             id="expense-title-input"
@@ -260,7 +260,7 @@ export default function AddExpense() {
         {/* 3. AMOUNT */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            How much was it?
+            Kitna laga?
           </label>
           <div style={{ position: 'relative' }}>
             <span style={{
@@ -284,7 +284,7 @@ export default function AddExpense() {
         {/* 4. WHO PAID? */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Who paid the bill?
+            Kisne paise diye?
           </label>
           <div
             style={{
@@ -579,7 +579,7 @@ export default function AddExpense() {
           id="submit-expense-btn"
           style={{ opacity: (isValid && !isSubmitting) ? 1 : 0.5, marginTop: '8px', minHeight: '48px', fontSize: '1rem', fontWeight: 800 }}
         >
-          {isSubmitting ? 'Adding bill...' : (editingExpenseId ? 'Save Changes' : 'Add bill')}
+          {isSubmitting ? 'Saving expense...' : (editingExpenseId ? 'Save Changes' : 'Save Expense')}
         </button>
       </form>
     </div>

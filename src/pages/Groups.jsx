@@ -82,10 +82,10 @@ export default function Groups() {
           const myBalance = user ? (balances[user.id] || 0) : 0;
           const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
           const statusText = myBalance > 0
-            ? `You get ${formatCurrency(Math.abs(myBalance))}`
+            ? `Tumhe ${formatCurrency(Math.abs(myBalance))} milne hain`
             : myBalance < 0
-            ? `You need to pay ${formatCurrency(Math.abs(myBalance))}`
-            : 'All clear 🎉';
+            ? `Tumhe ${formatCurrency(Math.abs(myBalance))} dene hain`
+            : 'Sab cleared hai 🎉';
 
           return (
             <div
