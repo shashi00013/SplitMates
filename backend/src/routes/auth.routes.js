@@ -3,6 +3,7 @@ import {
   register,
   login,
   getMe,
+  updateProfile,
   changePassword,
   forgotPassword,
   resetPassword,
@@ -16,6 +17,7 @@ const router = Router();
 router.post('/register', authRateLimiter, register);
 router.post('/login', authRateLimiter, login);
 router.get('/me', authenticateToken, getMe);
+router.put('/profile', authenticateToken, updateProfile);
 
 router.put('/change-password', authenticateToken, changePassword);
 router.post('/forgot-password', forgotPasswordRateLimiter, forgotPassword);

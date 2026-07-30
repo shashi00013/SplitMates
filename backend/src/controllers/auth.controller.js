@@ -84,6 +84,31 @@ export async function getMe(req, res) {
   return res.json({ user: req.user });
 }
 
+export async function updateProfile(req, res, next) {
+  try {
+    const userId = req.user?.id || req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    }
+
+    const { name, avatar, avatarId } = req.body;
+    const selectedAvatar = avatarId || avatar || 'avatar_01';
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(name ? { name: name.trim() } : {}),
+        avatar: selectedAvatar,
+      },
+    });
+
+    const serialized = serializeUser(updatedUser);
+    return res.json({ user: serialized });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function changePassword(req, res, next) {
   try {
     const validated = changePasswordSchema.parse(req.body);

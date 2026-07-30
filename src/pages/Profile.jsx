@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronRight,
@@ -12,8 +12,7 @@ import {
   Globe,
   X,
   Check,
-  Camera,
-  Upload,
+  Sparkles,
   KeyRound,
   Shield,
 } from 'lucide-react';
@@ -21,10 +20,11 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../translations/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../data/mockData';
+import { authApi } from '../services/apiService';
+import { getAvatarById } from '../data/avatars';
 import Avatar from '../components/Avatar';
 import NotificationsModal from '../components/NotificationsModal';
-
-const PRESET_CHARACTERS = ['🦊', '🐯', '🦁', '🐼', '🐱', '🐶', '🚀', '🦄', '⚡', '👑'];
+import AvatarPickerModal from '../components/AvatarPickerModal';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -48,53 +48,50 @@ export default function Profile() {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // Draft profile edit state
   const [draftName, setDraftName] = useState(user?.name || '');
-  const [draftAvatar, setDraftAvatar] = useState(user?.avatar || null);
-  const fileInputRef = useRef(null);
+
+  const currentAvatarInfo = getAvatarById(user?.avatarId || user?.avatar || 'avatar_01');
 
   function handleOpenEditModal() {
     setDraftName(user?.name || '');
-    setDraftAvatar(user?.avatar || null);
     setShowEditModal(true);
   }
 
-  function handleImageUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      showToast('Please select a valid image file');
-      return;
-    }
-
-    if (file.size > 3 * 1024 * 1024) {
-      showToast('Image size should be less than 3MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setDraftAvatar(event.target.result);
-        showToast('Photo uploaded!');
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function handleSaveProfile() {
+  async function handleSelectAvatar(newAvatarId) {
     if (!user) return;
     const updatedUser = {
       ...user,
-      name: draftName.trim() || user.name,
-      firstName: (draftName.trim() || user.name).split(' ')[0],
-      avatar: draftAvatar,
+      avatar: newAvatarId,
+      avatarId: newAvatarId,
+    };
+    setUser(updatedUser);
+    showToast('Avatar updated!');
+    try {
+      await authApi.updateProfile({ avatarId: newAvatarId, avatar: newAvatarId });
+    } catch (err) {
+      // handled offline
+    }
+  }
+
+  async function handleSaveProfile() {
+    if (!user) return;
+    const newName = draftName.trim() || user.name;
+    const updatedUser = {
+      ...user,
+      name: newName,
+      firstName: newName.split(' ')[0],
     };
     setUser(updatedUser);
     setShowEditModal(false);
     showToast('Profile updated!');
+    try {
+      await authApi.updateProfile({ name: newName });
+    } catch (err) {
+      // handled offline
+    }
   }
 
   return (
@@ -119,34 +116,26 @@ export default function Profile() {
       <div className="flex flex-col items-center text-center page-section" style={{ paddingTop: '8px' }}>
         <div
           style={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }}
-          onClick={handleOpenEditModal}
+          onClick={() => setShowAvatarModal(true)}
           id="profile-avatar-clickable"
         >
           <Avatar user={user} size="xl" />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              background: 'var(--accent)',
-              color: '#000',
-              borderRadius: '50%',
-              padding: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-              border: '2px solid var(--bg-primary)',
-            }}
-          >
-            <Camera size={14} />
-          </div>
         </div>
 
         <h2 style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.01em', marginTop: '12px', marginBottom: '2px', color: 'var(--text-primary)' }}>
           {user?.name}
         </h2>
-        <p className="text-secondary text-sm">{user?.email}</p>
+        <p className="text-secondary text-xs" style={{ marginBottom: '10px' }}>{user?.email}</p>
+
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm flex items-center gap-6"
+          onClick={() => setShowAvatarModal(true)}
+          id="change-avatar-btn"
+          style={{ padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', fontWeight: 700, borderColor: 'var(--accent)', color: 'var(--accent)' }}
+        >
+          <Sparkles size={14} /> [ Change Avatar ]
+        </button>
       </div>
 
       {/* 3. One Unified Net Balance Card (Matching Home Screen) */}
@@ -409,59 +398,20 @@ export default function Profile() {
               </button>
             </div>
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleImageUpload}
-              id="avatar-file-input"
-            />
-
             <div className="flex flex-col items-center gap-10">
-              <Avatar user={{ ...user, avatar: draftAvatar }} size="xl" />
+              <Avatar user={user} size="xl" />
               <button
                 type="button"
-                className="btn btn-outline text-xs"
-                onClick={() => fileInputRef.current?.click()}
-                style={{ borderRadius: 'var(--radius-full)', borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 600 }}
-                id="upload-photo-btn"
+                className="btn btn-outline text-xs flex items-center gap-6"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setShowAvatarModal(true);
+                }}
+                style={{ borderRadius: 'var(--radius-full)', borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 700 }}
+                id="open-avatar-picker-btn"
               >
-                <Upload size={14} /> Upload Custom Photo
+                <Sparkles size={14} /> [ Change Avatar ]
               </button>
-            </div>
-
-            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
-              <p className="text-secondary text-xs fw-700" style={{ marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Character Avatar
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
-                {PRESET_CHARACTERS.map((char) => {
-                  const isSelected = draftAvatar === char;
-                  return (
-                    <button
-                      key={char}
-                      type="button"
-                      onClick={() => setDraftAvatar(char)}
-                      style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        fontSize: '1.3rem',
-                        background: isSelected ? 'var(--accent-dim)' : 'var(--bg-input)',
-                        border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border-color)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      id={`avatar-char-${char}`}
-                    >
-                      {char}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             <div className="input-group">
@@ -489,6 +439,14 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      {/* Avatar Picker Modal */}
+      <AvatarPickerModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        currentAvatarId={user?.avatarId || user?.avatar || 'avatar_01'}
+        onSelectAvatar={handleSelectAvatar}
+      />
 
       {/* Notifications Modal */}
       <NotificationsModal

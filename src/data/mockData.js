@@ -30,7 +30,8 @@ export const currentUser = {
   firstName: "Arjun",
   email: "arjun.mehra@email.com",
   phone: "+91 90123 45678",
-  avatar: null,
+  avatar: "avatar_01",
+  avatarId: "avatar_01",
   color: "#CCFF00",
   joinedAt: "2025-03-10",
 };
@@ -40,11 +41,11 @@ export const currentUser = {
 // ============================================================
 export const allUsers = [
   currentUser,
-  { id: "user-2", name: "Vikram Joshi", firstName: "Vikram", email: "vikram.joshi@email.com", color: "#FF6B6B", avatar: null },
-  { id: "user-3", name: "Sneha Nair", firstName: "Sneha", email: "sneha.nair@email.com", color: "#4ECDC4", avatar: null },
-  { id: "user-4", name: "Devika Rao", firstName: "Devika", email: "devika.rao@email.com", color: "#FFE66D", avatar: null },
-  { id: "user-5", name: "Rohan Pillai", firstName: "Rohan", email: "rohan.pillai@email.com", color: "#A78BFA", avatar: null },
-  { id: "user-6", name: "Tara Desai", firstName: "Tara", email: "tara.desai@email.com", color: "#F472B6", avatar: null },
+  { id: "user-2", name: "Vikram Joshi", firstName: "Vikram", email: "vikram.joshi@email.com", color: "#FF6B6B", avatar: "avatar_02", avatarId: "avatar_02" },
+  { id: "user-3", name: "Sneha Nair", firstName: "Sneha", email: "sneha.nair@email.com", color: "#4ECDC4", avatar: "avatar_03", avatarId: "avatar_03" },
+  { id: "user-4", name: "Devika Rao", firstName: "Devika", email: "devika.rao@email.com", color: "#FFE66D", avatar: "avatar_04", avatarId: "avatar_04" },
+  { id: "user-5", name: "Rohan Pillai", firstName: "Rohan", email: "rohan.pillai@email.com", color: "#A78BFA", avatar: "avatar_05", avatarId: "avatar_05" },
+  { id: "user-6", name: "Tara Desai", firstName: "Tara", email: "tara.desai@email.com", color: "#F472B6", avatar: "avatar_06", avatarId: "avatar_06" },
 ];
 
 // ============================================================

@@ -1,46 +1,39 @@
+import AvatarGraphic from './AvatarGraphic';
+
 export default function Avatar({ user, size = 'md', selected = false, className = '', onClick }) {
   if (!user) return null;
 
-  const isImage = typeof user.avatar === 'string' && (
-    user.avatar.startsWith('data:image/') ||
-    user.avatar.startsWith('http://') ||
-    user.avatar.startsWith('https://') ||
-    user.avatar.startsWith('blob:')
-  );
+  // Determine avatar ID with fallback to avatar_01
+  let avatarId = user.avatarId || user.avatar;
+  if (!avatarId || typeof avatarId !== 'string' || !avatarId.startsWith('avatar_')) {
+    avatarId = 'avatar_01';
+  }
 
-  const initial = user.firstName ? user.firstName[0] : user.name ? user.name[0] : '?';
-  const displayContent = isImage ? null : (user.avatar || initial);
-
+  // Size mapping for pixel dimensions
+  const pixelSize = size === 'sm' ? 32 : size === 'lg' ? 56 : size === 'xl' ? 84 : 44;
   const sizeClass = size === 'sm' ? 'avatar-sm' : size === 'lg' ? 'avatar-lg' : size === 'xl' ? 'avatar-xl' : '';
   const selectedClass = selected ? 'avatar-selected' : '';
-  const bgColor = user.color || '#CCFF00';
 
   return (
     <div
       className={`avatar ${sizeClass} ${selectedClass} ${className}`}
       onClick={onClick}
       style={{
-        backgroundColor: bgColor,
-        borderColor: selected ? 'var(--accent)' : bgColor + '44',
+        borderRadius: '50%',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: onClick ? 'pointer' : 'default',
         userSelect: 'none',
+        border: selected ? '2px solid var(--accent)' : '2px solid transparent',
+        boxShadow: selected ? '0 0 10px rgba(204, 255, 0, 0.4)' : 'none',
+        flexShrink: 0,
+        transition: 'transform 0.15s ease, border-color 0.15s ease',
       }}
+      aria-label={`${user.name || 'User'}'s Avatar`}
     >
-      {isImage ? (
-        <img
-          src={user.avatar}
-          alt={user.name || 'User Avatar'}
-          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-        />
-      ) : (
-        <span style={{ fontSize: size === 'xl' ? '1.8rem' : size === 'lg' ? '1.4rem' : '1rem' }}>
-          {displayContent}
-        </span>
-      )}
+      <AvatarGraphic avatarId={avatarId} size={pixelSize} />
     </div>
   );
 }

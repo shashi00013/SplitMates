@@ -103,6 +103,18 @@ export const authApi = {
     localStorage.removeItem('splitly_mock_user');
   },
 
+  async updateProfile(profileData) {
+    try {
+      const data = await api.put('/auth/profile', profileData);
+      return mapUser(data?.user || data);
+    } catch (err) {
+      if (err.status === 0 || !err.status) {
+        return mapUser(profileData);
+      }
+      throw err;
+    }
+  },
+
   async changePassword(currentPassword, newPassword) {
     try {
       const data = await api.put('/auth/change-password', { currentPassword, newPassword });
