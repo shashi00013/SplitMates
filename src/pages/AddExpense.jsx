@@ -244,7 +244,7 @@ export default function AddExpense() {
         {/* 2. EXPENSE TITLE */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Kya kharida?
+            {t('kyaKharida')}
           </label>
           <input
             className="input"
@@ -260,7 +260,7 @@ export default function AddExpense() {
         {/* 3. AMOUNT */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Kitna laga?
+            {t('kitnaLaga')}
           </label>
           <div style={{ position: 'relative' }}>
             <span style={{
@@ -284,7 +284,7 @@ export default function AddExpense() {
         {/* 4. WHO PAID? */}
         <div className="input-group">
           <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
-            Kisne paise diye?
+            {t('kisnePaiseDiye')}
           </label>
           <div
             style={{

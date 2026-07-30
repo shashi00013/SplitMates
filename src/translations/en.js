@@ -106,5 +106,26 @@ export const en = {
   privacy: 'Privacy',
   helpSupport: 'Help & Support',
   logOut: 'Log Out',
+
+  // First Time User & Progressive Disclosure
+  welcomeToSplitMates: 'Welcome to SplitMates 🎉',
+  firstTimeSub: 'Your account is ready. Follow these 3 simple steps to get started:',
+  step1Title: 'Create Group',
+  step1Desc: 'Create a group for your roommates or friends.',
+  step2Title: 'Add Friends',
+  step2Desc: 'Add friends using invite code or QR code.',
+  step3Title: 'Add Expense',
+  step3Desc: 'Add rent, groceries, or bills to auto split.',
+  moreInsights: 'More Insights & Analytics',
+  kyaKharida: 'What was it for?',
+  kitnaLaga: 'How much was it?',
+  kisnePaiseDiye: 'Who paid?',
+  saveExpense: 'Save Expense',
+  markAsPaid: 'Mark as Paid',
+  moreOptions: 'More Options',
+  lessOptions: 'Less Options',
+  searchAndFilters: 'Search & History Filters',
+  detailsAndHistory: 'More Details & History',
+  membersQrDetails: 'More Options (Members, QR & Details)',
 };
 

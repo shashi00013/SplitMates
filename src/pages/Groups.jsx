@@ -9,7 +9,7 @@ import JoinGroupModal from '../components/JoinGroupModal';
 
 export default function Groups() {
   const { user, getUserGroups, getBalancesForGroup, isLoadingGroups, groupsError, refreshGroups, selectGroup } = useApp();
-  const { t } = useLanguage();
+  const { t, formatYouGet, formatYouPay } = useLanguage();
   const navigate = useNavigate();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -82,10 +82,10 @@ export default function Groups() {
           const myBalance = user ? (balances[user.id] || 0) : 0;
           const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
           const statusText = myBalance > 0
-            ? `Tumhe ${formatCurrency(Math.abs(myBalance))} milne hain`
+            ? formatYouGet(formatCurrency(Math.abs(myBalance)))
             : myBalance < 0
-            ? `Tumhe ${formatCurrency(Math.abs(myBalance))} dene hain`
-            : 'Sab cleared hai 🎉';
+            ? formatYouPay(formatCurrency(Math.abs(myBalance)))
+            : t('allSettledUp');
 
           return (
             <div

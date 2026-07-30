@@ -35,8 +35,47 @@ export function LanguageProvider({ children }) {
     return dictionaries.en[key] || key;
   }
 
+  function formatYouGet(amount) {
+    if (language === 'hinglish') return `Tumhe ${amount} milne hain`;
+    if (language === 'hi') return `आपको ${amount} मिलेंगे`;
+    if (language === 'pa') return `ਤੁਹਾਨੂੰ ${amount} ਮਿਲਣਗੇ`;
+    return `You get ${amount}`;
+  }
+
+  function formatYouPay(amount) {
+    if (language === 'hinglish') return `Tumhe ${amount} dene hain`;
+    if (language === 'hi') return `आपको ${amount} देने हैं`;
+    if (language === 'pa') return `ਤੁਸੀਂ ${amount} ਦੇਣੇ ਹਨ`;
+    return `You owe ${amount}`;
+  }
+
+  function formatMemberOwed(name, amount) {
+    if (language === 'hinglish') return `${name} se ${amount} milne hain`;
+    if (language === 'hi') return `${name} से ${amount} मिलेंगे`;
+    if (language === 'pa') return `${name} ਤੋਂ ${amount} ਮਿਲਣਗੇ`;
+    return `${name} owes you ${amount}`;
+  }
+
+  function formatMemberPay(name, amount) {
+    if (language === 'hinglish') return `${name} ko ${amount} dene hain`;
+    if (language === 'hi') return `${name} को ${amount} देने हैं`;
+    if (language === 'pa') return `${name} ਨੂੰ ${amount} ਦੇਣੇ ਹਨ`;
+    return `You owe ${name} ${amount}`;
+  }
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, languages }}>
+    <LanguageContext.Provider
+      value={{
+        language,
+        setLanguage,
+        t,
+        languages,
+        formatYouGet,
+        formatYouPay,
+        formatMemberOwed,
+        formatMemberPay,
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );

@@ -11,7 +11,7 @@ import Avatar from '../components/Avatar';
 export default function Settlement() {
   const { groupId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, formatMemberPay, formatMemberOwed } = useLanguage();
   const {
     user, groups, expenses, settlements,
     getGroupMembers, getBalancesForGroup,
@@ -145,15 +145,13 @@ export default function Settlement() {
   const simpleSentences = transactions.map((tx) => {
     const fromUser = getUserById(tx.from);
     const toUser = getUserById(tx.to);
-    const fromName = tx.from === user?.id ? 'Tumhe' : fromUser?.firstName || 'Dost';
-    const toName = tx.to === user?.id ? 'tumhe' : toUser?.firstName || 'Dost';
 
     if (tx.from === user?.id) {
-      return `Tumhe ${toUser?.firstName || 'Dost'} ko ${formatCurrency(tx.amount)} dene hain`;
+      return formatMemberPay(toUser?.firstName || 'Dost', formatCurrency(tx.amount));
     } else if (tx.to === user?.id) {
-      return `${fromUser?.firstName || 'Dost'} se ${formatCurrency(tx.amount)} milne hain`;
+      return formatMemberOwed(fromUser?.firstName || 'Dost', formatCurrency(tx.amount));
     }
-    return `${fromUser?.firstName || 'Member'} ko ${toUser?.firstName || 'Member'} ko ${formatCurrency(tx.amount)} dene hain`;
+    return formatMemberPay(toUser?.firstName || 'Member', formatCurrency(tx.amount));
   });
 
   return (
@@ -165,7 +163,7 @@ export default function Settlement() {
         </button>
         <div style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-            Hisab-Kitab (Settle Up)
+            {t('settleUp')}
           </h1>
           <p className="text-secondary text-xs" style={{ marginTop: '2px' }}>{group.name}</p>
         </div>
@@ -192,7 +190,7 @@ export default function Settlement() {
           </div>
         ) : (
           <p className="text-sm fw-600 text-positive" style={{ marginBottom: '20px' }}>
-            Koi baaki nahi hai! Sab cleared hai 🎉
+            {t('allSettledUp')}
           </p>
         )}
 
@@ -219,7 +217,7 @@ export default function Settlement() {
               fontWeight: 800,
             }}
           >
-            {isUserConfirmed ? '✓ Paid & Confirmed' : confirmingMemberId === user?.id ? 'Processing...' : 'Mark as Paid'}
+            {isUserConfirmed ? '✓ Paid & Confirmed' : confirmingMemberId === user?.id ? 'Processing...' : (t('markAsPaid') || 'Mark as Paid')}
           </button>
         )}
       </div>
@@ -233,7 +231,7 @@ export default function Settlement() {
           id="toggle-settlement-details-btn"
           style={{ padding: '12px 16px', fontSize: '0.85rem', fontWeight: 700 }}
         >
-          <span>More Details & History</span>
+          <span>{t('detailsAndHistory')}</span>
           {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 

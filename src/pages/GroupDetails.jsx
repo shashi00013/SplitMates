@@ -13,7 +13,7 @@ import InviteGroupModal from '../components/InviteGroupModal';
 export default function GroupDetails() {
   const { groupId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, formatYouGet, formatYouPay, formatMemberOwed, formatMemberPay } = useLanguage();
   const [activeExpense, setActiveExpense] = useState(null);
   const [activeSettlement, setActiveSettlement] = useState(null);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -74,14 +74,14 @@ export default function GroupDetails() {
     if (tx.from === user?.id) {
       return {
         type: 'owe',
-        text: `Tumhe ${toUser?.firstName || 'Dost'} ko ${formatCurrency(tx.amount)} dene hain`,
+        text: formatMemberPay(toUser?.firstName || 'Dost', formatCurrency(tx.amount)),
         amount: tx.amount,
         targetUser: toUser,
       };
     } else if (tx.to === user?.id) {
       return {
         type: 'owed',
-        text: `Tumhe ${fromUser?.firstName || 'Dost'} se ${formatCurrency(tx.amount)} lene hain`,
+        text: formatMemberOwed(fromUser?.firstName || 'Dost', formatCurrency(tx.amount)),
         amount: tx.amount,
         targetUser: fromUser,
       };
@@ -122,7 +122,7 @@ export default function GroupDetails() {
       {/* ── DEFAULT VIEW: Simple Balance Summary Card ───────────────────── */}
       <div className="card card-glow page-section" style={{ marginTop: '12px', padding: '20px' }} id="group-net-balance-card">
         <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-          Group Balance
+          {t('netBalance')}
         </p>
 
         {memberDuesSentences.length > 0 ? (
@@ -139,7 +139,7 @@ export default function GroupDetails() {
           </div>
         ) : (
           <p className="text-sm fw-600" style={{ color: 'var(--positive)', margin: 0 }}>
-            Sab cleared hai 🎉
+            {t('allSettledUp')}
           </p>
         )}
       </div>
@@ -153,7 +153,7 @@ export default function GroupDetails() {
           style={{ padding: '12px', fontWeight: 700, fontSize: '0.9rem' }}
         >
           <PlusCircle size={18} />
-          + Add Expense
+          + {t('addExpense')}
         </button>
         <button
           className="btn btn-secondary flex items-center justify-center gap-6"
@@ -162,7 +162,7 @@ export default function GroupDetails() {
           style={{ padding: '12px', fontWeight: 700, fontSize: '0.9rem', borderColor: 'var(--accent)', color: 'var(--accent)' }}
         >
           <CheckCircle2 size={18} />
-          Settle Up
+          {t('settleUp')}
         </button>
       </div>
 
@@ -188,7 +188,7 @@ export default function GroupDetails() {
             </p>
           </div>
           <div className="flex items-center gap-4 text-accent text-xs fw-600" style={{ color: 'var(--warning)' }}>
-            <span>Mark Paid</span>
+            <span>{t('markAsPaid')}</span>
             <ArrowUpRight size={16} />
           </div>
         </div>
@@ -206,11 +206,11 @@ export default function GroupDetails() {
 
       <div className="card page-section" style={{ padding: '0 16px' }}>
         {activeCycleExpenses.length === 0 ? (
-          <p className="text-secondary text-center" style={{ padding: '24px 0' }}>No bills added yet</p>
+          <p className="text-secondary text-center" style={{ padding: '24px 0' }}>{t('noExpensesYet')}</p>
         ) : (
           recentExpenses.map((exp) => {
             const payer = members.find((m) => m.id === exp.paidBy);
-            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Person';
+            const paidByLabel = exp.paidBy === user?.id ? (t('you') || 'You') : payer?.firstName || 'Person';
             const participants = exp.participants || exp.splitAmong || [];
             const isPayer = exp.paidBy === user?.id;
             const isParticipant = participants.includes(user?.id);
@@ -218,8 +218,8 @@ export default function GroupDetails() {
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
-              ? (receivable > 0 ? `Tumhe ${formatCurrency(receivable)} milne hain` : 'Sab cleared hai 🎉')
-              : (userShare > 0 ? `Tumhe ${formatCurrency(userShare)} dene hain` : 'Not involved');
+              ? (receivable > 0 ? formatYouGet(formatCurrency(receivable)) : t('allSettledUp'))
+              : (userShare > 0 ? formatYouPay(formatCurrency(userShare)) : 'Not involved');
 
             return (
               <div
@@ -255,7 +255,7 @@ export default function GroupDetails() {
           id="toggle-group-more-options-btn"
           style={{ padding: '12px 16px', fontSize: '0.85rem', fontWeight: 700 }}
         >
-          <span>More Options (Members, QR & Details)</span>
+          <span>{t('membersQrDetails')}</span>
           {showMoreOptions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
@@ -270,10 +270,10 @@ export default function GroupDetails() {
                 const bal = balances[m.id] || 0;
                 const isMe = m.id === user?.id;
                 const bClass = bal > 0 ? 'text-accent' : bal < 0 ? 'text-negative' : 'text-secondary';
-                const memberName = isMe ? 'You' : m.firstName || m.name || 'Person';
+                const memberName = isMe ? (t('you') || 'You') : m.firstName || m.name || 'Person';
                 const balText = isMe
-                  ? (bal > 0 ? `Tumhe ${formatCurrency(bal)} milne hain` : bal < 0 ? `Tumhe ${formatCurrency(Math.abs(bal))} dene hain` : 'All clear 🎉')
-                  : (bal > 0 ? `${memberName} se ${formatCurrency(bal)} milne hain` : bal < 0 ? `${memberName} ko ${formatCurrency(Math.abs(bal))} dene hain` : 'All clear 🎉');
+                  ? (bal > 0 ? formatYouGet(formatCurrency(bal)) : bal < 0 ? formatYouPay(formatCurrency(Math.abs(bal))) : t('allSettledUp'))
+                  : (bal > 0 ? formatMemberOwed(memberName, formatCurrency(bal)) : bal < 0 ? formatMemberPay(memberName, formatCurrency(Math.abs(bal))) : t('allSettledUp'));
 
                 return (
                   <div

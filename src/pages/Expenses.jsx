@@ -8,7 +8,7 @@ import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 
 export default function Expenses() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, formatYouGet, formatYouPay } = useLanguage();
   const { user, getAllExpensesForUser, groups, getUserById, getTotalBalances, isLoading } = useApp();
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,7 +41,7 @@ export default function Expenses() {
           <ChevronLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-          Bills History
+          {t('expenses')}
         </h1>
         <div style={{ width: '42px' }} />
       </div>
@@ -49,19 +49,19 @@ export default function Expenses() {
       {/* ── DEFAULT VIEW: Simple Balance Banner ─────────────────────────── */}
       <div className="card card-glow page-section" style={{ padding: '16px 20px', marginBottom: '16px' }} id="expenses-summary-banner">
         <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-          Total Balance
+          {t('netBalance')}
         </p>
         {totalBalance > 0 ? (
           <p className="text-accent fw-800" style={{ fontSize: '1.1rem', margin: 0 }}>
-            Tumhe ₹{Math.abs(totalBalance)} milne hain
+            {formatYouGet(formatCurrency(Math.abs(totalBalance)))}
           </p>
         ) : totalBalance < 0 ? (
           <p className="text-negative fw-800" style={{ fontSize: '1.1rem', margin: 0 }}>
-            Tumhe ₹{Math.abs(totalBalance)} dene hain
+            {formatYouPay(formatCurrency(Math.abs(totalBalance)))}
           </p>
         ) : (
           <p className="text-positive fw-800" style={{ fontSize: '1.1rem', margin: 0 }}>
-            Sab cleared hai 🎉
+            {t('allSettledUp')}
           </p>
         )}
       </div>
@@ -77,7 +77,7 @@ export default function Expenses() {
         >
           <div className="flex items-center gap-8">
             <SlidersHorizontal size={16} style={{ color: 'var(--accent)' }} />
-            <span>Search & History Filters</span>
+            <span>{t('searchAndFilters')}</span>
           </div>
           {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>

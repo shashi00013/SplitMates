@@ -28,7 +28,7 @@ export default function Home() {
     isLoading,
   } = useApp();
 
-  const { t } = useLanguage();
+  const { t, formatYouGet, formatYouPay, formatMemberOwed, formatMemberPay } = useLanguage();
   const navigate = useNavigate();
   const [activeExpense, setActiveExpense] = useState(null);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
@@ -141,34 +141,34 @@ export default function Home() {
         <div className="card page-section text-center" style={{ padding: '24px 18px', background: 'var(--bg-card)' }} id="onboarding-card">
           <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🚀</div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
-            Welcome to SplitMates!
+            {t('welcomeToSplitMates')}
           </h2>
           <p className="text-secondary text-xs" style={{ marginBottom: '20px' }}>
-            Follow these 3 simple steps to start splitting expenses with friends:
+            {t('firstTimeSub')}
           </p>
 
           <div className="flex flex-col gap-12 text-left" style={{ marginBottom: '24px' }}>
             <div className="flex items-center gap-12" style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent)', color: '#000', fontWeight: 800, display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '0.85rem', flexShrink: 0 }}>1</div>
               <div>
-                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Step 1: Group Banao</h4>
-                <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>Roommates ya friends ka group banao</p>
+                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>1. {t('step1Title')}</h4>
+                <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>{t('step1Desc')}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-12" style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent)', color: '#000', fontWeight: 800, display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '0.85rem', flexShrink: 0 }}>2</div>
               <div>
-                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Step 2: Dost Add Karo</h4>
-                <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>Invite code ya QR code se dosto ko add karo</p>
+                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>2. {t('step2Title')}</h4>
+                <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>{t('step2Desc')}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-12" style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent)', color: '#000', fontWeight: 800, display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '0.85rem', flexShrink: 0 }}>3</div>
               <div>
-                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Step 3: Kharcha Add Karo</h4>
-                <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>Rent, groceries ya bill add karke auto split karo</p>
+                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>3. {t('step3Title')}</h4>
+                <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>{t('step3Desc')}</p>
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function Home() {
             id="create-first-group-btn"
             style={{ fontWeight: 700, padding: '12px' }}
           >
-            + Create Your First Group
+            + {t('createGroupTitle')}
           </button>
         </div>
       ) : (
@@ -192,22 +192,22 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-secondary text-xs fw-600" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                  Tumhe milne / dene hain
+                  {t('netBalance')}
                 </p>
                 <p className="financial-hero-amount" style={{ color: totalBalance > 0 ? 'var(--accent)' : totalBalance < 0 ? 'var(--negative)' : 'var(--text-primary)' }}>
                   {formatCurrency(Math.abs(totalBalance))}
                 </p>
                 {totalBalance > 0 ? (
                   <p className="text-accent text-sm fw-600" style={{ marginTop: '8px' }}>
-                    Tumhe ₹{Math.abs(totalBalance)} milne hain
+                    {formatYouGet(formatCurrency(Math.abs(totalBalance)))}
                   </p>
                 ) : totalBalance < 0 ? (
                   <p className="text-negative text-sm fw-600" style={{ marginTop: '8px' }}>
-                    Tumhe ₹{Math.abs(totalBalance)} dene hain
+                    {formatYouPay(formatCurrency(Math.abs(totalBalance)))}
                   </p>
                 ) : (
                   <p className="text-sm fw-600" style={{ marginTop: '8px', color: 'var(--positive)' }}>
-                    Sab cleared hai 🎉
+                    {t('allSettledUp')}
                   </p>
                 )}
               </div>
@@ -219,7 +219,7 @@ export default function Home() {
                     onClick={() => setIsBalanceExpanded(!isBalanceExpanded)}
                     id="toggle-dues-breakdown"
                   >
-                    <span>Details</span>
+                    <span>{t('details') || 'Details'}</span>
                     {isBalanceExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
                 )}
@@ -240,7 +240,7 @@ export default function Home() {
                   Individual Dues Breakdown
                 </p>
                 {memberBreakdownItems.length === 0 ? (
-                  <p className="text-secondary text-xs">All clear 🎉</p>
+                  <p className="text-secondary text-xs">{t('allSettledUp')}</p>
                 ) : (
                   <div className="flex flex-col gap-8">
                     {memberBreakdownItems.map(({ member, amount }) => {
@@ -249,10 +249,10 @@ export default function Home() {
                       const absVal = formatCurrency(Math.abs(amount));
                       const bClass = isOwed ? 'text-accent' : isOwe ? 'text-negative' : 'text-secondary';
                       const bText = isOwed
-                        ? `${member.firstName || 'Dost'} se ${absVal} milne hain`
+                        ? formatMemberOwed(member.firstName || member.name, absVal)
                         : isOwe
-                        ? `${member.firstName || 'Dost'} ko ${absVal} dene hain`
-                        : 'All clear 🎉';
+                        ? formatMemberPay(member.firstName || member.name, absVal)
+                        : t('allSettledUp');
 
                       return (
                         <div key={member.id} className="flex justify-between items-center text-xs">
@@ -279,7 +279,7 @@ export default function Home() {
               style={{ padding: '14px', fontSize: '0.95rem', fontWeight: 700, boxShadow: 'var(--shadow-sm)' }}
             >
               <PlusCircle size={20} />
-              + Add Expense
+              + {t('addExpense')}
             </button>
           </div>
 
@@ -317,10 +317,10 @@ export default function Home() {
                 const myBalance = user ? balances[user.id] || 0 : 0;
                 const statusClass = myBalance > 0 ? 'text-accent' : myBalance < 0 ? 'text-negative' : 'text-secondary';
                 const statusText = myBalance > 0
-                  ? `Tumhe ${formatCurrency(Math.abs(myBalance))} milne hain`
+                  ? formatYouGet(formatCurrency(Math.abs(myBalance)))
                   : myBalance < 0
-                  ? `Tumhe ${formatCurrency(Math.abs(myBalance))} dene hain`
-                  : 'Sab cleared hai 🎉';
+                  ? formatYouPay(formatCurrency(Math.abs(myBalance)))
+                  : t('allSettledUp');
 
                 const statusBg = myBalance > 0
                   ? 'rgba(0, 210, 106, 0.12)'
@@ -429,7 +429,7 @@ export default function Home() {
               recentExpenses.map((exp) => {
                 const payer = getUserById(exp.paidBy);
                 const group = userGroups.find((g) => g.id === exp.groupId);
-                const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Member';
+                const paidByLabel = exp.paidBy === user?.id ? (t('you') || 'You') : payer?.firstName || 'Member';
                 const participants = exp.participants || exp.splitAmong || [];
                 const isPayer = exp.paidBy === user?.id;
                 const isParticipant = participants.includes(user?.id);
@@ -437,10 +437,8 @@ export default function Home() {
                 const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
                 const impactClass = isPayer ? 'text-accent' : userShare > 0 ? 'text-negative' : 'text-secondary';
                 const impactText = isPayer
-                  ? `Tumhe ${formatCurrency(receivable)} milne hain`
-                  : userShare > 0
-                  ? `Tumhe ${formatCurrency(userShare)} dene hain`
-                  : 'Not involved';
+                  ? (receivable > 0 ? formatYouGet(formatCurrency(receivable)) : t('allSettledUp'))
+                  : (userShare > 0 ? formatMemberPay(payer?.firstName || 'Dost', formatCurrency(userShare)) : 'Not involved');
 
                 return (
                   <div
@@ -479,7 +477,7 @@ export default function Home() {
               >
                 <div className="flex items-center gap-8">
                   <Sparkles size={16} style={{ color: 'var(--accent)' }} />
-                  <span>More Insights & Analytics</span>
+                  <span>{t('moreInsights')}</span>
                 </div>
                 {showInsights ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
