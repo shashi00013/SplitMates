@@ -14,38 +14,44 @@ export const hi = {
   back: 'वापस',
   close: 'बंद करें',
   done: 'हो गया',
+  you: 'आप',
 
   // Money & Balance Terms
   youGet: 'आपको मिलेंगे',
   youPay: 'आपको देने हैं',
   totalYouGet: 'कुल आपको मिलेंगे',
   totalYouPay: 'कुल आपको देने हैं',
-  netBalance: 'नेट बैलेंस',
+  netBalance: 'कुल बैलेंस',
+  balanceBreakdown: 'किसे किसे पैसे देने हैं',
   allSettled: 'सब चुकता',
   allSettledUp: 'सब चुकता हो गया 🎉',
   yourShare: 'आपका हिस्सा',
   totalExpense: 'कुल खर्च',
   settleUp: 'चुकता करें',
   startSettlingUp: 'चुकता शुरू करें',
-  confirmPayment: 'भुगतान की पुष्टि करें',
-  settlementInProgress: 'चुकता प्रगति पर है',
-  splitWith: 'इनके साथ बांटें',
+  confirmPayment: 'भुगतान की पुष्टि',
+  markAsPaid: 'भुगतान दर्ज करें',
+  settlementInProgress: 'भुगतान का इंतजार है',
+  pendingSettlement: 'भुगतान का इंतजार है',
+  splitWith: 'शामिल लोग',
   paidBy: 'भुगतान किया',
   yourPart: 'आपका हिस्सा',
   remainingAmount: 'बची हुई रकम',
-  currentPeriod: 'वर्तमान अवधि',
+  currentPeriod: 'हाल के',
   finishAndSettle: 'समाप्त कर चुकता करें',
   joinAGroup: 'ग्रुप में शामिल हों',
   groupCode: 'ग्रुप कोड',
   peopleInGroup: 'ग्रुप के सदस्य',
+  balanceImpact: 'किसे किसे पैसे देने हैं',
 
   // Navigation & Screens
   home: 'होम',
   groups: 'ग्रुप्स',
   expenses: 'खर्चे',
-  activity: 'गतिविधि',
+  activity: 'ताजा अपडेट',
   profile: 'प्रोफाइल',
-  history: 'इतिहास',
+  history: 'पुराने रिकॉर्ड',
+  settlementHistory: 'पुराने भुगतान',
 
   // Home Screen
   welcomeBack: 'वापसी पर स्वागत है,',
@@ -53,8 +59,14 @@ export const hi = {
   addExpense: 'खर्चा जोड़ें',
   createGroup: 'ग्रुप बनाएं',
   recentExpenses: 'हाल के खर्चे',
+  recentActivity: 'ताजा अपडेट',
+  mostActiveGroup: 'सबसे ज्यादा इस्तेमाल ग्रुप',
+  largestExpense: 'सबसे बड़ा खर्च',
+  currentExpenses: 'हाल के खर्चे',
   viewAll: 'सभी देखें',
-  noExpensesYet: 'इस अवधि में अभी कोई खर्चे नहीं हैं।',
+  noExpensesYet: 'अभी कोई खर्चे नहीं हैं।',
+  noGroupsYet: 'अभी कोई ग्रुप नहीं है। खर्चा बांटने के लिए ग्रुप बनाएं।',
+  homeEmpty: 'शुरू करने के लिए ग्रुप बनाएं या शामिल हों।',
 
   // Groups Screen
   myGroups: 'मेरे ग्रुप्स',
@@ -67,7 +79,7 @@ export const hi = {
   alreadyMember: 'आप पहले से ही इस ग्रुप के सदस्य हैं।',
 
   // Group Details
-  groupDetails: 'ग्रुप विवरण',
+  groupDetails: 'ग्रुप जानकारी',
   inviteMembers: 'सदस्यों को आमंत्रित करें',
   leaveGroup: 'ग्रुप छोड़ें',
   confirmLeaveGroup: 'क्या आप सच में यह ग्रुप छोड़ना चाहते हैं?',
@@ -75,27 +87,28 @@ export const hi = {
   cannotLeaveWithBalance: 'बकाया राशि रहते आप ग्रुप नहीं छोड़ सकते। कृपया पहले चुकता करें।',
 
   // Expenses & Add Expense
-  addExpenseTitle: 'नया खर्चा जोड़ें',
+  addExpenseTitle: 'खर्चा जोड़ें',
   editExpenseTitle: 'खर्चा बदलें',
-  expenseTitle: 'खर्चे का नाम',
+  expenseDetails: 'खर्चे की जानकारी',
+  expenseTitle: 'क्या खरीदा?',
   expenseTitlePlaceholder: 'जैसे- खाना, राशन, बिजली',
-  amount: 'रकम',
+  amount: 'कितना खर्च हुआ?',
   amountPlaceholder: '₹0.00',
-  splitType: 'बंटवारे का प्रकार',
-  splitEqual: 'बराबर',
-  splitExact: 'सटीक रकम',
-  splitPercent: 'प्रतिशत',
-  selectParticipants: 'सदस्यों को चुनें',
+  splitType: 'कैसे बांटें?',
+  splitEqual: 'बराबर बांटें',
+  splitExact: 'अपनी पसंद की रकम',
+  splitPercent: 'प्रतिशत हिस्सा',
+  selectParticipants: 'शामिल लोग',
   selectPayer: 'किसने भुगतान किया?',
 
   // Settlement & Confirmation
-  settlementConfirmationTitle: 'भुगतान विवरण की पुष्टि करें',
+  settlementConfirmationTitle: 'भुगतान की पुष्टि',
   confirmPaymentDesc: 'चुकता करने से पहले भुगतान की समीक्षा करें।',
-  confirmMyPayment: 'मेरे भुगतान की पुष्टि करें',
+  confirmMyPayment: 'मैंने भुगतान कर दिया',
   allMembersConfirmed: 'सभी सदस्यों ने पुष्टि कर दी है!',
   waitingForConfirmations: 'शेष सदस्यों की पुष्टि का इंतजार है',
-  completeSettlementBtn: 'पूरा करें और अवधि समाप्त करें',
-  cancelSettlementBtn: 'चुकता रद्द करें',
+  completeSettlementBtn: 'पूरा करें',
+  cancelSettlementBtn: 'रद्द करें',
 
   // Profile & Settings
   selectLanguage: 'भाषा चुनें',
@@ -109,22 +122,58 @@ export const hi = {
 
   // First Time User & Progressive Disclosure
   welcomeToSplitMates: 'स्प्लिटमेट्स में स्वागत है 🎉',
-  firstTimeSub: 'आपका खाता तैयार है। आगे बढ़ने के लिए ये 3 आसान कदम उठाएं:',
+  firstTimeSub: 'शुरू करने के लिए ग्रुप बनाएं या शामिल हों।',
   step1Title: 'ग्रुप बनाएं',
   step1Desc: 'अपने दोस्तों का ग्रुप बनाएं।',
   step2Title: 'दोस्त जोड़ें',
   step2Desc: 'कोड या QR से दोस्तों को आमंत्रित करें।',
   step3Title: 'खर्चा जोड़ें',
   step3Desc: 'किराया, राशन या बिल जोड़कर बांटें।',
-  moreInsights: 'अधिक विश्लेषण',
+  moreInsights: 'अधिक जानकारी',
   kyaKharida: 'क्या खरीदा?',
   kitnaLaga: 'कितना खर्च हुआ?',
   kisnePaiseDiye: 'किसने भुगतान किया?',
   saveExpense: 'खर्चा सहेजें',
-  markAsPaid: 'भुगतान दर्ज करें',
   moreOptions: 'और विकल्प',
   lessOptions: 'कम विकल्प',
   searchAndFilters: 'खोज और फ़िल्टर',
-  detailsAndHistory: 'विवरण और इतिहास',
-  membersQrDetails: 'और विकल्प (सदस्य, QR और विवरण)',
+  detailsAndHistory: 'और विकल्प (जानकारी और रिकॉर्ड)',
+  membersQrDetails: 'और विकल्प (ग्रुप जानकारी, सदस्य और QR)',
+  cycle: 'दौर',
+  confirmation: 'भुगतान की पुष्टि',
+  noHistoryYet: 'अभी कोई पुराना भुगतान नहीं है।',
+
+  // UX Psychology - Smart Defaults
+  defaultSplitHint: 'सभी लोगों में बराबर बंटेगा। नीचे बदल सकते हैं।',
+  defaultPayerHint: 'आप भुगतानकर्ता हैं। बदलने के लिए किसी और को चुनें।',
+
+  // UX Psychology - Goal Gradient
+  joinStepChoose: 'तरीका चुनें',
+  joinStepEnter: 'कोड दर्ज करें',
+  joinStepConfirm: 'पुष्टि करें',
+  joinStepDone: 'हो गया',
+  settlementProgressLabel: '{confirmed} में से {total} ने पुष्टि की',
+
+  // UX Psychology - Reciprocity
+  emptyExpensesHelpful: 'खर्चा जोड़ें, SplitMates अपने आप हिसाब लगा लेगा।',
+  emptyGroupsHelpful: 'दोस्तों या रूममेट्स का ग्रुप बनाएं, फिर खर्चे जोड़ें।',
+  emptyHistoryHelpful: 'ग्रुप में चुकता करने के बाद पुराने रिकॉर्ड यहाँ दिखेंगे।',
+  settlementValueProp: 'सभी की पुष्टि के बाद इस ग्रुप के सभी बैलेंस शून्य हो जाएंगे।',
+
+  // UX Psychology - IKEA Effect
+  groupCreatedCelebration: 'ग्रुप तैयार है! दोस्तों को कोड भेजें।',
+  expenseSavedCelebration: 'खर्चा जोड़ दिया! बैलेंस अपडेट हो गया।',
+
+  // UX Psychology - Loss Aversion
+  deleteExpenseWarning: 'हटाने से सभी का बैलेंस बदल जाएगा। यह वापस नहीं होगा।',
+  leaveGroupWarning: 'आप इस ग्रुप के खर्चे और रिकॉर्ड नहीं देख पाएंगे।',
+  leaveGroupBalanceWarning: 'इस ग्रुप में अभी {amount} बकाया है।',
+  unsettledDuesReminder: 'बकाया राशि बाकी है',
+  pendingExpenseCount: 'इस ग्रुप में {count} खर्चे बाकी हैं',
+
+  // UX Psychology - Contrast Effect
+  netPositive: 'आपको वापस मिलेंगे',
+  netNegative: 'आपको देने हैं',
+  netZero: 'सब चुकता',
+  details: 'विवरण',
 };

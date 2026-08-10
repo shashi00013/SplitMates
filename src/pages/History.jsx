@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Layers } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -13,8 +13,16 @@ export default function History() {
   const [selectedGroupFilter, setSelectedGroupFilter] = useState('all');
   const [activeSettlement, setActiveSettlement] = useState(null);
 
-  const userGroups = getUserGroups();
-  const historyList = getSettlementHistory(selectedGroupFilter === 'all' ? null : selectedGroupFilter);
+  const userGroups = useMemo(() => getUserGroups(), [getUserGroups]);
+  const historyList = useMemo(() => getSettlementHistory(selectedGroupFilter === 'all' ? null : selectedGroupFilter), [getSettlementHistory, selectedGroupFilter]);
+
+  const groupsMap = useMemo(() => {
+    const map = new Map();
+    for (const g of groups) {
+      if (g && g.id) map.set(String(g.id), g);
+    }
+    return map;
+  }, [groups]);
 
   return (
     <div className="page" id="history-page">
@@ -90,17 +98,18 @@ export default function History() {
       {historyList.length === 0 ? (
         <div className="card text-center" style={{ padding: '40px 20px' }}>
           <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📜</p>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary)' }}>
-            No settlement history yet
-          </h3>
-          <p className="text-secondary text-sm" style={{ maxWidth: '280px', margin: '0 auto' }}>
-            When all members confirm payment, completed settlements will appear here.
+          <p className="text-secondary text-sm" style={{ fontWeight: 600, marginBottom: '6px' }}>
+            {t('noHistoryYet')}
+          </p>
+          {/* Reciprocity: Explain when history records will appear */}
+          <p className="text-secondary text-xs" style={{ lineHeight: 1.4 }}>
+            {t('emptyHistoryHelpful')}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-12" style={{ marginBottom: '24px' }}>
           {historyList.map((settle) => {
-            const group = groups.find((g) => g.id === settle.groupId);
+            const group = groupsMap.get(String(settle.groupId));
             const memberCount = group?.memberIds?.length || settle.memberCount || 0;
             const dateStr = settle.completedAt || settle.date;
 

@@ -45,6 +45,10 @@ export default function JoinGroupFlow() {
   const [resolvedGroupId, setResolvedGroupId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Goal Gradient: Map current step to a numeric index for progress display
+  const stepIndex = step === 'select' ? 0 : (step === 'scan' || step === 'code') ? 1 : step === 'confirm' ? 2 : 3;
+  const stepLabels = [t('joinStepChoose'), t('joinStepEnter'), t('joinStepConfirm'), t('joinStepDone')];
+
   // Resolve group preview details from code
   function resolveGroupInfo(codeToUse) {
     if (!codeToUse) return null;
@@ -120,6 +124,73 @@ export default function JoinGroupFlow() {
         <h1>Join a Group</h1>
         <div className="spacer" />
       </div>
+
+      {/* Goal Gradient: Step Progress Indicator */}
+      {step !== 'success' && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0',
+            padding: '12px 16px 16px 16px',
+          }}
+          id="join-step-progress"
+        >
+          {stepLabels.map((label, idx) => {
+            const isCompleted = idx < stepIndex;
+            const isCurrent = idx === stepIndex;
+            const isActive = isCompleted || isCurrent;
+            return (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', flex: idx < stepLabels.length - 1 ? 1 : 'none' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '48px' }}>
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: isCompleted ? 'var(--accent)' : isCurrent ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+                      color: isCompleted ? '#000' : isCurrent ? 'var(--accent)' : 'var(--text-tertiary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      border: isCurrent ? '2px solid var(--accent)' : '1px solid var(--border-light)',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {isCompleted ? <Check size={14} strokeWidth={3} /> : idx + 1}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.62rem',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? 'var(--accent)' : 'var(--text-tertiary)',
+                      marginTop: '4px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {label}
+                  </span>
+                </div>
+                {idx < stepLabels.length - 1 && (
+                  <div
+                    style={{
+                      flex: 1,
+                      height: '2px',
+                      background: idx < stepIndex ? 'var(--accent)' : 'var(--border-light)',
+                      margin: '0 4px',
+                      marginBottom: '18px',
+                      transition: 'background 0.3s ease',
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div style={{ paddingTop: '8px' }}>
         {/* STEP 1: METHOD SELECTION */}

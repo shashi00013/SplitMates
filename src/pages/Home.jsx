@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, ArrowUpRight, ChevronDown, ChevronUp, Users, PlusCircle, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -28,7 +28,7 @@ export default function Home() {
     isLoading,
   } = useApp();
 
-  const { t, formatYouGet, formatYouPay, formatMemberOwed, formatMemberPay } = useLanguage();
+  const { t, formatYouGet, formatYouPay, formatMemberOwed, formatMemberPay, formatPaidBy } = useLanguage();
   const navigate = useNavigate();
   const [activeExpense, setActiveExpense] = useState(null);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
@@ -39,52 +39,55 @@ export default function Home() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  const userGroups = getUserGroups();
-  const { totalBalance } = getTotalBalances();
-  const allExpenses = getAllExpensesForUser();
-  const recentExpenses = allExpenses.slice(0, 5);
+  const userGroups = useMemo(() => getUserGroups(), [getUserGroups]);
+  const totalBalanceInfo = useMemo(() => getTotalBalances(), [getTotalBalances]);
+  const totalBalance = totalBalanceInfo.totalBalance;
+  const allExpenses = useMemo(() => getAllExpensesForUser(), [getAllExpensesForUser]);
+  const recentExpenses = useMemo(() => allExpenses.slice(0, 5), [allExpenses]);
 
   const isFirstTimeUser = userGroups.length === 0 && allExpenses.length === 0;
 
   // Derive proactive actions & real-data insights
-  const proactiveActions = deriveProactiveActions({
+  const proactiveActions = useMemo(() => deriveProactiveActions({
     user,
     userGroups,
     settlements,
     allExpenses,
     getBalancesForGroup,
     getUserById,
-  });
+  }), [user, userGroups, settlements, allExpenses, getBalancesForGroup, getUserById]);
 
-  const financialInsights = deriveFinancialInsights({
+  const financialInsights = useMemo(() => deriveFinancialInsights({
     userGroups,
     allExpenses,
-  });
+  }), [userGroups, allExpenses]);
 
   // Compute aggregated per-member breakdown across all user groups
-  const memberDuesMap = {};
-  userGroups.forEach((g) => {
-    const balances = getBalancesForGroup(g.id);
-    const txs = calculateSettlementTransactions(balances);
-    txs.forEach((tx) => {
-      if (tx.from === user?.id) {
-        const toUser = getUserById(tx.to);
-        if (toUser) {
-          const key = toUser.id;
-          if (!memberDuesMap[key]) memberDuesMap[key] = { member: toUser, amount: 0 };
-          memberDuesMap[key].amount -= tx.amount;
+  const memberBreakdownItems = useMemo(() => {
+    const memberDuesMap = {};
+    userGroups.forEach((g) => {
+      const balances = getBalancesForGroup(g.id);
+      const txs = calculateSettlementTransactions(balances);
+      txs.forEach((tx) => {
+        if (tx.from === user?.id) {
+          const toUser = getUserById(tx.to);
+          if (toUser) {
+            const key = toUser.id;
+            if (!memberDuesMap[key]) memberDuesMap[key] = { member: toUser, amount: 0 };
+            memberDuesMap[key].amount -= tx.amount;
+          }
+        } else if (tx.to === user?.id) {
+          const fromUser = getUserById(tx.from);
+          if (fromUser) {
+            const key = fromUser.id;
+            if (!memberDuesMap[key]) memberDuesMap[key] = { member: fromUser, amount: 0 };
+            memberDuesMap[key].amount += tx.amount;
+          }
         }
-      } else if (tx.to === user?.id) {
-        const fromUser = getUserById(tx.from);
-        if (fromUser) {
-          const key = fromUser.id;
-          if (!memberDuesMap[key]) memberDuesMap[key] = { member: fromUser, amount: 0 };
-          memberDuesMap[key].amount += tx.amount;
-        }
-      }
+      });
     });
-  });
-  const memberBreakdownItems = Object.values(memberDuesMap);
+    return Object.values(memberDuesMap);
+  }, [userGroups, getBalancesForGroup, user?.id, getUserById]);
 
   return (
     <div className="page" id="home-page">
@@ -188,6 +191,10 @@ export default function Home() {
           <div
             className="card card-glow page-section card-hover"
             id="total-balance-card"
+            /* Contrast Effect: Colored border based on financial status */
+            style={{
+              border: totalBalance > 0 ? '1px solid rgba(0, 210, 106, 0.25)' : totalBalance < 0 ? '1px solid rgba(255, 71, 87, 0.25)' : undefined,
+            }}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -297,8 +304,12 @@ export default function Home() {
               </div>
             ) : userGroups.length === 0 ? (
               <div className="card text-center" style={{ padding: '24px 16px' }}>
-                <p className="text-secondary text-sm" style={{ marginBottom: '14px' }}>
+                <p className="text-secondary text-sm" style={{ marginBottom: '8px' }}>
                   No groups yet. Create or join a group to start splitting!
+                </p>
+                {/* Reciprocity: Helpful explanation before asking for action */}
+                <p className="text-secondary text-xs" style={{ marginBottom: '14px', lineHeight: 1.4 }}>
+                  {t('emptyGroupsHelpful')}
                 </p>
                 <button
                   className="btn btn-primary btn-full"
@@ -424,6 +435,11 @@ export default function Home() {
             ) : recentExpenses.length === 0 ? (
               <p className="text-secondary text-center" style={{ padding: '24px 0' }}>
                 {t('noExpensesYet')}
+                {/* Reciprocity: Helpful explanation for empty expense list */}
+                <br />
+                <span className="text-xs" style={{ display: 'block', marginTop: '4px', lineHeight: 1.4 }}>
+                  {t('emptyExpensesHelpful')}
+                </span>
               </p>
             ) : (
               recentExpenses.map((exp) => {
@@ -451,7 +467,7 @@ export default function Home() {
                     <div className="expense-icon">{exp.emoji}</div>
                     <div className="expense-info">
                       <h3>{exp.title}</h3>
-                      <p>{group?.name || 'Group'} · {paidByLabel} ne diya</p>
+                      <p>{group?.name || 'Group'} · {formatPaidBy(paidByLabel)}</p>
                     </div>
                     <div className="expense-amount" style={{ textAlign: 'right' }}>
                       <p className="amount">{formatCurrency(exp.amount)}</p>
@@ -465,75 +481,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* ── MORE OPTIONS: Spending Insights & Action Analytics (Collapsed by Default) ── */}
-          {(proactiveActions.length > 0 || financialInsights.length > 0) && (
-            <div className="page-section" id="more-insights-section">
-              <button
-                type="button"
-                className="btn btn-secondary btn-full flex items-center justify-between"
-                onClick={() => setShowInsights((prev) => !prev)}
-                id="toggle-more-insights-btn"
-                style={{ padding: '12px 16px', fontSize: '0.85rem', fontWeight: 700 }}
-              >
-                <div className="flex items-center gap-8">
-                  <Sparkles size={16} style={{ color: 'var(--accent)' }} />
-                  <span>{t('moreInsights')}</span>
-                </div>
-                {showInsights ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
-
-              {showInsights && (
-                <div className="flex flex-col gap-12" style={{ marginTop: '12px' }}>
-                  {/* Proactive actions */}
-                  {proactiveActions.map((action) => (
-                    <div
-                      key={action.id}
-                      className="card flex items-center justify-between card-hover"
-                      style={{
-                        padding: '14px 16px',
-                        background: 'var(--bg-card-alt)',
-                        border: '1px solid var(--border-color)',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => navigate(action.targetRoute)}
-                      id={`action-item-${action.id}`}
-                    >
-                      <div>
-                        <h4 style={{ fontSize: '0.88rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                          {action.title}
-                        </h4>
-                        <p className="text-secondary text-xs" style={{ margin: '2px 0 0 0' }}>
-                          {action.subtitle}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4 text-accent text-xs fw-700">
-                        <span>{action.ctaLabel}</span>
-                        <ArrowUpRight size={16} />
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Financial Activity Insights */}
-                  {financialInsights.length > 0 && (
-                    <div className="card" style={{ padding: '12px 16px', background: 'var(--bg-card-alt)' }} id="financial-insights-card">
-                      <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-                        Spending Summary
-                      </p>
-                      <div className="flex flex-col gap-6">
-                        {financialInsights.map((insight) => (
-                          <div key={insight.id} className="flex items-center gap-8 text-xs">
-                            <span>{insight.icon}</span>
-                            <span className="text-primary fw-600">{insight.title}:</span>
-                            <span className="text-secondary">{insight.text}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </>
       )}
 

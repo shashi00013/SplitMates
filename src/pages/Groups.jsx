@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, RefreshCw, AlertCircle, Plus, Link2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -14,7 +14,7 @@ export default function Groups() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
 
-  const userGroups = getUserGroups();
+  const userGroups = useMemo(() => getUserGroups(), [getUserGroups]);
 
   function handleSelectGroup(groupId) {
     selectGroup(groupId);
@@ -112,11 +112,12 @@ export default function Groups() {
         {!isLoadingGroups && userGroups.length === 0 && (
           <div className="card text-center" style={{ padding: '40px 20px' }}>
             <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🏘️</p>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary)' }}>
-              No groups yet
-            </h3>
-            <p className="text-secondary text-sm" style={{ marginBottom: '20px', maxWidth: '280px', margin: '0 auto 20px' }}>
-              Create a group to start splitting expenses with your people.
+            <p className="text-secondary text-sm" style={{ marginBottom: '6px', maxWidth: '300px', margin: '0 auto 6px' }}>
+              {t('noGroupsYet')}
+            </p>
+            {/* Reciprocity: Explain what users get when they create a group */}
+            <p className="text-secondary text-xs" style={{ marginBottom: '20px', maxWidth: '300px', margin: '0 auto 20px', lineHeight: 1.4 }}>
+              {t('emptyGroupsHelpful')}
             </p>
             <div className="flex gap-10">
               <button

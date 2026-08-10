@@ -27,7 +27,8 @@ export default function AddExpense() {
   const [selectedGroup, setSelectedGroup] = useState(editingExpense ? editingExpense.groupId : preselectedGroupId);
   const [paidBy, setPaidBy] = useState(editingExpense ? editingExpense.paidBy : user?.id || '');
   const [splitType, setSplitType] = useState(editingExpense ? editingExpense.splitType || 'equal' : 'equal');
-  const [date, setDate] = useState(editingExpense ? editingExpense.date : new Date().toISOString().split('T')[0]);
+  const todayDate = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const [date, setDate] = useState(editingExpense ? editingExpense.date : todayDate);
 
   // Custom split inputs (for exact or percent splits)
   const [customShares, setCustomShares] = useState(editingExpense?.shares || {});
@@ -132,7 +133,20 @@ export default function AddExpense() {
     return Math.round(sum * 100) / 100;
   }, [splitType, parsedAmount, selectedParticipants, computedShares]);
 
-  const isValidSharesTotal = splitType === 'equal' || Math.abs(sharesTotal - parsedAmount) < 0.05;
+  const totalPercent = useMemo(() => {
+    if (splitType !== 'percentage') return 100;
+    let sum = 0;
+    for (const id of selectedParticipants) {
+      sum += parseFloat(customPercents[id]) || 0;
+    }
+    return Math.round(sum * 100) / 100;
+  }, [splitType, selectedParticipants, customPercents]);
+
+  const isValidSharesTotal = useMemo(() => {
+    if (splitType === 'equal') return true;
+    if (splitType === 'percentage') return Math.abs(totalPercent - 100) < 0.1;
+    return Math.abs(sharesTotal - parsedAmount) < 0.05;
+  }, [splitType, totalPercent, sharesTotal, parsedAmount]);
 
   const isValid =
     title.trim().length > 0 &&
@@ -199,7 +213,7 @@ export default function AddExpense() {
         showToast('Bill updated');
       } else {
         await addExpense(expenseData);
-        showToast('Bill added');
+        showToast(t('expenseSavedCelebration'));
       }
       goBack();
     } catch (err) {
@@ -239,6 +253,12 @@ export default function AddExpense() {
               <option key={g.id} value={g.id}>{g.icon || '🏠'} {g.name}</option>
             ))}
           </select>
+          {/* Smart Default: Show hint when group is auto-selected */}
+          {!editingExpenseId && selectedGroup && userGroups.length > 1 && (
+            <p className="text-secondary text-xs" style={{ marginTop: '4px', fontWeight: 500 }}>
+              {t('defaultSplitHint')}
+            </p>
+          )}
         </div>
 
         {/* 2. EXPENSE TITLE */}
@@ -331,6 +351,12 @@ export default function AddExpense() {
               );
             })}
           </div>
+          {/* Smart Default: Show hint when current user is auto-selected as payer */}
+          {!editingExpenseId && paidBy === user?.id && allMembers.length > 1 && (
+            <p className="text-secondary text-xs" style={{ marginTop: '6px', fontWeight: 500 }}>
+              {t('defaultPayerHint')}
+            </p>
+          )}
         </div>
 
         {/* 5. ADVANCED OPTIONS TOGGLE (Collapsed by Default) */}
@@ -364,9 +390,21 @@ export default function AddExpense() {
           >
             {/* OPTION A — SPLIT TYPE */}
             <div className="input-group">
-              <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                How should we split it?
-              </label>
+              <div className="flex items-center justify-between">
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  How should we split it?
+                </label>
+                {splitType === 'exact' && parsedAmount > 0 && (
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: isValidSharesTotal ? 'var(--accent)' : '#ff5555' }}>
+                    {formatCurrency(sharesTotal)} / {formatCurrency(parsedAmount)}
+                  </span>
+                )}
+                {splitType === 'percentage' && (
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: isValidSharesTotal ? 'var(--accent)' : '#ff5555' }}>
+                    {totalPercent}% / 100%
+                  </span>
+                )}
+              </div>
               <div
                 id="split-type-selector"
                 style={{
@@ -537,8 +575,17 @@ export default function AddExpense() {
                 <input
                   className="input"
                   type="date"
+                  max={todayDate}
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    const selDate = e.target.value;
+                    if (selDate > todayDate) {
+                      showToast('Future dates cannot be selected');
+                      setDate(todayDate);
+                    } else {
+                      setDate(selDate);
+                    }
+                  }}
                   style={{ paddingLeft: '42px' }}
                   id="expense-date-input"
                 />

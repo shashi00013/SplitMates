@@ -63,7 +63,8 @@ export default function BalanceBreakdown() {
 
       <div className="flex flex-col gap-20" style={{ paddingTop: '8px' }}>
         {/* Section 1: You Owe */}
-        <div className="card" style={{ padding: '18px 20px', border: '1px solid var(--border-light)' }}>
+        {/* Contrast Effect: Tinted background for 'You Owe' section */}
+        <div className="card" style={{ padding: '18px 20px', border: '1px solid rgba(255, 71, 87, 0.2)', background: 'rgba(255, 71, 87, 0.03)' }}>
           <div className="flex justify-between items-center" style={{ marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
             <div className="flex items-center gap-8">
               <div
@@ -128,7 +129,8 @@ export default function BalanceBreakdown() {
         </div>
 
         {/* Section 2: You're Owed */}
-        <div className="card" style={{ padding: '18px 20px', border: '1px solid var(--border-light)' }}>
+        {/* Contrast Effect: Tinted background for 'You're Owed' section */}
+        <div className="card" style={{ padding: '18px 20px', border: '1px solid rgba(0, 210, 106, 0.2)', background: 'rgba(0, 210, 106, 0.03)' }}>
           <div className="flex justify-between items-center" style={{ marginBottom: '14px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
             <div className="flex items-center gap-8">
               <div

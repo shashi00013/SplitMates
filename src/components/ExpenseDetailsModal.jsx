@@ -204,9 +204,13 @@ export default function ExpenseDetailsModal({ expense, onClose }) {
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
               Delete Bill?
             </h3>
-            <p className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: '20px' }}>
+            <p className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: '8px' }}>
               Are you sure you want to delete <strong>"{expense.title}"</strong> of{' '}
-              <strong className="text-accent">{formatCurrency(expense.amount)}</strong>? This cannot be undone.
+              <strong className="text-accent">{formatCurrency(expense.amount)}</strong>?
+            </p>
+            {/* Loss Aversion: Show specific consequences */}
+            <p className="text-negative text-xs fw-600" style={{ lineHeight: 1.4, marginBottom: '20px' }}>
+              {t('deleteExpenseWarning')} {participants.length > 1 ? `(${participants.length} people affected)` : ''}
             </p>
 
             <div className="flex flex-col gap-10">

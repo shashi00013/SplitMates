@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Search, ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -8,30 +8,41 @@ import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
 
 export default function Expenses() {
   const navigate = useNavigate();
-  const { t, formatYouGet, formatYouPay } = useLanguage();
+  const { t, formatYouGet, formatYouPay, formatPaidBy } = useLanguage();
   const { user, getAllExpensesForUser, groups, getUserById, getTotalBalances, isLoading } = useApp();
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeExpense, setActiveExpense] = useState(null);
   const [showFilters, setShowFilters] = useState(false); // Collapsed by default (Progressive Disclosure)
 
-  const allExpenses = getAllExpensesForUser();
-  const { totalBalance } = getTotalBalances();
+  const allExpenses = useMemo(() => getAllExpensesForUser(), [getAllExpensesForUser]);
+  const totalBalanceInfo = useMemo(() => getTotalBalances(), [getTotalBalances]);
+  const totalBalance = totalBalanceInfo.totalBalance;
 
-  const filtered = allExpenses.filter((exp) => {
-    if (filter === 'current' && exp.settled) return false;
-    if (filter === 'historical' && !exp.settled) return false;
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      const group = groups.find((g) => g.id === exp.groupId);
-      const matchesTitle = exp.title?.toLowerCase().includes(q);
-      const matchesGroup = group?.name?.toLowerCase().includes(q);
-      if (!matchesTitle && !matchesGroup) return false;
+  const groupsMap = useMemo(() => {
+    const map = new Map();
+    for (const g of groups) {
+      if (g && g.id) map.set(String(g.id), g);
     }
+    return map;
+  }, [groups]);
 
-    return true;
-  });
+  const filtered = useMemo(() => {
+    return allExpenses.filter((exp) => {
+      if (filter === 'current' && exp.settled) return false;
+      if (filter === 'historical' && !exp.settled) return false;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const group = groupsMap.get(String(exp.groupId));
+        const matchesTitle = exp.title?.toLowerCase().includes(q);
+        const matchesGroup = group?.name?.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesGroup) return false;
+      }
+
+      return true;
+    });
+  }, [allExpenses, filter, searchQuery, groupsMap]);
 
   return (
     <div className="page" id="expenses-page">
@@ -47,7 +58,17 @@ export default function Expenses() {
       </div>
 
       {/* ── DEFAULT VIEW: Simple Balance Banner ─────────────────────────── */}
-      <div className="card card-glow page-section" style={{ padding: '16px 20px', marginBottom: '16px' }} id="expenses-summary-banner">
+      <div
+        className="card card-glow page-section"
+        style={{
+          padding: '16px 20px',
+          marginBottom: '16px',
+          /* Contrast Effect: Distinct background based on financial status */
+          background: totalBalance > 0 ? 'rgba(0, 210, 106, 0.06)' : totalBalance < 0 ? 'rgba(255, 71, 87, 0.06)' : 'var(--bg-card)',
+          border: totalBalance > 0 ? '1px solid rgba(0, 210, 106, 0.2)' : totalBalance < 0 ? '1px solid rgba(255, 71, 87, 0.2)' : '1px solid var(--border-light)',
+        }}
+        id="expenses-summary-banner"
+      >
         <p className="text-secondary text-xs fw-700" style={{ textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
           {t('netBalance')}
         </p>
@@ -152,12 +173,12 @@ export default function Expenses() {
       ) : filtered.length === 0 ? (
         <div className="card text-center" style={{ padding: '40px 20px' }}>
           <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</p>
-          <p className="text-secondary text-sm" style={{ fontWeight: 600 }}>
-            {filter === 'all'
-              ? 'No bills yet'
-              : filter === 'current'
-              ? 'No bills this month'
-              : 'No old bills'}
+          <p className="text-secondary text-sm" style={{ fontWeight: 600, marginBottom: '6px' }}>
+            {t('noExpensesYet')}
+          </p>
+          {/* Reciprocity: Explain what the user gets when they add expenses */}
+          <p className="text-secondary text-xs" style={{ lineHeight: 1.4 }}>
+            {t('emptyExpensesHelpful')}
           </p>
         </div>
       ) : (
@@ -165,7 +186,7 @@ export default function Expenses() {
           {filtered.map((exp) => {
             const payer = getUserById(exp.paidBy);
             const group = groups.find((g) => g.id === exp.groupId);
-            const paidByLabel = exp.paidBy === user?.id ? 'You' : payer?.firstName || 'Dost';
+            const paidByLabel = exp.paidBy === user?.id ? (t('you') || 'You') : payer?.firstName || 'Member';
             const participants = exp.participants || exp.splitAmong || [];
             const isPayer = exp.paidBy === user?.id;
             const isParticipant = participants.includes(user?.id);
@@ -173,8 +194,8 @@ export default function Expenses() {
             const receivable = isPayer ? Math.max(0, exp.amount - userShare) : 0;
             const impactClass = isPayer ? (receivable > 0 ? 'text-accent' : 'text-secondary') : userShare > 0 ? 'text-negative' : 'text-secondary';
             const impactText = isPayer
-              ? (receivable > 0 ? `Tumhe ${formatCurrency(receivable)} milne hain` : 'Sab cleared hai 🎉')
-              : (userShare > 0 ? `Tumhe ${formatCurrency(userShare)} dene hain` : 'Not involved');
+              ? (receivable > 0 ? formatYouGet(formatCurrency(receivable)) : t('allSettledUp'))
+              : (userShare > 0 ? formatYouPay(formatCurrency(userShare)) : 'Not involved');
 
             return (
               <div
@@ -187,7 +208,7 @@ export default function Expenses() {
                 <div className="expense-icon">{exp.emoji || '💰'}</div>
                 <div className="expense-info">
                   <h3>{exp.title}</h3>
-                  <p>{group?.name || 'Group'} · {paidByLabel} ne diya</p>
+                  <p>{group?.name || 'Group'} · {formatPaidBy(paidByLabel)}</p>
                 </div>
                 <div className="expense-amount" style={{ textAlign: 'right' }}>
                   <p className="amount">{formatCurrency(exp.amount)}</p>

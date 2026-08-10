@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, LogOut, QrCode, CheckCircle2, ChevronDown, ChevronUp, Users, ArrowUpRight, PlusCircle, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -13,12 +13,13 @@ import InviteGroupModal from '../components/InviteGroupModal';
 export default function GroupDetails() {
   const { groupId } = useParams();
   const navigate = useNavigate();
-  const { t, formatYouGet, formatYouPay, formatMemberOwed, formatMemberPay } = useLanguage();
+  const { t, formatYouGet, formatYouPay, formatMemberOwed, formatMemberPay, formatPaidBy } = useLanguage();
   const [activeExpense, setActiveExpense] = useState(null);
   const [activeSettlement, setActiveSettlement] = useState(null);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   const {
     user,
@@ -57,37 +58,39 @@ export default function GroupDetails() {
     );
   }
 
-  const members = getGroupMembers(groupId);
-  const balances = getBalancesForGroup(groupId);
+  const members = useMemo(() => getGroupMembers(groupId), [getGroupMembers, groupId]);
+  const balances = useMemo(() => getBalancesForGroup(groupId), [getBalancesForGroup, groupId]);
   const myBalance = balances[user?.id] || 0;
 
-  const groupExpenses = getGroupExpenses(groupId);
-  const activeCycleExpenses = groupExpenses.filter((e) => !e.settled);
-  const recentExpenses = [...activeCycleExpenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  const groupExpenses = useMemo(() => getGroupExpenses(groupId), [getGroupExpenses, groupId]);
+  const activeCycleExpenses = useMemo(() => groupExpenses.filter((e) => !e.settled), [groupExpenses]);
+  const recentExpenses = useMemo(() => [...activeCycleExpenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3), [activeCycleExpenses]);
 
   // Compute exact simplified pair-wise dues for this group
-  const groupTxs = calculateSettlementTransactions(balances);
-  const memberDuesSentences = groupTxs.map((tx) => {
-    const fromUser = getUserById(tx.from);
-    const toUser = getUserById(tx.to);
+  const memberDuesSentences = useMemo(() => {
+    const groupTxs = calculateSettlementTransactions(balances);
+    return groupTxs.map((tx) => {
+      const fromUser = getUserById(tx.from);
+      const toUser = getUserById(tx.to);
 
-    if (tx.from === user?.id) {
-      return {
-        type: 'owe',
-        text: formatMemberPay(toUser?.firstName || 'Dost', formatCurrency(tx.amount)),
-        amount: tx.amount,
-        targetUser: toUser,
-      };
-    } else if (tx.to === user?.id) {
-      return {
-        type: 'owed',
-        text: formatMemberOwed(fromUser?.firstName || 'Dost', formatCurrency(tx.amount)),
-        amount: tx.amount,
-        targetUser: fromUser,
-      };
-    }
-    return null;
-  }).filter(Boolean);
+      if (tx.from === user?.id) {
+        return {
+          type: 'owe',
+          text: formatMemberPay(toUser?.firstName || 'Dost', formatCurrency(tx.amount)),
+          amount: tx.amount,
+          targetUser: toUser,
+        };
+      } else if (tx.to === user?.id) {
+        return {
+          type: 'owed',
+          text: formatMemberOwed(fromUser?.firstName || 'Dost', formatCurrency(tx.amount)),
+          amount: tx.amount,
+          targetUser: fromUser,
+        };
+      }
+      return null;
+    }).filter(Boolean);
+  }, [balances, getUserById, user?.id, formatMemberPay, formatMemberOwed]);
 
   async function handleLeaveGroup() {
     if (isLeaving) return;
@@ -100,6 +103,7 @@ export default function GroupDetails() {
       showToast(err.message || t('cannotLeaveWithBalance'));
     } finally {
       setIsLeaving(false);
+      setShowLeaveConfirm(false);
     }
   }
 
@@ -184,7 +188,7 @@ export default function GroupDetails() {
               Payment Pending...
             </h4>
             <p className="text-secondary text-xs" style={{ margin: 0, marginTop: '2px' }}>
-              Rahul ko ₹250 dene hain
+              {t('settlementInProgress')}
             </p>
           </div>
           <div className="flex items-center gap-4 text-accent text-xs fw-600" style={{ color: 'var(--warning)' }}>
@@ -232,7 +236,7 @@ export default function GroupDetails() {
                 <div className="expense-icon">{exp.emoji}</div>
                 <div className="expense-info">
                   <h3>{exp.title}</h3>
-                  <p>{paidByLabel} ne diya · {formatDate(exp.date)}</p>
+                  <p>{formatPaidBy(paidByLabel)} · {formatDate(exp.date)}</p>
                 </div>
                 <div className="expense-amount" style={{ textAlign: 'right' }}>
                   <p className="amount">{formatCurrency(exp.amount)}</p>
@@ -324,11 +328,10 @@ export default function GroupDetails() {
               </button>
             </div>
 
-            {/* Leave Group Button */}
+            {/* Leave Group Button - Loss Aversion: Show confirmation with consequences */}
             <button
               className="btn flex items-center justify-center gap-8"
-              onClick={handleLeaveGroup}
-              disabled={isLeaving}
+              onClick={() => setShowLeaveConfirm(true)}
               id="leave-group-btn"
               style={{
                 padding: '12px',
@@ -340,7 +343,7 @@ export default function GroupDetails() {
               }}
             >
               <LogOut size={16} />
-              {isLeaving ? 'Leaving group...' : 'Leave Group'}
+              Leave Group
             </button>
           </div>
         )}
@@ -350,6 +353,63 @@ export default function GroupDetails() {
       <ExpenseDetailsModal expense={activeExpense} onClose={() => setActiveExpense(null)} />
       <SettlementDetailsModal settlement={activeSettlement} onClose={() => setActiveSettlement(null)} />
       <InviteGroupModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} group={group} />
+
+      {/* Loss Aversion: Leave Group Confirmation Modal */}
+      {showLeaveConfirm && (
+        <div className="modal-overlay" onClick={() => setShowLeaveConfirm(false)} id="leave-group-confirm-overlay">
+          <div
+            className="modal-content text-center"
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '24px', maxWidth: '380px' }}
+          >
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'rgba(255, 71, 87, 0.12)',
+                color: 'var(--negative)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+              }}
+            >
+              <LogOut size={28} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
+              {t('leaveGroup')}?
+            </h3>
+            {/* Show specific consequence based on balance */}
+            {myBalance !== 0 && (
+              <p className="text-negative text-sm fw-600" style={{ marginBottom: '8px' }}>
+                {t('leaveGroupBalanceWarning').replace('{amount}', formatCurrency(Math.abs(myBalance)))}
+              </p>
+            )}
+            <p className="text-secondary text-sm" style={{ lineHeight: 1.5, marginBottom: '20px' }}>
+              {t('leaveGroupWarning')}
+            </p>
+            <div className="flex flex-col gap-10">
+              <button
+                className="btn btn-primary btn-full"
+                onClick={handleLeaveGroup}
+                disabled={isLeaving}
+                id="confirm-leave-btn"
+                style={{ background: 'var(--negative)', borderColor: 'var(--negative)', minHeight: '44px', fontWeight: 700 }}
+              >
+                {isLeaving ? 'Leaving...' : t('leaveGroup')}
+              </button>
+              <button
+                className="btn btn-secondary btn-full"
+                onClick={() => setShowLeaveConfirm(false)}
+                id="cancel-leave-btn"
+              >
+                {t('cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

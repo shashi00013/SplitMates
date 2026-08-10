@@ -138,7 +138,7 @@ export default function CreateGroupModal({ isOpen, onClose }) {
                 {createdGroup.name}
               </h2>
               <p style={{ fontSize: '0.8rem', color: '#888888', margin: 0 }}>
-                Your group is ready! Scan or share the {t('groupCode')} below.
+                {t('groupCreatedCelebration')}
               </p>
             </div>
 

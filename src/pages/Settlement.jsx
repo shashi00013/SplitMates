@@ -181,7 +181,7 @@ export default function Settlement() {
         </h2>
 
         {simpleSentences.length > 0 ? (
-          <div className="flex flex-col gap-8" style={{ marginBottom: '20px' }}>
+          <div className="flex flex-col gap-8" style={{ marginBottom: '16px' }}>
             {simpleSentences.map((sentence, idx) => (
               <p key={idx} style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--accent)' }}>
                 {sentence}
@@ -189,8 +189,43 @@ export default function Settlement() {
             ))}
           </div>
         ) : (
-          <p className="text-sm fw-600 text-positive" style={{ marginBottom: '20px' }}>
+          <p className="text-sm fw-600 text-positive" style={{ marginBottom: '16px' }}>
             {t('allSettledUp')}
+          </p>
+        )}
+
+        {/* Goal Gradient: Always-visible progress bar */}
+        {settlement && totalMembersCount > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <div className="flex justify-between items-center" style={{ marginBottom: '6px' }}>
+              <span className="text-secondary text-xs fw-600">
+                {t('confirmation')}
+              </span>
+              <span className="fw-700 text-accent" style={{ fontSize: '0.82rem' }}>
+                {confirmedCount} / {totalMembersCount}
+              </span>
+            </div>
+            <div style={{
+              width: '100%',
+              height: '6px',
+              background: 'var(--bg-elevated)',
+              borderRadius: 'var(--radius-full)',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                width: `${Math.round((confirmedCount / (totalMembersCount || 1)) * 100)}%`,
+                height: '100%',
+                background: 'var(--accent)',
+                transition: 'width 0.3s ease',
+              }} />
+            </div>
+          </div>
+        )}
+
+        {/* Reciprocity: Value proposition before asking for action */}
+        {simpleSentences.length > 0 && (
+          <p className="text-secondary text-xs" style={{ marginBottom: '16px', lineHeight: 1.4 }}>
+            {t('settlementValueProp')}
           </p>
         )}
 

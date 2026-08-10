@@ -14,38 +14,44 @@ export const pa = {
   back: 'ਵਾਪਸ',
   close: 'ਬੰਦ ਕਰੋ',
   done: 'ਹੋ ਗਿਆ',
+  you: 'ਤੁਸੀਂ',
 
   // Money & Balance Terms
   youGet: 'ਤੁਹਾਨੂੰ ਮਿਲਣਗੇ',
   youPay: 'ਤੁਸੀਂ ਦੇਣੇ ਹਨ',
   totalYouGet: 'ਕੁੱਲ ਤੁਹਾਨੂੰ ਮਿਲਣਗੇ',
   totalYouPay: 'ਕੁੱਲ ਤੁਸੀਂ ਦੇਣੇ ਹਨ',
-  netBalance: 'ਨੈੱਟ ਬਕਾਇਆ',
+  netBalance: 'ਕੁੱਲ ਬੈਲੇਂਸ',
+  balanceBreakdown: 'ਕਿਸ ਨੇ ਕਿਸ ਦੇ ਪੈਸੇ ਦੇਣੇ ਹਨ',
   allSettled: 'ਸਭ ਹਿਸਾਬ ਪੂਰਾ',
   allSettledUp: 'ਸਭ ਹਿਸਾਬ ਪੂਰਾ ਹੋ ਗਿਆ 🎉',
   yourShare: 'ਤੁਹਾਡਾ ਹਿੱਸਾ',
   totalExpense: 'ਕੁੱਲ ਖਰਚਾ',
   settleUp: 'ਹਿਸਾਬ ਪੂਰਾ ਕਰੋ',
   startSettlingUp: 'ਹਿਸਾਬ ਸ਼ੁਰੂ ਕਰੋ',
-  confirmPayment: 'ਭੁਗਤਾਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ',
-  settlementInProgress: 'ਹਿਸਾਬ ਚੱਲ ਰਿਹਾ ਹੈ',
-  splitWith: 'ਇਹਨਾਂ ਨਾਲ ਵੰਡੋ',
+  confirmPayment: 'ਭੁਗਤਾਨ ਦੀ ਪੁਸ਼ਟੀ',
+  markAsPaid: 'ਭੁਗਤਾਨ ਦਰਜ ਕਰੋ',
+  settlementInProgress: 'ਭੁਗਤਾਨ ਦਾ ਇੰਤਜ਼ਾਰ ਹੈ',
+  pendingSettlement: 'ਭੁਗਤਾਨ ਦਾ ਇੰਤਜ਼ਾਰ ਹੈ',
+  splitWith: 'ਸ਼ਾਮਲ ਲੋਕ',
   paidBy: 'ਭੁਗਤਾਨ ਕੀਤਾ',
   yourPart: 'ਤੁਹਾਡਾ ਹਿੱਸਾ',
   remainingAmount: 'ਬਾਕੀ ਰਕਮ',
-  currentPeriod: 'ਮੌਜੂਦਾ ਸਮਾਂ',
+  currentPeriod: 'ਹਾਲੀਆ',
   finishAndSettle: 'ਖਤਮ ਕਰਕੇ ਹਿਸਾਬ ਕਰੋ',
   joinAGroup: 'ਗਰੁੱਪ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ',
   groupCode: 'ਗਰੁੱਪ ਕੋਡ',
   peopleInGroup: 'ਗਰੁੱਪ ਦੇ ਮੈਂਬਰ',
+  balanceImpact: 'ਕਿਸ ਨੇ ਕਿਸ ਦੇ ਪੈਸੇ ਦੇਣੇ ਹਨ',
 
   // Navigation & Screens
   home: 'ਹੋਮ',
   groups: 'ਗਰੁੱਪ',
   expenses: 'ਖਰਚੇ',
-  activity: 'ਗਤੀਵਿਧੀ',
+  activity: 'ਤਾਜ਼ਾ ਅਪਡੇਟ',
   profile: 'ਪ੍ਰੋਫਾਈਲ',
-  history: 'ਇਤਿਹਾਸ',
+  history: 'ਪੁਰਾਣੇ ਰਿਕਾਰਡ',
+  settlementHistory: 'ਪੁਰਾਣੇ ਭੁਗਤਾਨ',
 
   // Home Screen
   welcomeBack: 'ਜੀ ਆਇਆਂ ਨੂੰ,',
@@ -53,8 +59,14 @@ export const pa = {
   addExpense: 'ਖਰਚਾ ਜੋੜੋ',
   createGroup: 'ਗਰੁੱਪ ਬਣਾਓ',
   recentExpenses: 'ਹਾਲੀਆ ਖਰਚੇ',
+  recentActivity: 'ਤਾਜ਼ਾ ਅਪਡੇਟ',
+  mostActiveGroup: 'ਸਭ ਤੋਂ ਵੱਧ ਵਰਤਿਆ ਗਰੁੱਪ',
+  largestExpense: 'ਸਭ ਤੋਂ ਵੱਡਾ ਖਰਚਾ',
+  currentExpenses: 'ਹਾਲੀਆ ਖਰਚੇ',
   viewAll: 'ਸਾਰੇ ਵੇਖੋ',
-  noExpensesYet: 'ਇਸ ਸਮੇਂ ਵਿੱਚ ਹਾਲੇ ਕੋਈ ਖਰਚਾ ਨਹੀਂ ਹੈ।',
+  noExpensesYet: 'ਹਾਲੇ ਕੋਈ ਖਰਚਾ ਨਹੀਂ ਹੈ।',
+  noGroupsYet: 'ਹਾਲੇ ਕੋਈ ਗਰੁੱਪ ਨਹੀਂ ਹੈ। ਖਰਚਾ ਵੰਡਣ ਲਈ ਗਰੁੱਪ ਬਣਾਓ।',
+  homeEmpty: 'ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਗਰੁੱਪ ਬਣਾਓ ਜਾਂ ਸ਼ਾਮਲ ਹੋਵੋ।',
 
   // Groups Screen
   myGroups: 'ਮੇਰੇ ਗਰੁੱਪ',
@@ -67,7 +79,7 @@ export const pa = {
   alreadyMember: 'ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ ਇਸ ਗਰੁੱਪ ਦੇ ਮੈਂਬਰ ਹੋ।',
 
   // Group Details
-  groupDetails: 'ਗਰੁੱਪ ਵੇਰਵਾ',
+  groupDetails: 'ਗਰੁੱਪ ਜਾਣਕਾਰੀ',
   inviteMembers: 'ਮੈਂਬਰਾਂ ਨੂੰ ਸੱਦਾ ਦਿਓ',
   leaveGroup: 'ਗਰੁੱਪ ਛੱਡੋ',
   confirmLeaveGroup: 'ਕੀ ਤੁਸੀਂ ਸੱਚਮੁੱਚ ਇਹ ਗਰੁੱਪ ਛੱਡਣਾ ਚਾਹੁੰਦੇ ਹੋ?',
@@ -75,27 +87,28 @@ export const pa = {
   cannotLeaveWithBalance: 'ਬਾਕੀ ਰਕਮ ਹੁੰਦਿਆਂ ਤੁਸੀਂ ਗਰੁੱਪ ਨਹੀਂ ਛੱਡ ਸਕਦੇ। ਪਹਿਲਾਂ ਹਿਸਾਬ ਕਰੋ।',
 
   // Expenses & Add Expense
-  addExpenseTitle: 'ਨਵਾਂ ਖਰਚਾ ਜੋੜੋ',
+  addExpenseTitle: 'ਖਰਚਾ ਜੋੜੋ',
   editExpenseTitle: 'ਖਰਚਾ ਬਦਲੋ',
-  expenseTitle: 'ਖਰਚੇ ਦਾ ਨਾਂ',
+  expenseDetails: 'ਖਰਚੇ ਦੀ ਜਾਣਕਾਰੀ',
+  expenseTitle: 'ਕੀ ਖਰੀਦਿਆ?',
   expenseTitlePlaceholder: 'ਜਿਵੇਂ- ਖਾਣਾ, ਰਾਸ਼ਨ, ਬਿਜਲੀ',
-  amount: 'ਰਕਮ',
+  amount: 'ਕਿੰਨਾ ਖਰਚ ਹੋਇਆ?',
   amountPlaceholder: '₹0.00',
-  splitType: 'ਵੰਡ ਦੀ ਕਿਸਮ',
-  splitEqual: 'ਬਰਾਬਰ',
-  splitExact: 'ਸਹੀ ਰਕਮ',
-  splitPercent: 'ਫੀਸਦੀ (%)',
-  selectParticipants: 'ਮੈਂਬਰ ਚੁਣੋ',
+  splitType: 'ਕਿਵੇਂ ਵੰਡੀਏ?',
+  splitEqual: 'ਬਰਾਬਰ ਵੰਡੋ',
+  splitExact: 'ਆਪਣੀ ਪਸੰਦ ਦੀ ਰਕਮ',
+  splitPercent: 'ਫੀਸਦੀ ਹਿੱਸਾ',
+  selectParticipants: 'ਸ਼ਾਮਲ ਲੋਕ',
   selectPayer: 'ਕਿਸਨੇ ਭੁਗਤਾਨ ਕੀਤਾ?',
 
   // Settlement & Confirmation
-  settlementConfirmationTitle: 'ਭੁਗਤਾਨ ਵੇਰਵੇ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ',
+  settlementConfirmationTitle: 'ਭੁਗਤਾਨ ਦੀ ਪੁਸ਼ਟੀ',
   confirmPaymentDesc: 'ਹਿਸਾਬ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਵੇਰਵੇ ਵੇਖੋ।',
-  confirmMyPayment: 'ਮੇਰੇ ਭੁਗਤਾਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ',
+  confirmMyPayment: 'ਮੈਂ ਭੁਗਤਾਨ ਕਰ ਦਿੱਤਾ',
   allMembersConfirmed: 'ਸਾਰੇ ਮੈਂਬਰਾਂ ਨੇ ਪੁਸ਼ਟੀ ਕਰ ਦਿੱਤੀ ਹੈ!',
   waitingForConfirmations: 'ਬਾਕੀ ਮੈਂਬਰਾਂ ਦੀ ਪੁਸ਼ਟੀ ਦਾ ਇੰਤਜ਼ਾਰ ਹੈ',
-  completeSettlementBtn: 'ਪੂਰਾ ਕਰੋ ਅਤੇ ਸਮਾਂ ਖਤਮ ਕਰੋ',
-  cancelSettlementBtn: 'ਹਿਸਾਬ ਰੱਦ ਕਰੋ',
+  completeSettlementBtn: 'ਪੂਰਾ ਕਰੋ',
+  cancelSettlementBtn: 'ਰੱਦ ਕਰੋ',
 
   // Profile & Settings
   selectLanguage: 'ਭਾਸ਼ਾ ਚੁਣੋ',
@@ -109,22 +122,58 @@ export const pa = {
 
   // First Time User & Progressive Disclosure
   welcomeToSplitMates: 'ਸਪਲਿਟਮੇਟਸ ਵਿੱਚ ਸਵਾਗਤ ਹੈ 🎉',
-  firstTimeSub: 'ਤੁਹਾਡਾ ਖਾਤਾ ਤਿਆਰ ਹੈ। ਅੱਗੇ ਵਧਣ ਲਈ ਇਹ 3 ਕਦਮ ਫਾਲੋ ਕਰੋ:',
+  firstTimeSub: 'ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਗਰੁੱਪ ਬਣਾਓ ਜਾਂ ਸ਼ਾਮਲ ਹੋਵੋ।',
   step1Title: 'ਗਰੁੱਪ ਬਣਾਓ',
   step1Desc: 'ਆਪਣੇ ਦੋਸਤਾਂ ਦਾ ਗਰੁੱਪ ਬਣਾਓ।',
   step2Title: 'ਦੋਸਤ ਜੋੜੋ',
   step2Desc: 'ਕੋਡ ਜਾਂ QR ਨਾਲ ਦੋਸਤਾਂ ਨੂੰ ਜੋੜੋ।',
   step3Title: 'ਖਰਚਾ ਜੋੜੋ',
   step3Desc: 'ਕਿਰਾਇਆ, ਰਾਸ਼ਨ ਜਾਂ ਬਿਲ ਜੋੜ ਕੇ ਵੰਡੋ।',
-  moreInsights: 'ਹੋਰ ਵਿਸ਼ਲੇਸ਼ਣ',
+  moreInsights: 'ਹੋਰ ਜਾਣਕਾਰੀ',
   kyaKharida: 'ਕੀ ਖਰੀਦਿਆ?',
   kitnaLaga: 'ਕਿੰਨਾ ਖਰਚ ਹੋਇਆ?',
   kisnePaiseDiye: 'ਕਿਸਨੇ ਭੁਗਤਾਨ ਕੀਤਾ?',
   saveExpense: 'ਖਰਚਾ ਸੰਭਾਲੋ',
-  markAsPaid: 'ਭੁਗਤਾਨ ਦਰਜ ਕਰੋ',
   moreOptions: 'ਹੋਰ ਵਿਕਲਪ',
   lessOptions: 'ਘੱਟ ਵਿਕਲਪ',
   searchAndFilters: 'ਖੋਜ ਅਤੇ ਫਿਲਟਰ',
-  detailsAndHistory: 'ਵੇਰਵੇ ਅਤੇ ਇਤਿਹਾਸ',
-  membersQrDetails: 'ਹੋਰ ਵਿਕਲਪ (ਮੈਂਬਰ, QR ਅਤੇ ਵੇਰਵੇ)',
+  detailsAndHistory: 'ਹੋਰ ਵਿਕਲਪ (ਜਾਣਕਾਰੀ ਅਤੇ ਰਿਕਾਰਡ)',
+  membersQrDetails: 'ਹੋਰ ਵਿਕਲਪ (ਗਰੁੱਪ ਜਾਣਕਾਰੀ, ਮੈਂਬਰ ਅਤੇ QR)',
+  cycle: 'ਗੇੜ',
+  confirmation: 'ਭੁਗਤਾਨ ਦੀ ਪੁਸ਼ਟੀ',
+  noHistoryYet: 'ਹਾਲੇ ਕੋਈ ਪੁਰਾਣਾ ਭੁਗਤਾਨ ਨਹੀਂ ਹੈ।',
+
+  // UX Psychology - Smart Defaults
+  defaultSplitHint: 'ਸਭ ਵਿੱਚ ਬਰਾਬਰ ਵੰਡੇਗਾ। ਹੇਠਾਂ ਬਦਲ ਸਕਦੇ ਹੋ।',
+  defaultPayerHint: 'ਤੁਸੀਂ ਭੁਗਤਾਨਕਰਤਾ ਹੋ। ਬਦਲਣ ਲਈ ਕਿਸੇ ਹੋਰ ਨੂੰ ਚੁਣੋ।',
+
+  // UX Psychology - Goal Gradient
+  joinStepChoose: 'ਤਰੀਕਾ ਚੁਣੋ',
+  joinStepEnter: 'ਕੋਡ ਦਰਜ ਕਰੋ',
+  joinStepConfirm: 'ਪੁਸ਼ਟੀ ਕਰੋ',
+  joinStepDone: 'ਹੋ ਗਿਆ',
+  settlementProgressLabel: '{confirmed} ਵਿੱਚੋਂ {total} ਨੇ ਪੁਸ਼ਟੀ ਕੀਤੀ',
+
+  // UX Psychology - Reciprocity
+  emptyExpensesHelpful: 'ਖਰਚਾ ਜੋੜੋ, SplitMates ਆਪੇ ਆਪ ਹਿਸਾਬ ਲਗਾ ਲਵੇਗਾ।',
+  emptyGroupsHelpful: 'ਦੋਸਤਾਂ ਦਾ ਗਰੁੱਪ ਬਣਾਓ, ਫੇਰ ਖਰਚੇ ਜੋੜੋ।',
+  emptyHistoryHelpful: 'ਗਰੁੱਪ ਵਿੱਚ ਹਿਸਾਬ ਪੂਰਾ ਕਰਨ ਤੋਂ ਬਾਅਦ ਪੁਰਾਣੇ ਰਿਕਾਰਡ ਇੱਥੇ ਦਿਖਣਗੇ।',
+  settlementValueProp: 'ਸਭ ਦੇ ਪੁਸ਼ਟੀ ਤੋਂ ਬਾਅਦ ਇਸ ਗਰੁੱਪ ਦੇ ਸਭ ਬੈਲੇਂਸ ਜ਼ੀਰੋ ਹੋ ਜਾਣਗੇ।',
+
+  // UX Psychology - IKEA Effect
+  groupCreatedCelebration: 'ਗਰੁੱਪ ਤਿਆਰ ਹੈ! ਦੋਸਤਾਂ ਨੂੰ ਕੋਡ ਭੇਜੋ।',
+  expenseSavedCelebration: 'ਖਰਚਾ ਜੋੜ ਦਿੱਤਾ! ਬੈਲੇਂਸ ਅਪਡੇਟ ਹੋ ਗਿਆ।',
+
+  // UX Psychology - Loss Aversion
+  deleteExpenseWarning: 'ਹਟਾਉਣ ਨਾਲ ਸਭ ਦੇ ਬੈਲੇਂਸ ਬਦਲ ਜਾਵੇਗਾ। ਇਹ ਵਾਪਸ ਨਹੀਂ ਹੋਵੇਗਾ।',
+  leaveGroupWarning: 'ਤੁਸੀਂ ਇਸ ਗਰੁੱਪ ਦੇ ਖਰਚੇ ਅਤੇ ਰਿਕਾਰਡ ਨਹੀਂ ਦੇਖ ਪਾਓਗੇ।',
+  leaveGroupBalanceWarning: 'ਇਸ ਗਰੁੱਪ ਵਿੱਚ ਹਾਲੇ {amount} ਬਕਾਇਆ ਹੈ।',
+  unsettledDuesReminder: 'ਬਕਾਇਆ ਪੈਸਾ ਬਾਕੀ ਹੈ',
+  pendingExpenseCount: 'ਇਸ ਗਰੁੱਪ ਵਿੱਚ {count} ਖਰਚੇ ਬਾਕੀ ਹਨ',
+
+  // UX Psychology - Contrast Effect
+  netPositive: 'ਤੁਹਾਨੂੰ ਵਾਪਸ ਮਿਲਣਗੇ',
+  netNegative: 'ਤੁਸੀਂ ਦੇਣੇ ਹਨ',
+  netZero: 'ਸਭ ਹਿਸਾਬ ਪੂਰਾ',
+  details: 'ਵੇਰਵੇ',
 };
